@@ -15,7 +15,6 @@ export function useContextMenu() {
 				items: [
 					{
 						label: "Cut",
-						shortcut: "Ctrl+X",
 						event: async () => {
 							const selection = document.getSelection();
 							if (selection) {
@@ -26,7 +25,6 @@ export function useContextMenu() {
 					},
 					{
 						label: "Copy",
-						shortcut: "Ctrl+C",
 						event: async () => {
 							const selection = document.getSelection();
 							if (selection) {
@@ -36,7 +34,6 @@ export function useContextMenu() {
 					},
 					{
 						label: "Paste",
-						shortcut: "Ctrl+V",
 						event: async () => {
 							const text = await readText();
 							if (text) {
@@ -46,7 +43,6 @@ export function useContextMenu() {
 					},
 					{
 						label: "Select All",
-						shortcut: "Ctrl+A",
 						event: () => {
 							document.execCommand("selectAll");
 						},
