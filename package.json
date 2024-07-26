@@ -1,0 +1,17 @@
+{
+	"name": "ark-asa-shop-config-generator",
+	"version": "1.0.0",
+	"main": "index.jsx",
+	"scripts": {
+		"start": "cd frontend && npm start",
+		"build": "cd frontend && npm run build",
+		"tauri": "tauri"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"description": "Ark ASA Shop Config Generator",
+	"devDependencies": {
+		"@tauri-apps/cli": "^1.6.0"
+	}
+}

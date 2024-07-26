@@ -1,0 +1,56 @@
+{
+	"build": {
+		"distDir": "../frontend/build",
+		"devPath": "http://localhost:3001",
+		"beforeDevCommand": "npm run start",
+		"beforeBuildCommand": "npm run build"
+	},
+	"tauri": {
+		"bundle": {
+			"active": true,
+			"targets": "all",
+			"identifier": "com.arkshop.config-generator",
+			"icon": ["icons/icon.ico"],
+			"resources": [],
+			"externalBin": [],
+			"copyright": "",
+			"category": "DeveloperTool",
+			"shortDescription": "",
+			"longDescription": "",
+			"deb": {
+				"depends": []
+			},
+			"macOS": {
+				"frameworks": [],
+				"minimumSystemVersion": "",
+				"exceptionDomain": "",
+				"signingIdentity": null,
+				"providerShortName": null,
+				"entitlements": null
+			},
+			"windows": {
+				"certificateThumbprint": null,
+				"digestAlgorithm": "sha256",
+				"timestampUrl": ""
+			}
+		},
+		"updater": {
+			"active": false
+		},
+		"allowlist": {
+			"all": true
+		},
+		"windows": [
+			{
+				"title": "Ark ASA Shop Config Generator",
+				"width": 800,
+				"height": 600,
+				"resizable": true,
+				"fullscreen": false
+			}
+		],
+		"security": {
+			"csp": null
+		}
+	}
+}

@@ -1,0 +1,56 @@
+/* src/styles/customInputs.css */
+
+/* Hide default arrows */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
+
+input[type="number"] {
+	-moz-appearance: textfield;
+}
+
+/* Custom arrows container */
+.number-input-wrapper {
+	position: relative;
+}
+
+/* Custom arrows */
+.number-input-arrows {
+	position: absolute;
+	right: 5px;
+	top: 50%;
+	transform: translateY(-50%);
+	display: flex;
+	flex-direction: column;
+	height: 75%;
+	width: 20px;
+}
+
+.number-input-arrow {
+	flex: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	user-select: none;
+	color: #6b7280;
+	transition: color 0.2s;
+}
+
+.number-input-arrow:hover {
+	color: #3b82f6;
+}
+
+/* Up arrow */
+.number-input-arrow-up::before {
+	content: "\25B2";
+	font-size: 0.8em;
+}
+
+/* Down arrow */
+.number-input-arrow-down::before {
+	content: "\25BC";
+	font-size: 0.8em;
+}
