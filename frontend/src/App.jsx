@@ -1,3 +1,5 @@
+// src/App.jsx
+
 import React, { useState } from "react";
 import Sidebar from "./components/Sidebar";
 import ConfigTabs from "./components/ConfigTabs";
@@ -12,6 +14,17 @@ const defaultConfig = {
 		MysqlPort: 3306,
 	},
 	General: {
+		Discord: {
+			Enabled: false,
+			SenderName: "ArkShop",
+			URL: "",
+		},
+		TimedPointsReward: {
+			Enabled: false,
+			StackRewards: false,
+			Interval: 30,
+			Groups: {},
+		},
 		ItemsPerPage: 15,
 		ShopDisplayTime: 15.0,
 		ShopTextSize: 1.3,
@@ -26,11 +39,6 @@ const defaultConfig = {
 		PreventUseUnconscious: true,
 		PreventUseHandcuffed: true,
 		PreventUseCarried: true,
-		TimedPointsReward: {
-			Enabled: false,
-			StackRewards: false,
-			Interval: 30,
-		},
 	},
 };
 
