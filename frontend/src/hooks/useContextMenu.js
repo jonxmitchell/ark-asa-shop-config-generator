@@ -9,72 +9,46 @@ export function useContextMenu() {
 		const handleContextMenu = async (e) => {
 			e.preventDefault();
 
-			showMenu({
+			await showMenu({
 				pos: { x: e.clientX, y: e.clientY },
 				theme: "dark",
-				style: {
-					backgroundColor: "#1E1E1E",
-					color: "#FFFFFF",
-					borderColor: "#333333",
-				},
 				items: [
 					{
 						label: "Cut",
-						shortcut: "CmdOrCtrl+X",
-						event: () => {
+						shortcut: "Ctrl+X",
+						event: async () => {
 							const selection = document.getSelection();
 							if (selection) {
-								writeText(selection.toString()).then(() => {
-									document.execCommand("delete");
-								});
+								await writeText(selection.toString());
+								document.execCommand("delete");
 							}
-						},
-						style: {
-							backgroundColor: "#1E1E1E",
-							color: "#FFFFFF",
-							hoverBackgroundColor: "#2A2A2A",
 						},
 					},
 					{
 						label: "Copy",
-						shortcut: "CmdOrCtrl+C",
-						event: () => {
+						shortcut: "Ctrl+C",
+						event: async () => {
 							const selection = document.getSelection();
 							if (selection) {
-								writeText(selection.toString());
+								await writeText(selection.toString());
 							}
-						},
-						style: {
-							backgroundColor: "#1E1E1E",
-							color: "#FFFFFF",
-							hoverBackgroundColor: "#2A2A2A",
 						},
 					},
 					{
 						label: "Paste",
-						shortcut: "CmdOrCtrl+V",
+						shortcut: "Ctrl+V",
 						event: async () => {
 							const text = await readText();
 							if (text) {
 								document.execCommand("insertText", false, text);
 							}
 						},
-						style: {
-							backgroundColor: "#1E1E1E",
-							color: "#FFFFFF",
-							hoverBackgroundColor: "#2A2A2A",
-						},
 					},
 					{
 						label: "Select All",
-						shortcut: "CmdOrCtrl+A",
+						shortcut: "Ctrl+A",
 						event: () => {
 							document.execCommand("selectAll");
-						},
-						style: {
-							backgroundColor: "#1E1E1E",
-							color: "#FFFFFF",
-							hoverBackgroundColor: "#2A2A2A",
 						},
 					},
 				],
