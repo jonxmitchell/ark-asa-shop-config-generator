@@ -61,6 +61,7 @@ function JsonEditor({ config }) {
 						renderLineHighlight: "all",
 						lineNumbers: "on",
 						roundedSelection: false,
+						contextmenu: false,
 						selectOnLineNumbers: true,
 						automaticLayout: true,
 					}}
