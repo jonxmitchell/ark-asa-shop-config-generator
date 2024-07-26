@@ -54,3 +54,9 @@ input[type="number"] {
 	content: "\25BC";
 	font-size: 0.8em;
 }
+
+input:disabled,
+input:disabled + label,
+input:disabled ~ * {
+	cursor: not-allowed !important;
+}
