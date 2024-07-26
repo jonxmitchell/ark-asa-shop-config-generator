@@ -9,3 +9,8 @@ node_modules
 # Frontend build
 /frontend/build
 
+# Frontend Package Lock
+frontend/package-lock.json
+
+# Backend Package Lock
+package-lock.json
