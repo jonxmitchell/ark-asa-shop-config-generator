@@ -1,5 +1,3 @@
-// src/components/settings/DiscordSettings.jsx
-
 import React from "react";
 
 function DiscordSettings({ config, onConfigUpdate }) {
@@ -56,6 +54,7 @@ function DiscordSettings({ config, onConfigUpdate }) {
 						value={config.General.Discord?.SenderName || ""}
 						onChange={handleChange}
 						disabled={!isEnabled}
+						autoComplete="off"
 						className={`w-full px-3 py-2 text-sm text-white bg-mid-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
 							!isEnabled && "opacity-50 cursor-not-allowed"
 						}`}
@@ -77,6 +76,7 @@ function DiscordSettings({ config, onConfigUpdate }) {
 						value={config.General.Discord?.URL || ""}
 						onChange={handleChange}
 						disabled={!isEnabled}
+						autoComplete="off"
 						className={`w-full px-3 py-2 text-sm text-white bg-mid-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
 							!isEnabled && "opacity-50 cursor-not-allowed"
 						}`}

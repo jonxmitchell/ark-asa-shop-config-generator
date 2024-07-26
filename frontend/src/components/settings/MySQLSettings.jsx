@@ -52,6 +52,7 @@ function MySQLSettings({ config, onConfigUpdate }) {
 							value={config.Mysql[setting] || ""}
 							onChange={handleChange}
 							disabled={!isMySQL}
+							autoComplete="off"
 							className={`w-full px-3 py-2 text-sm text-white bg-mid-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
 								!isMySQL && "opacity-50 cursor-not-allowed"
 							}`}
@@ -83,6 +84,7 @@ function MySQLSettings({ config, onConfigUpdate }) {
 						value={config.Mysql.MysqlPort || 3306}
 						onChange={handleChange}
 						disabled={!isMySQL}
+						autoComplete="off"
 						className={`w-full px-3 py-2 text-sm text-white bg-mid-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
 							!isMySQL && "opacity-50 cursor-not-allowed"
 						}`}

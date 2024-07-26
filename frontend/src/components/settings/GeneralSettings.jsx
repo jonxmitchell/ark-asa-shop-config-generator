@@ -1,5 +1,3 @@
-// src/components/settings/GeneralSettings.jsx
-
 import React from "react";
 import DiscordSettings from "./DiscordSettings";
 import TimedPointsRewards from "./TimedPointsRewards";
@@ -65,6 +63,7 @@ function GeneralSettings({ config, onConfigUpdate }) {
 										value={config.General[setting] || 0}
 										onChange={handleChange}
 										step={setting === "ShopTextSize" ? 0.1 : 1}
+										autoComplete="off"
 										className="w-1/12 px-2 py-1 text-sm text-white bg-mid-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
 									/>
 								</div>
@@ -86,6 +85,7 @@ function GeneralSettings({ config, onConfigUpdate }) {
 								name={setting}
 								value={config.General[setting] || ""}
 								onChange={handleChange}
+								autoComplete="off"
 								className="w-full px-3 py-2 text-sm text-white bg-mid-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
 							/>
 						</div>

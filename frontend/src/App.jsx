@@ -1,5 +1,3 @@
-// src/App.jsx
-
 import React, { useState } from "react";
 import Sidebar from "./components/Sidebar";
 import ConfigTabs from "./components/ConfigTabs";
@@ -18,22 +16,24 @@ function App() {
 	};
 
 	return (
-		<div className="flex h-screen bg-deep-black text-white p-4 overflow-hidden">
-			<div className="flex w-full space-x-4 h-full">
-				<div className="w-64 bg-mid-black rounded-xl shadow-lg flex flex-col overflow-hidden">
-					<Sidebar
-						activeItem={activeSidebarItem}
-						setActiveItem={setActiveSidebarItem}
-					/>
-				</div>
-				<div className="flex-1 bg-mid-black rounded-xl shadow-lg flex flex-col overflow-hidden">
-					<ConfigTabs
-						activeTab={activeTab}
-						setActiveTab={setActiveTab}
-						config={config}
-						onConfigUpdate={handleConfigUpdate}
-						activeSidebarItem={activeSidebarItem}
-					/>
+		<div autoComplete="off" data-form-type="other">
+			<div className="flex h-screen bg-deep-black text-white p-4 overflow-hidden">
+				<div className="flex w-full space-x-4 h-full">
+					<div className="w-64 bg-mid-black rounded-xl shadow-lg flex flex-col overflow-hidden">
+						<Sidebar
+							activeItem={activeSidebarItem}
+							setActiveItem={setActiveSidebarItem}
+						/>
+					</div>
+					<div className="flex-1 bg-mid-black rounded-xl shadow-lg flex flex-col overflow-hidden">
+						<ConfigTabs
+							activeTab={activeTab}
+							setActiveTab={setActiveTab}
+							config={config}
+							onConfigUpdate={handleConfigUpdate}
+							activeSidebarItem={activeSidebarItem}
+						/>
+					</div>
 				</div>
 			</div>
 		</div>

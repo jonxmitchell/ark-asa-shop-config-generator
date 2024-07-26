@@ -1,5 +1,3 @@
-// src/components/settings/TimedPointsRewards.jsx
-
 import React, { useState } from "react";
 import { TrashIcon } from "@heroicons/react/24/solid";
 
@@ -157,6 +155,7 @@ function TimedPointsRewards({ config, onConfigUpdate }) {
 							value={config.General.TimedPointsReward?.Interval || 30}
 							onChange={handleChange}
 							disabled={!isEnabled}
+							autoComplete="off"
 							className={`w-1/12 px-2 py-1 text-sm text-white bg-mid-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
 								!isEnabled && "opacity-50 cursor-not-allowed"
 							}`}
@@ -173,6 +172,7 @@ function TimedPointsRewards({ config, onConfigUpdate }) {
 							onChange={(e) => setNewGroupName(e.target.value)}
 							placeholder="New group name"
 							disabled={!isEnabled}
+							autoComplete="off"
 							className={`flex-grow px-3 py-2 text-sm text-white bg-mid-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
 								!isEnabled && "cursor-not-allowed"
 							}`}
@@ -213,6 +213,7 @@ function TimedPointsRewards({ config, onConfigUpdate }) {
 									value={groupData.Amount}
 									onChange={(e) => handleGroupChange(groupName, e.target.value)}
 									disabled={!isEnabled}
+									autoComplete="off"
 									className={`w-2/12 px-2 py-1 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
 										!isEnabled && "cursor-not-allowed"
 									}`}
