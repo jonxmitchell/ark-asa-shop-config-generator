@@ -1,3 +1,4 @@
+// src/components/PasswordInput.jsx
 import React, { useState, useRef, useEffect } from "react";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/solid";
 
@@ -17,12 +18,12 @@ const PasswordInput = ({ value, onChange, disabled }) => {
 	};
 
 	return (
-		<div className="relative">
+		<div className="relative flex items-center">
 			<div
 				ref={inputRef}
 				contentEditable={!disabled}
 				onInput={handleInput}
-				className={`w-full px-3 py-2 pr-10 text-sm text-white bg-mid-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
+				className={`w-full min-h-[38px] px-3 py-2 pr-10 text-sm text-white bg-mid-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
 					disabled ? "opacity-50 cursor-not-allowed" : "focus:outline-none"
 				}`}
 				style={{
@@ -32,7 +33,7 @@ const PasswordInput = ({ value, onChange, disabled }) => {
 			/>
 			<button
 				type="button"
-				className="absolute inset-y-0 right-0 pr-3 flex items-center"
+				className="absolute right-0 pr-3 flex items-center h-full"
 				onClick={() => setShowPassword(!showPassword)}
 				disabled={disabled}>
 				{showPassword ? (
