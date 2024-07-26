@@ -3,49 +3,15 @@
 import React, { useState } from "react";
 import Sidebar from "./components/Sidebar";
 import ConfigTabs from "./components/ConfigTabs";
-
-const defaultConfig = {
-	Mysql: {
-		UseMysql: false,
-		MysqlHost: "",
-		MysqlUser: "",
-		MysqlPass: "",
-		MysqlDB: "",
-		MysqlPort: 3306,
-	},
-	General: {
-		Discord: {
-			Enabled: false,
-			SenderName: "ArkShop",
-			URL: "",
-		},
-		TimedPointsReward: {
-			Enabled: false,
-			StackRewards: false,
-			Interval: 30,
-			Groups: {},
-		},
-		ItemsPerPage: 15,
-		ShopDisplayTime: 15.0,
-		ShopTextSize: 1.3,
-		DbPathOverride: "",
-		DefaultKit: "",
-		GiveDinosInCryopods: true,
-		UseSoulTraps: false,
-		CryoLimitedTime: false,
-		CryoItemPath: "",
-		UseOriginalTradeCommandWithUI: false,
-		PreventUseNoglin: true,
-		PreventUseUnconscious: true,
-		PreventUseHandcuffed: true,
-		PreventUseCarried: true,
-	},
-};
+import { useContextMenu } from "./hooks/useContextMenu";
+import { defaultConfig } from "./config/defaultConfig";
 
 function App() {
 	const [config, setConfig] = useState(defaultConfig);
 	const [activeTab, setActiveTab] = useState("generator");
 	const [activeSidebarItem, setActiveSidebarItem] = useState("MySQL");
+
+	useContextMenu();
 
 	const handleConfigUpdate = (newConfig) => {
 		setConfig(newConfig);
