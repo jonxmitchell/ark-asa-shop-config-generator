@@ -37,7 +37,7 @@ const defaultConfig = {
 function App() {
 	const [config, setConfig] = useState(defaultConfig);
 	const [activeTab, setActiveTab] = useState("generator");
-	const [activeSidebarItem, setActiveSidebarItem] = useState("General");
+	const [activeSidebarItem, setActiveSidebarItem] = useState("MySQL");
 
 	const handleConfigUpdate = (newConfig) => {
 		setConfig(newConfig);
