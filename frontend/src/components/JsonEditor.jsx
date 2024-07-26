@@ -32,7 +32,7 @@ function JsonEditor({ config }) {
 			scrollbar: {
 				vertical: "hidden",
 				horizontal: "hidden",
-				useShadows: false,
+				useShadows: true,
 				verticalHasArrows: false,
 				horizontalHasArrows: false,
 				verticalScrollbarSize: 0,
@@ -49,16 +49,16 @@ function JsonEditor({ config }) {
 			className="h-full w-full bg-mid-black rounded-lg overflow-hidden">
 			<div className="h-full overflow-hidden hover:overflow-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
 				<Editor
-					height="100%"
+					height="95%"
 					defaultLanguage="json"
 					value={jsonString}
 					theme="vs-dark"
 					options={{
 						readOnly: true,
 						minimap: { enabled: false },
-						fontSize: 14,
+						fontSize: 13,
 						scrollBeyondLastLine: false,
-						renderLineHighlight: "all",
+						renderLineHighlight: "20",
 						lineNumbers: "on",
 						roundedSelection: false,
 						contextmenu: false,

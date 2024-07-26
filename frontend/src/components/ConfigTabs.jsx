@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import ConfigForm from "./ConfigForm";
 import JsonEditor from "./JsonEditor";
 
@@ -9,9 +9,34 @@ function ConfigTabs({
 	onConfigUpdate,
 	activeSidebarItem,
 }) {
+	const [showShadow, setShowShadow] = useState(false);
+	const contentRef = useRef(null);
+
+	useEffect(() => {
+		const handleScroll = () => {
+			if (contentRef.current) {
+				setShowShadow(contentRef.current.scrollTop > 0);
+			}
+		};
+
+		const currentContentRef = contentRef.current;
+		if (currentContentRef) {
+			currentContentRef.addEventListener("scroll", handleScroll);
+		}
+
+		return () => {
+			if (currentContentRef) {
+				currentContentRef.removeEventListener("scroll", handleScroll);
+			}
+		};
+	}, []);
+
 	return (
 		<div className="h-full flex flex-col">
-			<div className="bg-mid-black pt-4 px-6 pb-4">
+			<div
+				className={`sticky top-0 z-10 bg-mid-black pt-4 px-6 pb-4 ${
+					showShadow ? "shadow-tabs" : ""
+				} transition-shadow duration-300`}>
 				<ul className="flex flex-wrap text-sm font-medium" role="tablist">
 					<li className="mr-2" role="presentation">
 						<button
@@ -37,9 +62,9 @@ function ConfigTabs({
 					</li>
 				</ul>
 			</div>
-			<div className="flex-grow overflow-hidden bg-mid-black">
+			<div className="flex-grow overflow-auto bg-mid-black" ref={contentRef}>
 				{activeTab === "generator" ? (
-					<div className="h-full overflow-y-auto p-6 scrollbar-thin scrollbar-thumb-blue scrollbar-track-gray">
+					<div className="p-6">
 						<ConfigForm
 							config={config}
 							onConfigUpdate={onConfigUpdate}
