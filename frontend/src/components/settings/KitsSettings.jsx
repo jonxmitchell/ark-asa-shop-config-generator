@@ -7,6 +7,7 @@ import {
 	CubeIcon,
 	SparklesIcon,
 	CommandLineIcon,
+	PowerIcon,
 } from "@heroicons/react/24/solid";
 import { motion, AnimatePresence } from "framer-motion";
 import ItemsModal from "./modals/ItemsModal";
@@ -112,6 +113,17 @@ function KitsSettings({ config, onConfigUpdate }) {
 		});
 	};
 
+	const toggleField = (kitName, field) => {
+		const updatedKits = { ...config.Kits };
+		if (field in updatedKits[kitName]) {
+			delete updatedKits[kitName][field];
+		} else {
+			updatedKits[kitName][field] =
+				field === "Price" ? 0 : field === "MinLevel" ? 1 : 20;
+		}
+		onConfigUpdate({ ...config, Kits: updatedKits });
+	};
+
 	return (
 		<div className="bg-light-black p-6 rounded-lg">
 			<div className="space-y-4">
@@ -192,69 +204,53 @@ function KitsSettings({ config, onConfigUpdate }) {
 										autoComplete="off"
 									/>
 								</div>
-								<div>
-									<label
-										htmlFor={`${kitName}-price`}
-										className="block text-xs font-medium text-gray-300">
-										Price
-									</label>
-									<input
-										id={`${kitName}-price`}
-										type="number"
-										value={kitData.Price || 0}
-										onChange={(e) =>
-											handleKitChange(
-												kitName,
-												"Price",
-												parseInt(e.target.value, 10)
-											)
-										}
-										className="w-full px-2 py-1 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
-										autoComplete="off"
-									/>
-								</div>
-								<div>
-									<label
-										htmlFor={`${kitName}-min-level`}
-										className="block text-xs font-medium text-gray-300">
-										Min Level
-									</label>
-									<input
-										id={`${kitName}-min-level`}
-										type="number"
-										value={kitData.MinLevel || 1}
-										onChange={(e) =>
-											handleKitChange(
-												kitName,
-												"MinLevel",
-												parseInt(e.target.value, 10)
-											)
-										}
-										className="w-full px-2 py-1 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
-										autoComplete="off"
-									/>
-								</div>
-								<div>
-									<label
-										htmlFor={`${kitName}-max-level`}
-										className="block text-xs font-medium text-gray-300">
-										Max Level
-									</label>
-									<input
-										id={`${kitName}-max-level`}
-										type="number"
-										value={kitData.MaxLevel || 20}
-										onChange={(e) =>
-											handleKitChange(
-												kitName,
-												"MaxLevel",
-												parseInt(e.target.value, 10)
-											)
-										}
-										className="w-full px-2 py-1 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
-										autoComplete="off"
-									/>
-								</div>
+								{["Price", "MinLevel", "MaxLevel"].map((field) => (
+									<div key={field} className="relative">
+										<label
+											htmlFor={`${kitName}-${field.toLowerCase()}`}
+											className="block text-xs font-medium text-gray-300">
+											{field}
+										</label>
+										<div className="relative">
+											<input
+												id={`${kitName}-${field.toLowerCase()}`}
+												type="number"
+												value={
+													kitData[field] ||
+													(field === "Price"
+														? 0
+														: field === "MinLevel"
+														? 1
+														: 20)
+												}
+												onChange={(e) =>
+													handleKitChange(
+														kitName,
+														field,
+														parseInt(e.target.value, 10)
+													)
+												}
+												className={`w-full px-2 py-1 pr-8 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
+													!(field in kitData) && "opacity-50 cursor-not-allowed"
+												}`}
+												disabled={!(field in kitData)}
+												autoComplete="off"
+											/>
+											<button
+												onClick={() => toggleField(kitName, field)}
+												className={`absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors ${
+													field in kitData
+														? "hover:text-red-500"
+														: "hover:text-green-500"
+												}`}
+												title={
+													field in kitData ? "Disable field" : "Enable field"
+												}>
+												<PowerIcon className="h-4 w-4" />
+											</button>
+										</div>
+									</div>
+								))}
 							</div>
 							<div className="grid grid-cols-2 gap-2">
 								<div>
@@ -339,13 +335,13 @@ function KitsSettings({ config, onConfigUpdate }) {
 						initial={{ opacity: 0 }}
 						animate={{ opacity: 1 }}
 						exit={{ opacity: 0 }}
-						className="fixed inset-0 z-50 overflow-auto bg-black bg-opacity-50 flex items-center justify-center backdrop-filter backdrop-blur-sm">
+						className="fixed inset-0 z-50 overflow-hidden bg-black bg-opacity-50 flex items-center justify-center backdrop-filter backdrop-blur-sm">
 						<motion.div
 							initial={{ scale: 0.9, opacity: 0 }}
 							animate={{ scale: 1, opacity: 1 }}
 							exit={{ scale: 0.9, opacity: 0 }}
-							className="relative bg-mid-black w-full max-w-2xl m-auto rounded-lg shadow-lg">
-							<div className="p-6">
+							className="relative bg-mid-black w-full max-w-2xl m-auto rounded-lg shadow-lg overflow-hidden">
+							<div className="p-6 max-h-[90vh] overflow-y-auto">
 								<button
 									onClick={() => closeModal("items")}
 									className="absolute top-4 right-4 text-gray-400 hover:text-white">
@@ -382,13 +378,13 @@ function KitsSettings({ config, onConfigUpdate }) {
 						initial={{ opacity: 0 }}
 						animate={{ opacity: 1 }}
 						exit={{ opacity: 0 }}
-						className="fixed inset-0 z-50 overflow-auto bg-black bg-opacity-50 flex items-center justify-center backdrop-filter backdrop-blur-sm">
+						className="fixed inset-0 z-50 overflow-hidden bg-black bg-opacity-50 flex items-center justify-center backdrop-filter backdrop-blur-sm">
 						<motion.div
 							initial={{ scale: 0.9, opacity: 0 }}
 							animate={{ scale: 1, opacity: 1 }}
 							exit={{ scale: 0.9, opacity: 0 }}
-							className="relative bg-mid-black w-full max-w-2xl m-auto rounded-lg shadow-lg">
-							<div className="p-6">
+							className="relative bg-mid-black w-full max-w-2xl m-auto rounded-lg shadow-lg overflow-hidden">
+							<div className="p-6 max-h-[90vh] overflow-y-auto">
 								<button
 									onClick={() => closeModal("dinos")}
 									className="absolute top-4 right-4 text-gray-400 hover:text-white">
@@ -425,13 +421,13 @@ function KitsSettings({ config, onConfigUpdate }) {
 						initial={{ opacity: 0 }}
 						animate={{ opacity: 1 }}
 						exit={{ opacity: 0 }}
-						className="fixed inset-0 z-50 overflow-auto bg-black bg-opacity-50 flex items-center justify-center backdrop-filter backdrop-blur-sm">
+						className="fixed inset-0 z-50 overflow-hidden bg-black bg-opacity-50 flex items-center justify-center backdrop-filter backdrop-blur-sm">
 						<motion.div
 							initial={{ scale: 0.9, opacity: 0 }}
 							animate={{ scale: 1, opacity: 1 }}
 							exit={{ scale: 0.9, opacity: 0 }}
-							className="relative bg-mid-black w-full max-w-2xl m-auto rounded-lg shadow-lg">
-							<div className="p-6">
+							className="relative bg-mid-black w-full max-w-2xl m-auto rounded-lg shadow-lg overflow-hidden">
+							<div className="p-6 max-h-[90vh] overflow-y-auto">
 								<button
 									onClick={() => closeModal("commands")}
 									className="absolute top-4 right-4 text-gray-400 hover:text-white">

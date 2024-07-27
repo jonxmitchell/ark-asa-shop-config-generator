@@ -1,3 +1,5 @@
+// src/components/settings/modals/CommandsModal.jsx
+
 import React, { useState, useEffect } from "react";
 import { TrashIcon } from "@heroicons/react/24/solid";
 import { motion, AnimatePresence } from "framer-motion";
@@ -55,54 +57,59 @@ function CommandsModal({ kitName, commands, onSave, onClose }) {
 				</select>
 			</div>
 			<div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
-				<AnimatePresence>
+				<AnimatePresence initial={false}>
 					{filteredCommands.map((command, index) => (
 						<motion.div
 							key={index}
-							initial={{ opacity: 0, y: -10 }}
-							animate={{ opacity: 1, y: 0 }}
-							exit={{ opacity: 0, y: -10 }}
-							className="bg-light-black p-4 rounded-lg relative">
-							<div className="grid grid-cols-2 gap-4 mb-4">
-								<div>
-									<label
-										htmlFor={`command-${index}`}
-										className="block text-sm font-medium text-gray-300 mb-1">
-										Command
-									</label>
-									<input
-										id={`command-${index}`}
-										type="text"
-										value={command.Command}
-										onChange={(e) =>
-											handleCommandChange(index, "Command", e.target.value)
-										}
-										className="w-full px-3 py-2 text-sm text-white bg-mid-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
-										autoComplete="off"
-									/>
+							initial={{ opacity: 0, height: 0 }}
+							animate={{ opacity: 1, height: "auto" }}
+							exit={{ opacity: 0, height: 0 }}
+							transition={{ type: "tween", duration: 0.2 }}
+							className="bg-light-black rounded-lg overflow-hidden">
+							<div className="p-4">
+								<div className="grid grid-cols-2 gap-4 mb-4">
+									<div>
+										<label
+											htmlFor={`command-${index}`}
+											className="block text-sm font-medium text-gray-300 mb-1">
+											Command
+										</label>
+										<input
+											id={`command-${index}`}
+											type="text"
+											value={command.Command}
+											onChange={(e) =>
+												handleCommandChange(index, "Command", e.target.value)
+											}
+											className="w-full px-3 py-2 text-sm text-white bg-mid-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+											autoComplete="off"
+										/>
+									</div>
+									<div>
+										<label
+											htmlFor={`display-as-${index}`}
+											className="block text-sm font-medium text-gray-300 mb-1">
+											Display As
+										</label>
+										<input
+											id={`display-as-${index}`}
+											type="text"
+											value={command.DisplayAs}
+											onChange={(e) =>
+												handleCommandChange(index, "DisplayAs", e.target.value)
+											}
+											className="w-full px-3 py-2 text-sm text-white bg-mid-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+											autoComplete="off"
+										/>
+									</div>
 								</div>
-								<div>
-									<label
-										htmlFor={`display-as-${index}`}
-										className="block text-sm font-medium text-gray-300 mb-1">
-										Display As
-									</label>
-									<input
-										id={`display-as-${index}`}
-										type="text"
-										value={command.DisplayAs}
-										onChange={(e) =>
-											handleCommandChange(index, "DisplayAs", e.target.value)
-										}
-										className="w-full px-3 py-2 text-sm text-white bg-mid-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
-										autoComplete="off"
-									/>
+								<div className="flex justify-end">
+									<button
+										onClick={() => removeCommand(index)}
+										className="text-red-500 hover:text-red-700">
+										<TrashIcon className="h-5 w-5" />
+									</button>
 								</div>
-								<button
-									onClick={() => removeCommand(index)}
-									className="text-red-500 hover:text-red-700 mt-2">
-									<TrashIcon className="h-5 w-5" />
-								</button>
 							</div>
 						</motion.div>
 					))}
