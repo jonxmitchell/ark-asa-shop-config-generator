@@ -36,4 +36,5 @@ export const defaultConfig = {
 		PreventUseHandcuffed: true,
 		PreventUseCarried: true,
 	},
+	Kits: {},
 };
