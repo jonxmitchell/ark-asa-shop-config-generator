@@ -1,0 +1,76 @@
+{
+	"Dinos": {
+		"Achatina": {
+			"ID": 1,
+			"Type": "creature",
+			"Name": "Achatina",
+			"EntityID": "Achatina_Character_BP_C",
+			"Blueprint": "Blueprint'/Game/PrimalEarth/Dinos/Achatina/Achatina_Character_BP.Achatina_Character_BP'"
+		},
+		"Allosaurus": {
+			"ID": 2,
+			"Type": "creature",
+			"Name": "Allosaurus",
+			"EntityID": "Allo_Character_BP_C",
+			"Blueprint": "Blueprint'/Game/PrimalEarth/Dinos/Allosaurus/Allo_Character_BP.Allo_Character_BP'"
+		},
+		"Ammonite": {
+			"ID": 10,
+			"Type": "creature",
+			"Name": "Ammonite",
+			"EntityID": "Ammonite_Character_C",
+			"Blueprint": "Blueprint'/Game/PrimalEarth/Dinos/Ammonite/Ammonite_Character.Ammonite_Character'"
+		},
+		"Anglerfish": {
+			"ID": 11,
+			"Type": "creature",
+			"Name": "Anglerfish",
+			"EntityID": "Angler_Character_BP_C",
+			"Blueprint": "Blueprint'/Game/PrimalEarth/Dinos/Anglerfish/Angler_Character_BP.Angler_Character_BP'"
+		},
+		"Ankylosaurus": {
+			"ID": 12,
+			"Type": "creature",
+			"Name": "Ankylosaurus",
+			"EntityID": "Ankylo_Character_BP_C",
+			"Blueprint": "Blueprint'/Game/PrimalEarth/Dinos/Ankylo/Ankylo_Character_BP.Ankylo_Character_BP'"
+		}
+	},
+	"Items": {
+		"Absorbent Substrate": {
+			"ID": 1,
+			"Type": "Resources",
+			"Name": "Absorbent Substrate",
+			"ClassName": "PrimalItemResource_SubstrateAbsorbent_C",
+			"Blueprint": "Blueprint'/Game/PrimalEarth/CoreBlueprints/Resources/PrimalItemResource_SubstrateAbsorbent.PrimalItemResource_SubstrateAbsorbent'"
+		},
+		"Achatina Paste": {
+			"ID": 2,
+			"Type": "Resources",
+			"Name": "Achatina Paste",
+			"ClassName": "PrimalItemResource_SnailPaste_C",
+			"Blueprint": "Blueprint'/Game/PrimalEarth/Dinos/Achatina/PrimalItemResource_SnailPaste.PrimalItemResource_SnailPaste'"
+		},
+		"Ambergris": {
+			"ID": 3,
+			"Type": "Resources",
+			"Name": "Ambergris",
+			"ClassName": "PrimalItemResource_Ambergris_C",
+			"Blueprint": "Blueprint'/Game/Genesis/Dinos/SpaceWhale/PrimalItemResource_Ambergris.PrimalItemResource_Ambergris'"
+		},
+		"Ammonite Bile": {
+			"ID": 4,
+			"Type": "Resources",
+			"Name": "Ammonite Bile",
+			"ClassName": "PrimalItemResource_AmmoniteBlood_C",
+			"Blueprint": "Blueprint'/Game/PrimalEarth/CoreBlueprints/Resources/PrimalItemResource_AmmoniteBlood.PrimalItemResource_AmmoniteBlood'"
+		},
+		"AnglerGel": {
+			"ID": 5,
+			"Type": "Resources",
+			"Name": "AnglerGel",
+			"ClassName": "PrimalItemResource_AnglerGel_C",
+			"Blueprint": "Blueprint'/Game/PrimalEarth/CoreBlueprints/Resources/PrimalItemResource_AnglerGel.PrimalItemResource_AnglerGel'"
+		}
+	}
+}
