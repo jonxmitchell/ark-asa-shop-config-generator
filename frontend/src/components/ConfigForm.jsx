@@ -4,6 +4,7 @@ import React from "react";
 import MySQLSettings from "./settings/MySQLSettings";
 import GeneralSettings from "./settings/GeneralSettings";
 import KitsSettings from "./settings/KitsSettings";
+import ShopItemsSettings from "./settings/ShopItemsSettings";
 
 function ConfigForm({ config, onConfigUpdate, activeSidebarItem }) {
 	const renderSettingsComponent = () => {
@@ -18,6 +19,10 @@ function ConfigForm({ config, onConfigUpdate, activeSidebarItem }) {
 				);
 			case "Kits":
 				return <KitsSettings config={config} onConfigUpdate={onConfigUpdate} />;
+			case "Shop Items":
+				return (
+					<ShopItemsSettings config={config} onConfigUpdate={onConfigUpdate} />
+				);
 			// Add cases for other sidebar items here
 			default:
 				return <p>Select a setting from the sidebar</p>;

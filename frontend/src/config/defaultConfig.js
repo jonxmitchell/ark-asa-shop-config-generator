@@ -37,4 +37,5 @@ export const defaultConfig = {
 		PreventUseCarried: true,
 	},
 	Kits: {},
+	ShopItems: {},
 };
