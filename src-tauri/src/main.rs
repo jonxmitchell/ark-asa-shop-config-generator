@@ -1,7 +1,5 @@
 mod ark_data;
 
-use tauri::Manager;
-
 #[tauri::command]
 fn read_ark_data(app: tauri::AppHandle) -> Result<serde_json::Value, String> {
     ark_data::read_ark_data(app)
