@@ -11,7 +11,7 @@
 			"targets": "all",
 			"identifier": "com.arkshop.config-generator",
 			"icon": ["icons/icon.ico"],
-			"resources": [],
+			"resources": ["ark_data.json"],
 			"externalBin": [],
 			"copyright": "",
 			"category": "DeveloperTool",
