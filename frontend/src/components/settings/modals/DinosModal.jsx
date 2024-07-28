@@ -1,5 +1,3 @@
-// src/components/settings/modals/DinosModal.jsx
-
 import React, { useState, useEffect } from "react";
 import { TrashIcon } from "@heroicons/react/24/solid";
 import { motion, AnimatePresence } from "framer-motion";

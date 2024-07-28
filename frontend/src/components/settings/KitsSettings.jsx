@@ -1,6 +1,4 @@
-// src/components/settings/KitsSettings.jsx
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
 	TrashIcon,
 	PencilIcon,
@@ -24,6 +22,17 @@ function KitsSettings({ config, onConfigUpdate }) {
 		commands: false,
 	});
 	const [currentEditingKit, setCurrentEditingKit] = useState(null);
+	const [searchTerm, setSearchTerm] = useState("");
+	const [searchField, setSearchField] = useState("Blueprint");
+	const [filteredItems, setFilteredItems] = useState([]);
+
+	useEffect(() => {
+		const filtered = Object.entries(config.Kits || {}).filter(
+			([kitName, kitData]) =>
+				kitName.toLowerCase().includes(searchTerm.toLowerCase())
+		);
+		setFilteredItems(filtered);
+	}, [searchTerm, config.Kits]);
 
 	const handleKitChange = (kitName, field, value) => {
 		onConfigUpdate({
@@ -31,7 +40,7 @@ function KitsSettings({ config, onConfigUpdate }) {
 			Kits: {
 				...config.Kits,
 				[kitName]: {
-					...(config.Kits?.[kitName] || {}),
+					...config.Kits[kitName],
 					[field]: value,
 				},
 			},
@@ -52,9 +61,6 @@ function KitsSettings({ config, onConfigUpdate }) {
 						MinLevel: 1,
 						MaxLevel: 20,
 						OnlyFromSpawn: false,
-						Items: [],
-						Dinos: [],
-						Commands: [],
 					},
 				},
 			});
@@ -101,14 +107,17 @@ function KitsSettings({ config, onConfigUpdate }) {
 	};
 
 	const updateKitData = (kitName, field, data) => {
+		const updatedKit = { ...config.Kits[kitName] };
+		if (data.length > 0) {
+			updatedKit[field] = data;
+		} else {
+			delete updatedKit[field];
+		}
 		onConfigUpdate({
 			...config,
 			Kits: {
 				...config.Kits,
-				[kitName]: {
-					...config.Kits[kitName],
-					[field]: data,
-				},
+				[kitName]: updatedKit,
 			},
 		});
 	};
@@ -142,8 +151,18 @@ function KitsSettings({ config, onConfigUpdate }) {
 						Add Kit
 					</button>
 				</div>
+				<div className="flex space-x-2 mb-4">
+					<input
+						type="text"
+						placeholder="Search kits..."
+						value={searchTerm}
+						onChange={(e) => setSearchTerm(e.target.value)}
+						className="flex-grow px-3 py-2 text-sm text-white bg-mid-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+						autoComplete="off"
+					/>
+				</div>
 				<AnimatePresence>
-					{Object.entries(config.Kits || {}).map(([kitName, kitData]) => (
+					{filteredItems.map(([kitName, kitData]) => (
 						<motion.div
 							key={kitName}
 							initial={{ opacity: 0, y: -10 }}
