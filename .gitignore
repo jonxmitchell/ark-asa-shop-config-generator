@@ -14,3 +14,7 @@ frontend/package-lock.json
 
 # Backend Package Lock
 package-lock.json
+
+# Tree Generators
+tree.ps1
+run_tree.bat
