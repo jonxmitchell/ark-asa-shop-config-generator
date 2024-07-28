@@ -23,7 +23,6 @@ function KitsSettings({ config, onConfigUpdate }) {
 	});
 	const [currentEditingKit, setCurrentEditingKit] = useState(null);
 	const [searchTerm, setSearchTerm] = useState("");
-	const [searchField, setSearchField] = useState("Blueprint");
 	const [filteredItems, setFilteredItems] = useState([]);
 
 	useEffect(() => {
