@@ -350,7 +350,12 @@ function ShopItemsSettings({ config, onConfigUpdate }) {
 											{itemName}
 										</h5>
 									)}
-									<span className="text-xs px-2 py-1 bg-blue-600 text-white rounded">
+									<span
+										className={`text-xs px-2 py-1 text-white rounded ${
+											itemData.Type === "beacon"
+												? "bg-purple-600"
+												: "bg-blue-600"
+										}`}>
 										{itemData.Type}
 									</span>
 								</div>
