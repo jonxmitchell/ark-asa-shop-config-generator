@@ -3,7 +3,12 @@ import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/tauri";
 
 export function useArkData() {
-	const [arkData, setArkData] = useState({ Dinos: {}, Items: {} });
+	const [arkData, setArkData] = useState({
+		Dinos: {},
+		Items: {},
+		Beacons: {},
+		Engrams: {},
+	});
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
 
