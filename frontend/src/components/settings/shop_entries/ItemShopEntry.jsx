@@ -139,6 +139,7 @@ function ItemShopEntry({
 										}
 										placeholder="Select or enter a blueprint"
 										value={entry.Blueprint}
+										className={"w-full bg-mid-black"}
 									/>
 								</div>
 								<div className="flex justify-between items-center">
