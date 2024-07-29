@@ -14,6 +14,7 @@ import { useArkData } from "../../hooks/useArkData";
 import ItemShopEntry from "./shop_entries/ItemShopEntry";
 import BeaconShopEntry from "./shop_entries/BeaconShopEntry";
 import ExperienceShopEntry from "./shop_entries/ExperienceShopEntry";
+import UnlockEngramShopEntry from "./shop_entries/UnlockEngramShopEntry";
 import ConfirmationModal from "../ConfirmationModal";
 
 function ShopItemsSettings({ config, onConfigUpdate }) {
@@ -357,6 +358,8 @@ function ShopItemsSettings({ config, onConfigUpdate }) {
 												? "bg-purple-600"
 												: itemData.Type === "experience"
 												? "bg-orange-700"
+												: itemData.Type === "unlockengram"
+												? "bg-green-600"
 												: "bg-blue-600"
 										}`}>
 										{itemData.Type}
@@ -422,6 +425,18 @@ function ShopItemsSettings({ config, onConfigUpdate }) {
 									itemData={itemData}
 									expanded={expandedItem === itemName}
 									handleItemChange={handleItemChange}
+								/>
+							)}
+							{itemData.Type === "unlockengram" && (
+								<UnlockEngramShopEntry
+									itemName={itemName}
+									itemData={itemData}
+									expanded={expandedItem === itemName}
+									handleItemChange={handleItemChange}
+									handleItemEntryChange={handleItemEntryChange}
+									addItemEntry={addItemEntry}
+									removeItemEntry={removeItemEntry}
+									arkData={arkData}
 								/>
 							)}
 							{/* Add other item type components here when implemented */}

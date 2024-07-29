@@ -67,13 +67,13 @@ function SearchableDropdown({
 				<ul className="py-1">
 					{filteredOptions.map((option) => (
 						<li
-							key={option.ID}
+							key={option.ID || option.Blueprint}
 							onMouseDown={(e) => {
 								e.preventDefault(); // Prevent input blur
 								handleOptionSelect(option);
 							}}
 							className="px-3 py-2 text-sm text-white hover:bg-gray-700 cursor-pointer">
-							{option.Name}
+							{option.Name || option.ClassName}
 						</li>
 					))}
 				</ul>
