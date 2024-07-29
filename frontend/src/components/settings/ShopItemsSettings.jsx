@@ -13,6 +13,7 @@ import {
 import { useArkData } from "../../hooks/useArkData";
 import ItemShopEntry from "./shop_entries/ItemShopEntry";
 import BeaconShopEntry from "./shop_entries/BeaconShopEntry";
+import ExperienceShopEntry from "./shop_entries/ExperienceShopEntry";
 import ConfirmationModal from "../ConfirmationModal";
 
 function ShopItemsSettings({ config, onConfigUpdate }) {
@@ -411,6 +412,14 @@ function ShopItemsSettings({ config, onConfigUpdate }) {
 									expanded={expandedItem === itemName}
 									handleItemChange={handleItemChange}
 									arkData={arkData}
+								/>
+							)}
+							{itemData.Type === "experience" && (
+								<ExperienceShopEntry
+									itemName={itemName}
+									itemData={itemData}
+									expanded={expandedItem === itemName}
+									handleItemChange={handleItemChange}
 								/>
 							)}
 							{/* Add other item type components here when implemented */}
