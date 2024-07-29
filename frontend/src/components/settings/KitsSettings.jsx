@@ -221,13 +221,15 @@ function KitsSettings({ config, onConfigUpdate }) {
 						autoComplete="off"
 					/>
 				</div>
-				<AnimatePresence>
+				<AnimatePresence initial={false}>
 					{filteredItems.map(([kitName, kitData]) => (
 						<motion.div
 							key={kitName}
-							initial={{ opacity: 0, y: -10 }}
-							animate={{ opacity: 1, y: 0 }}
-							exit={{ opacity: 0, y: -10 }}
+							initial={{ opacity: 0 }}
+							animate={{ opacity: 1 }}
+							exit={{ opacity: 0 }}
+							transition={{ duration: 0.2 }}
+							layout
 							className="bg-mid-black p-4 rounded-lg space-y-2 hover:bg-opacity-80 transition-colors cursor-pointer"
 							onClick={() => toggleKitExpansion(kitName)}>
 							<div className="flex justify-between items-center">
@@ -305,13 +307,14 @@ function KitsSettings({ config, onConfigUpdate }) {
 									{editValidationMessage}
 								</p>
 							)}
-							<AnimatePresence>
+							<AnimatePresence initial={false}>
 								{expandedKit === kitName && (
 									<motion.div
-										initial={{ opacity: 0, height: 0 }}
-										animate={{ opacity: 1, height: "auto" }}
-										exit={{ opacity: 0, height: 0 }}
-										transition={{ duration: 0.3 }}
+										initial={{ opacity: 0 }}
+										animate={{ opacity: 1 }}
+										exit={{ opacity: 0 }}
+										transition={{ duration: 0.2 }}
+										layout
 										className="space-y-2 mt-2"
 										onClick={(e) => e.stopPropagation()}>
 										<div className="grid grid-cols-4 gap-2">

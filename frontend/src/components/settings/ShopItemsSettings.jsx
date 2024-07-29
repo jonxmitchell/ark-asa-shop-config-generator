@@ -249,14 +249,15 @@ function ShopItemsSettings({ config, onConfigUpdate }) {
 					/>
 				</div>
 
-				<AnimatePresence>
+				<AnimatePresence initial={false}>
 					{filteredItems.map(([itemName, itemData]) => (
 						<motion.div
 							key={itemName}
-							initial={{ opacity: 0, y: -10 }}
-							animate={{ opacity: 1, y: 0 }}
-							exit={{ opacity: 0, y: -10 }}
+							initial={{ opacity: 0 }}
+							animate={{ opacity: 1 }}
+							exit={{ opacity: 0 }}
 							transition={{ duration: 0.2 }}
+							layout
 							className="bg-mid-black p-4 rounded-lg hover:bg-opacity-80 transition-colors">
 							<div
 								className="flex justify-between items-center cursor-pointer"
