@@ -20,8 +20,8 @@ function BeaconShopEntry({ itemName, itemData, expanded, handleItemChange }) {
 		}
 	};
 
-	// if (loading) return <div>Loading...</div>;
-	// if (error) return <div>Error loading data</div>;
+	if (loading) return <div>Loading...</div>;
+	if (error) return <div>Error loading data</div>;
 
 	const beaconOptions = Object.values(arkData.Beacons || {});
 

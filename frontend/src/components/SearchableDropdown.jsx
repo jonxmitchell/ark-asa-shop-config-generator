@@ -3,7 +3,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import ReactDOM from "react-dom";
 
-function SearchableDropdown({ options, onSelect, placeholder, value }) {
+function SearchableDropdown({
+	options,
+	onSelect,
+	placeholder,
+	value,
+	className,
+}) {
 	const [isOpen, setIsOpen] = useState(false);
 	const [inputValue, setInputValue] = useState(value || "");
 	const [filteredOptions, setFilteredOptions] = useState(options);
@@ -86,7 +92,7 @@ function SearchableDropdown({ options, onSelect, placeholder, value }) {
 				onFocus={() => setIsOpen(true)}
 				onBlur={() => setTimeout(() => setIsOpen(false), 200)}
 				placeholder={placeholder}
-				className="w-full px-3 py-2 text-sm text-white bg-mid-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+				className={`w-full px-3 py-2 text-sm text-white rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${className}`}
 			/>
 			{isOpen && filteredOptions.length > 0 && <DropdownContent />}
 		</div>
