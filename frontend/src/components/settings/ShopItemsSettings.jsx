@@ -15,6 +15,7 @@ import ItemShopEntry from "./shop_entries/ItemShopEntry";
 import BeaconShopEntry from "./shop_entries/BeaconShopEntry";
 import ExperienceShopEntry from "./shop_entries/ExperienceShopEntry";
 import UnlockEngramShopEntry from "./shop_entries/UnlockEngramShopEntry";
+import CommandShopEntry from "./shop_entries/CommandShopEntry";
 import ConfirmationModal from "../ConfirmationModal";
 
 function ShopItemsSettings({ config, onConfigUpdate }) {
@@ -158,10 +159,29 @@ function ShopItemsSettings({ config, onConfigUpdate }) {
 
 	const addItemEntry = useCallback(
 		(itemName) => {
-			const newItems = [
-				...(config.ShopItems[itemName].Items || []),
-				{ Quality: 0, ForceBlueprint: false, Amount: 1, Blueprint: "" },
-			];
+			const itemType = config.ShopItems[itemName].Type;
+			let newEntry;
+
+			switch (itemType) {
+				case "item":
+					newEntry = {
+						Quality: 0,
+						ForceBlueprint: false,
+						Amount: 1,
+						Blueprint: "",
+					};
+					break;
+				case "unlockengram":
+					newEntry = { Blueprint: "" };
+					break;
+				case "command":
+					newEntry = { Command: "", DisplayAs: "" };
+					break;
+				default:
+					newEntry = {};
+			}
+
+			const newItems = [...(config.ShopItems[itemName].Items || []), newEntry];
 			handleItemChange(itemName, "Items", newItems);
 		},
 		[config.ShopItems, handleItemChange]
@@ -250,6 +270,70 @@ function ShopItemsSettings({ config, onConfigUpdate }) {
 		if (deleteConfirmation) {
 			removeItem(deleteConfirmation);
 			setDeleteConfirmation(null);
+		}
+	};
+
+	const renderShopEntry = (itemName, itemData) => {
+		switch (itemData.Type) {
+			case "item":
+				return (
+					<ItemShopEntry
+						itemName={itemName}
+						itemData={itemData}
+						expanded={expandedItem === itemName}
+						handleItemChange={handleItemChange}
+						handleItemEntryChange={handleItemEntryChange}
+						addItemEntry={addItemEntry}
+						removeItemEntry={removeItemEntry}
+						arkData={arkData}
+					/>
+				);
+			case "beacon":
+				return (
+					<BeaconShopEntry
+						itemName={itemName}
+						itemData={itemData}
+						expanded={expandedItem === itemName}
+						handleItemChange={handleItemChange}
+						arkData={arkData}
+					/>
+				);
+			case "experience":
+				return (
+					<ExperienceShopEntry
+						itemName={itemName}
+						itemData={itemData}
+						expanded={expandedItem === itemName}
+						handleItemChange={handleItemChange}
+					/>
+				);
+			case "unlockengram":
+				return (
+					<UnlockEngramShopEntry
+						itemName={itemName}
+						itemData={itemData}
+						expanded={expandedItem === itemName}
+						handleItemChange={handleItemChange}
+						handleItemEntryChange={handleItemEntryChange}
+						addItemEntry={addItemEntry}
+						removeItemEntry={removeItemEntry}
+						arkData={arkData}
+					/>
+				);
+			case "command":
+				return (
+					<CommandShopEntry
+						itemName={itemName}
+						itemData={itemData}
+						expanded={expandedItem === itemName}
+						handleItemChange={handleItemChange}
+						handleItemEntryChange={handleItemEntryChange}
+						addItemEntry={addItemEntry}
+						removeItemEntry={removeItemEntry}
+					/>
+				);
+			default:
+				return null;
 		}
 	};
 
@@ -360,6 +444,8 @@ function ShopItemsSettings({ config, onConfigUpdate }) {
 												? "bg-orange-700"
 												: itemData.Type === "unlockengram"
 												? "bg-green-600"
+												: itemData.Type === "command"
+												? "bg-yellow-600"
 												: "bg-blue-600"
 										}`}>
 										{itemData.Type}
@@ -398,48 +484,7 @@ function ShopItemsSettings({ config, onConfigUpdate }) {
 								</p>
 							)}
 
-							{itemData.Type === "item" && (
-								<ItemShopEntry
-									itemName={itemName}
-									itemData={itemData}
-									expanded={expandedItem === itemName}
-									handleItemChange={handleItemChange}
-									handleItemEntryChange={handleItemEntryChange}
-									addItemEntry={addItemEntry}
-									removeItemEntry={removeItemEntry}
-									arkData={arkData}
-								/>
-							)}
-							{itemData.Type === "beacon" && (
-								<BeaconShopEntry
-									itemName={itemName}
-									itemData={itemData}
-									expanded={expandedItem === itemName}
-									handleItemChange={handleItemChange}
-									arkData={arkData}
-								/>
-							)}
-							{itemData.Type === "experience" && (
-								<ExperienceShopEntry
-									itemName={itemName}
-									itemData={itemData}
-									expanded={expandedItem === itemName}
-									handleItemChange={handleItemChange}
-								/>
-							)}
-							{itemData.Type === "unlockengram" && (
-								<UnlockEngramShopEntry
-									itemName={itemName}
-									itemData={itemData}
-									expanded={expandedItem === itemName}
-									handleItemChange={handleItemChange}
-									handleItemEntryChange={handleItemEntryChange}
-									addItemEntry={addItemEntry}
-									removeItemEntry={removeItemEntry}
-									arkData={arkData}
-								/>
-							)}
-							{/* Add other item type components here when implemented */}
+							{renderShopEntry(itemName, itemData)}
 						</motion.div>
 					))}
 				</AnimatePresence>
