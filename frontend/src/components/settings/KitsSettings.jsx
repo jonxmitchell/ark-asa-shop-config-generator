@@ -29,7 +29,7 @@ function KitsSettings({ config, onConfigUpdate }) {
 	const [currentEditingKit, setCurrentEditingKit] = useState(null);
 	const [searchTerm, setSearchTerm] = useState("");
 	const [filteredItems, setFilteredItems] = useState([]);
-	const [expandedKits, setExpandedKits] = useState({});
+	const [expandedKit, setExpandedKit] = useState(null);
 	const [nameValidationMessage, setNameValidationMessage] = useState("");
 	const [editValidationMessage, setEditValidationMessage] = useState("");
 	const [deleteConfirmation, setDeleteConfirmation] = useState(null);
@@ -93,7 +93,7 @@ function KitsSettings({ config, onConfigUpdate }) {
 				},
 			});
 			setNewKitName("");
-			setExpandedKits((prev) => ({ ...prev, [newKitName]: true }));
+			setExpandedKit(newKitName);
 			setNameValidationMessage("");
 		}
 	};
@@ -106,6 +106,9 @@ function KitsSettings({ config, onConfigUpdate }) {
 			Kits: newKits,
 		});
 		setDeleteConfirmation(null);
+		if (expandedKit === kitName) {
+			setExpandedKit(null);
+		}
 	};
 
 	const startRenameKit = (kitName) => {
@@ -129,6 +132,9 @@ function KitsSettings({ config, onConfigUpdate }) {
 				...config,
 				Kits: newKits,
 			});
+			if (expandedKit === editingKitName) {
+				setExpandedKit(newKitNameInput);
+			}
 		}
 		setEditingKitName("");
 		setNewKitNameInput("");
@@ -179,7 +185,9 @@ function KitsSettings({ config, onConfigUpdate }) {
 	};
 
 	const toggleKitExpansion = (kitName) => {
-		setExpandedKits((prev) => ({ ...prev, [kitName]: !prev[kitName] }));
+		setExpandedKit((prevExpanded) =>
+			prevExpanded === kitName ? null : kitName
+		);
 	};
 
 	return (
@@ -284,7 +292,7 @@ function KitsSettings({ config, onConfigUpdate }) {
 											toggleKitExpansion(kitName);
 										}}
 										className="text-gray-400 hover:text-gray-300">
-										{expandedKits[kitName] ? (
+										{expandedKit === kitName ? (
 											<ChevronUpIcon className="h-5 w-5" />
 										) : (
 											<ChevronDownIcon className="h-5 w-5" />
@@ -298,7 +306,7 @@ function KitsSettings({ config, onConfigUpdate }) {
 								</p>
 							)}
 							<AnimatePresence>
-								{expandedKits[kitName] && (
+								{expandedKit === kitName && (
 									<motion.div
 										initial={{ opacity: 0, height: 0 }}
 										animate={{ opacity: 1, height: "auto" }}

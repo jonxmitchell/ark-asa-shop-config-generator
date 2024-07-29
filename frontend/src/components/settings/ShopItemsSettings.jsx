@@ -17,7 +17,7 @@ function ShopItemsSettings({ config, onConfigUpdate }) {
 	const [newItemType, setNewItemType] = useState("item");
 	const [editingName, setEditingName] = useState(null);
 	const [editedName, setEditedName] = useState("");
-	const [expandedItems, setExpandedItems] = useState({});
+	const [expandedItem, setExpandedItem] = useState(null);
 	const [deleteConfirmation, setDeleteConfirmation] = useState(null);
 	const [newItemValidationMessage, setNewItemValidationMessage] = useState("");
 	const [editValidationMessage, setEditValidationMessage] = useState("");
@@ -72,7 +72,7 @@ function ShopItemsSettings({ config, onConfigUpdate }) {
 			},
 		});
 		setNewItemName("");
-		setExpandedItems((prev) => ({ ...prev, [newItemName]: true }));
+		setExpandedItem(newItemName);
 		setNewItemValidationMessage("");
 	}, [config, newItemName, newItemType, onConfigUpdate, validateItemName]);
 
@@ -130,17 +130,17 @@ function ShopItemsSettings({ config, onConfigUpdate }) {
 				...config,
 				ShopItems: newShopItems,
 			});
-			setExpandedItems((prev) => {
-				const newExpanded = { ...prev };
-				delete newExpanded[itemName];
-				return newExpanded;
-			});
+			if (expandedItem === itemName) {
+				setExpandedItem(null);
+			}
 		},
-		[config, onConfigUpdate]
+		[config, onConfigUpdate, expandedItem]
 	);
 
 	const toggleItemExpansion = useCallback((itemName) => {
-		setExpandedItems((prev) => ({ ...prev, [itemName]: !prev[itemName] }));
+		setExpandedItem((prevExpanded) =>
+			prevExpanded === itemName ? null : itemName
+		);
 	}, []);
 
 	const startEditingName = useCallback((itemName) => {
@@ -172,16 +172,15 @@ function ShopItemsSettings({ config, onConfigUpdate }) {
 						[editedName]: item,
 					},
 				});
-				setExpandedItems((prev) => {
-					const { [oldName]: expanded, ...rest } = prev;
-					return { ...rest, [editedName]: expanded };
-				});
+				if (expandedItem === oldName) {
+					setExpandedItem(editedName);
+				}
 			}
 			setEditingName(null);
 			setEditedName("");
 			setEditValidationMessage("");
 		},
-		[config, editedName, onConfigUpdate, validateItemName]
+		[config, editedName, onConfigUpdate, validateItemName, expandedItem]
 	);
 
 	const handleDeleteConfirmation = (itemName) => {
@@ -319,7 +318,7 @@ function ShopItemsSettings({ config, onConfigUpdate }) {
 									<button
 										onClick={() => toggleItemExpansion(itemName)}
 										className="text-gray-400 hover:text-gray-300">
-										{expandedItems[itemName] ? (
+										{expandedItem === itemName ? (
 											<ChevronUpIcon className="h-5 w-5" />
 										) : (
 											<ChevronDownIcon className="h-5 w-5" />
@@ -338,7 +337,7 @@ function ShopItemsSettings({ config, onConfigUpdate }) {
 								<ItemShopEntry
 									itemName={itemName}
 									itemData={itemData}
-									expanded={expandedItems[itemName]}
+									expanded={expandedItem === itemName}
 									handleItemChange={handleItemChange}
 									handleItemEntryChange={handleItemEntryChange}
 									addItemEntry={addItemEntry}
