@@ -339,7 +339,6 @@ function ShopItemsSettings({ config, onConfigUpdate }) {
 
 	return (
 		<div className="bg-light-black p-6 rounded-lg">
-			<h4 className="text-lg font-semibold mb-4 text-white">Shop Items</h4>
 			<div className="space-y-4">
 				<div className="flex flex-col space-y-2">
 					<div className="flex space-x-2">
