@@ -15,24 +15,33 @@ function SearchableDropdown({ options, onSelect, placeholder, value }) {
 	}, [value]);
 
 	useEffect(() => {
-		setFilteredOptions(
-			options.filter(
-				(option) =>
-					option.Name.toLowerCase().includes(inputValue.toLowerCase()) ||
-					option.Blueprint.toLowerCase().includes(inputValue.toLowerCase())
-			)
-		);
+		if (Array.isArray(options)) {
+			setFilteredOptions(
+				options.filter((option) => {
+					const optionName = option.Name || option.ClassName || "";
+					const optionBlueprint = option.Blueprint || option.ClassName || "";
+					return (
+						optionName.toLowerCase().includes(inputValue.toLowerCase()) ||
+						optionBlueprint.toLowerCase().includes(inputValue.toLowerCase())
+					);
+				})
+			);
+		} else {
+			setFilteredOptions([]);
+		}
 	}, [inputValue, options]);
 
 	const handleInputChange = (e) => {
 		const newValue = e.target.value;
 		setInputValue(newValue);
-		onSelect({ Blueprint: newValue });
+		onSelect(newValue);
 		setIsOpen(true);
 	};
 
 	const handleOptionSelect = (option) => {
-		setInputValue(option.Blueprint);
+		const selectedValue =
+			option.ClassName || option.Blueprint || option.Name || "";
+		setInputValue(selectedValue);
 		onSelect(option);
 		setIsOpen(false);
 	};

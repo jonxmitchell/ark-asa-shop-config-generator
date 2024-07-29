@@ -1,3 +1,5 @@
+// src/components/settings/ShopItemsSettings.jsx
+
 import React, { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -10,6 +12,7 @@ import {
 } from "@heroicons/react/24/solid";
 import { useArkData } from "../../hooks/useArkData";
 import ItemShopEntry from "./shop_entries/ItemShopEntry";
+import BeaconShopEntry from "./shop_entries/BeaconShopEntry";
 import ConfirmationModal from "../ConfirmationModal";
 
 function ShopItemsSettings({ config, onConfigUpdate }) {
@@ -33,6 +36,29 @@ function ShopItemsSettings({ config, onConfigUpdate }) {
 			.sort((a, b) => a[0].localeCompare(b[0]));
 		setFilteredItems(filtered);
 	}, [searchTerm, config.ShopItems]);
+
+	useEffect(() => {
+		const cleanupBeaconEntries = () => {
+			const updatedShopItems = { ...config.ShopItems };
+			let hasChanges = false;
+
+			Object.entries(updatedShopItems).forEach(([itemName, itemData]) => {
+				if (itemData.Type === "beacon" && "Items" in itemData) {
+					delete itemData.Items;
+					hasChanges = true;
+				}
+			});
+
+			if (hasChanges) {
+				onConfigUpdate({
+					...config,
+					ShopItems: updatedShopItems,
+				});
+			}
+		};
+
+		cleanupBeaconEntries();
+	}, [config, onConfigUpdate]);
 
 	const handleNewItemNameChange = (e) => {
 		const value = e.target.value.replace(/\s/g, "");
@@ -59,16 +85,43 @@ function ShopItemsSettings({ config, onConfigUpdate }) {
 			return;
 		}
 
+		let newItemStructure = {
+			Type: newItemType,
+			Description: "",
+			Price: 0,
+		};
+
+		// Add type-specific fields
+		switch (newItemType) {
+			case "item":
+				newItemStructure.Items = [];
+				break;
+			case "dino":
+				newItemStructure.Level = 1;
+				newItemStructure.Blueprint = "";
+				break;
+			case "beacon":
+				newItemStructure.ClassName = "";
+				break;
+			case "experience":
+				newItemStructure.Amount = 0;
+				newItemStructure.GiveToDino = false;
+				break;
+			case "unlockengram":
+				newItemStructure.Items = [];
+				break;
+			case "command":
+				newItemStructure.Items = [{ Command: "", DisplayAs: "" }];
+				break;
+			default:
+				break;
+		}
+
 		onConfigUpdate({
 			...config,
 			ShopItems: {
 				...config.ShopItems,
-				[newItemName]: {
-					Type: newItemType,
-					Description: "",
-					Price: 0,
-					Items: [],
-				},
+				[newItemName]: newItemStructure,
 			},
 		});
 		setNewItemName("");
@@ -343,6 +396,15 @@ function ShopItemsSettings({ config, onConfigUpdate }) {
 									handleItemEntryChange={handleItemEntryChange}
 									addItemEntry={addItemEntry}
 									removeItemEntry={removeItemEntry}
+									arkData={arkData}
+								/>
+							)}
+							{itemData.Type === "beacon" && (
+								<BeaconShopEntry
+									itemName={itemName}
+									itemData={itemData}
+									expanded={expandedItem === itemName}
+									handleItemChange={handleItemChange}
 									arkData={arkData}
 								/>
 							)}
