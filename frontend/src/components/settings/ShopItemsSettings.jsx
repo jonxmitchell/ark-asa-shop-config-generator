@@ -16,6 +16,7 @@ import BeaconShopEntry from "./shop_entries/BeaconShopEntry";
 import ExperienceShopEntry from "./shop_entries/ExperienceShopEntry";
 import UnlockEngramShopEntry from "./shop_entries/UnlockEngramShopEntry";
 import CommandShopEntry from "./shop_entries/CommandShopEntry";
+import DinoShopEntry from "./shop_entries/DinoShopEntry";
 import ConfirmationModal from "../ConfirmationModal";
 
 function ShopItemsSettings({ config, onConfigUpdate }) {
@@ -110,6 +111,8 @@ function ShopItemsSettings({ config, onConfigUpdate }) {
 			case "dino":
 				newItemStructure.Level = 1;
 				newItemStructure.Blueprint = "";
+				newItemStructure.Neutered = false;
+				newItemStructure.Gender = "random";
 				break;
 			case "beacon":
 				newItemStructure.ClassName = "";
@@ -297,6 +300,15 @@ function ShopItemsSettings({ config, onConfigUpdate }) {
 						arkData={arkData}
 					/>
 				);
+			case "dino":
+				return (
+					<DinoShopEntry
+						itemName={itemName}
+						itemData={itemData}
+						expanded={expandedItem === itemName}
+						handleItemChange={handleItemChange}
+					/>
+				);
 			case "beacon":
 				return (
 					<BeaconShopEntry
@@ -459,6 +471,8 @@ function ShopItemsSettings({ config, onConfigUpdate }) {
 												? "bg-green-600"
 												: itemData.Type === "command"
 												? "bg-yellow-600"
+												: itemData.Type === "dino"
+												? "bg-pink-600"
 												: "bg-blue-600"
 										}`}>
 										{itemData.Type}
