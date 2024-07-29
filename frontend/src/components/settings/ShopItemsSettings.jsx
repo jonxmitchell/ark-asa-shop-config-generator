@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
 	TrashIcon,
@@ -22,6 +22,17 @@ function ShopItemsSettings({ config, onConfigUpdate }) {
 	const [newItemValidationMessage, setNewItemValidationMessage] = useState("");
 	const [editValidationMessage, setEditValidationMessage] = useState("");
 	const { arkData } = useArkData();
+	const [searchTerm, setSearchTerm] = useState("");
+	const [filteredItems, setFilteredItems] = useState([]);
+
+	useEffect(() => {
+		const filtered = Object.entries(config.ShopItems || {})
+			.filter(([itemName]) =>
+				itemName.toLowerCase().includes(searchTerm.toLowerCase())
+			)
+			.sort((a, b) => a[0].localeCompare(b[0]));
+		setFilteredItems(filtered);
+	}, [searchTerm, config.ShopItems]);
 
 	const handleNewItemNameChange = (e) => {
 		const value = e.target.value.replace(/\s/g, "");
@@ -228,8 +239,19 @@ function ShopItemsSettings({ config, onConfigUpdate }) {
 					)}
 				</div>
 
+				<div className="flex space-x-2 mb-4">
+					<input
+						type="text"
+						placeholder="Search items..."
+						value={searchTerm}
+						onChange={(e) => setSearchTerm(e.target.value)}
+						className="flex-grow px-3 py-2 text-sm text-white bg-mid-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+						autoComplete="off"
+					/>
+				</div>
+
 				<AnimatePresence>
-					{Object.entries(config.ShopItems).map(([itemName, itemData]) => (
+					{filteredItems.map(([itemName, itemData]) => (
 						<motion.div
 							key={itemName}
 							initial={{ opacity: 0, y: -10 }}

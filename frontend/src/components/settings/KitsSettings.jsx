@@ -35,10 +35,11 @@ function KitsSettings({ config, onConfigUpdate }) {
 	const [deleteConfirmation, setDeleteConfirmation] = useState(null);
 
 	useEffect(() => {
-		const filtered = Object.entries(config.Kits || {}).filter(
-			([kitName, kitData]) =>
+		const filtered = Object.entries(config.Kits || {})
+			.filter(([kitName]) =>
 				kitName.toLowerCase().includes(searchTerm.toLowerCase())
-		);
+			)
+			.sort((a, b) => a[0].localeCompare(b[0]));
 		setFilteredItems(filtered);
 	}, [searchTerm, config.Kits]);
 
