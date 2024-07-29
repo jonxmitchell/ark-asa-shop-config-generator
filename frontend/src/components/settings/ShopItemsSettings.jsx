@@ -355,6 +355,8 @@ function ShopItemsSettings({ config, onConfigUpdate }) {
 										className={`text-xs px-2 py-1 text-white rounded ${
 											itemData.Type === "beacon"
 												? "bg-purple-600"
+												: itemData.Type === "experience"
+												? "bg-orange-700"
 												: "bg-blue-600"
 										}`}>
 										{itemData.Type}
