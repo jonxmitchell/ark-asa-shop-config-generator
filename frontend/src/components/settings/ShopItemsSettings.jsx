@@ -30,6 +30,7 @@ function ShopItemsSettings({ config, onConfigUpdate }) {
 	const { arkData } = useArkData();
 	const [searchTerm, setSearchTerm] = useState("");
 	const [filteredItems, setFilteredItems] = useState([]);
+	const [nameError, setNameError] = useState("");
 
 	useEffect(() => {
 		const filtered = Object.entries(config.ShopItems || {})
@@ -66,6 +67,8 @@ function ShopItemsSettings({ config, onConfigUpdate }) {
 	const handleNewItemNameChange = (e) => {
 		const value = e.target.value.replace(/\s/g, "");
 		setNewItemName(value);
+		setNameError("");
+		setNewItemValidationMessage("");
 	};
 
 	const validateItemName = useCallback(
@@ -82,6 +85,11 @@ function ShopItemsSettings({ config, onConfigUpdate }) {
 	);
 
 	const handleAddItem = useCallback(() => {
+		if (!newItemName.trim()) {
+			setNameError("Item name cannot be empty");
+			return;
+		}
+
 		const validationError = validateItemName(newItemName);
 		if (validationError) {
 			setNewItemValidationMessage(validationError);
@@ -130,6 +138,7 @@ function ShopItemsSettings({ config, onConfigUpdate }) {
 		setNewItemName("");
 		setExpandedItem(newItemName);
 		setNewItemValidationMessage("");
+		setNameError("");
 	}, [config, newItemName, newItemType, onConfigUpdate, validateItemName]);
 
 	const handleItemChange = useCallback(
@@ -348,7 +357,9 @@ function ShopItemsSettings({ config, onConfigUpdate }) {
 							onChange={handleNewItemNameChange}
 							placeholder="New item name (no spaces)"
 							className={`flex-grow px-3 py-2 text-sm text-white bg-mid-black rounded border ${
-								newItemValidationMessage ? "border-red-500" : "border-gray-600"
+								nameError || newItemValidationMessage
+									? "border-red-500"
+									: "border-gray-600"
 							} focus:ring-blue-500 focus:border-blue-500`}
 							autoComplete="off"
 						/>
@@ -369,6 +380,9 @@ function ShopItemsSettings({ config, onConfigUpdate }) {
 							Add Item
 						</button>
 					</div>
+					{nameError && (
+						<p className="text-red-500 text-xs mt-1 mb-2">{nameError}</p>
+					)}
 					{newItemValidationMessage && (
 						<p className="text-red-500 text-xs mt-1 mb-2">
 							{newItemValidationMessage}
