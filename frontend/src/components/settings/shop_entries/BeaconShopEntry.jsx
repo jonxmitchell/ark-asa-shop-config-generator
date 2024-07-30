@@ -4,6 +4,7 @@ import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import SearchableDropdown from "../../SearchableDropdown";
 import { useArkData } from "../../../hooks/useArkData";
+import { PowerIcon } from "@heroicons/react/24/solid";
 
 function BeaconShopEntry({ itemName, itemData, expanded, handleItemChange }) {
 	const { arkData, loading, error } = useArkData();
@@ -20,6 +21,14 @@ function BeaconShopEntry({ itemName, itemData, expanded, handleItemChange }) {
 		}
 	};
 
+	const toggleField = (field) => {
+		handleItemChange(
+			itemName,
+			field,
+			itemData[field] === undefined ? 0 : undefined
+		);
+	};
+
 	if (loading) return <div>Loading...</div>;
 	if (error) return <div>Error loading data</div>;
 
@@ -34,8 +43,8 @@ function BeaconShopEntry({ itemName, itemData, expanded, handleItemChange }) {
 					exit={{ opacity: 0, height: 0 }}
 					transition={{ duration: 0.3 }}
 					className="space-y-2 mt-2">
-					<div className="grid grid-cols-2 gap-2">
-						<div>
+					<div className="grid grid-cols-12 gap-2">
+						<div className="col-span-5">
 							<label
 								htmlFor={`description-${itemName}`}
 								className="block text-sm font-medium text-gray-300">
@@ -52,7 +61,7 @@ function BeaconShopEntry({ itemName, itemData, expanded, handleItemChange }) {
 								autoComplete="off"
 							/>
 						</div>
-						<div>
+						<div className="col-span-2">
 							<label
 								htmlFor={`price-${itemName}`}
 								className="block text-sm font-medium text-gray-300">
@@ -69,20 +78,69 @@ function BeaconShopEntry({ itemName, itemData, expanded, handleItemChange }) {
 								autoComplete="off"
 							/>
 						</div>
+						<div className="col-span-5">
+							<label
+								htmlFor={`className-${itemName}`}
+								className="block text-sm font-medium text-gray-300">
+								Beacon Class Name
+							</label>
+							<SearchableDropdown
+								options={beaconOptions}
+								onSelect={handleBeaconSelect}
+								placeholder="Select or enter a beacon class name"
+								value={itemData.ClassName || ""}
+								className="w-full bg-dark-black"
+							/>
+						</div>
 					</div>
-					<div>
-						<label
-							htmlFor={`className-${itemName}`}
-							className="block text-sm font-medium text-gray-300">
-							Beacon Class Name
-						</label>
-						<SearchableDropdown
-							options={beaconOptions}
-							onSelect={handleBeaconSelect}
-							placeholder="Select or enter a beacon class name"
-							value={itemData.ClassName || ""}
-							className="bg-dark-black"
-						/>
+
+					{/* New fields: MinLevel, MaxLevel, Permissions */}
+					<div className="grid grid-cols-3 gap-2">
+						{["MinLevel", "MaxLevel", "Permissions"].map((field) => (
+							<div key={field} className="relative">
+								<label
+									htmlFor={`${field}-${itemName}`}
+									className="block text-sm font-medium text-gray-300">
+									{field}
+								</label>
+								<div className="relative">
+									<input
+										id={`${field}-${itemName}`}
+										type={field === "Permissions" ? "text" : "number"}
+										value={itemData[field] !== undefined ? itemData[field] : ""}
+										onChange={(e) =>
+											handleItemChange(
+												itemName,
+												field,
+												field === "Permissions"
+													? e.target.value
+													: parseInt(e.target.value)
+											)
+										}
+										className={`w-full px-3 py-2 pr-8 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
+											itemData[field] === undefined &&
+											"opacity-50 cursor-not-allowed"
+										}`}
+										disabled={itemData[field] === undefined}
+										autoComplete="off"
+									/>
+									<button
+										onClick={() => toggleField(field)}
+										className={`absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 transition-colors ${
+											itemData[field] !== undefined
+												? "hover:text-red-500"
+												: "hover:text-green-500"
+										}`}
+										title={
+											itemData[field] !== undefined
+												? "Disable field"
+												: "Enable field"
+										}>
+										<PowerIcon className="h-4 w-4" />
+									</button>
+								</div>
+							</div>
+						))}
 					</div>
 				</motion.div>
 			)}
