@@ -1,8 +1,12 @@
+// src/App.jsx
+
 import React, { useState } from "react";
 import Sidebar from "./components/Sidebar";
 import ConfigTabs from "./components/ConfigTabs";
 import { useContextMenu } from "./hooks/useContextMenu";
 import { defaultConfig } from "./config/defaultConfig";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
 	const [config, setConfig] = useState(defaultConfig);
@@ -36,6 +40,7 @@ function App() {
 					</div>
 				</div>
 			</div>
+			<ToastContainer />
 		</div>
 	);
 }
