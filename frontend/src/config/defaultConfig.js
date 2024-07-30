@@ -38,4 +38,5 @@ export const defaultConfig = {
 	},
 	Kits: {},
 	ShopItems: {},
+	SellItems: {},
 };

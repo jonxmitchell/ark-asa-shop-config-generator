@@ -5,6 +5,7 @@ import MySQLSettings from "./settings/MySQLSettings";
 import GeneralSettings from "./settings/GeneralSettings";
 import KitsSettings from "./settings/KitsSettings";
 import ShopItemsSettings from "./settings/ShopItemsSettings";
+import SellItemsSettings from "./settings/SellItemsSettings";
 
 function ConfigForm({ config, onConfigUpdate, activeSidebarItem }) {
 	const renderSettingsComponent = () => {
@@ -23,7 +24,10 @@ function ConfigForm({ config, onConfigUpdate, activeSidebarItem }) {
 				return (
 					<ShopItemsSettings config={config} onConfigUpdate={onConfigUpdate} />
 				);
-			// Add cases for other sidebar items here
+			case "Sell Items":
+				return (
+					<SellItemsSettings config={config} onConfigUpdate={onConfigUpdate} />
+				);
 			default:
 				return <p>Select a setting from the sidebar</p>;
 		}
