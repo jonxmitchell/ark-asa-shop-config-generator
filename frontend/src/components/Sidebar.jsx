@@ -11,6 +11,8 @@ const menuItems = [
 	"Messages",
 ];
 
+// ... rest of the component remains the same
+
 function Sidebar({ activeItem, setActiveItem }) {
 	return (
 		<aside

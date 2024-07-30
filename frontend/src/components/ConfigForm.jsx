@@ -6,6 +6,7 @@ import GeneralSettings from "./settings/GeneralSettings";
 import KitsSettings from "./settings/KitsSettings";
 import ShopItemsSettings from "./settings/ShopItemsSettings";
 import SellItemsSettings from "./settings/SellItemsSettings";
+import MessagesSettings from "./settings/MessagesSettings";
 
 function ConfigForm({ config, onConfigUpdate, activeSidebarItem }) {
 	const renderSettingsComponent = () => {
@@ -27,6 +28,10 @@ function ConfigForm({ config, onConfigUpdate, activeSidebarItem }) {
 			case "Sell Items":
 				return (
 					<SellItemsSettings config={config} onConfigUpdate={onConfigUpdate} />
+				);
+			case "Messages":
+				return (
+					<MessagesSettings config={config} onConfigUpdate={onConfigUpdate} />
 				);
 			default:
 				return <p>Select a setting from the sidebar</p>;
