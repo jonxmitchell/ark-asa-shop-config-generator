@@ -62,7 +62,9 @@
 				"all": true
 			},
 			"dialog": {
-				"open": true
+				"all": true,
+				"open": true,
+				"save": true
 			}
 		},
 		"windows": [

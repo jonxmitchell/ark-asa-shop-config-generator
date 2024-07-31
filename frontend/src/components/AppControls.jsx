@@ -1,5 +1,7 @@
 // src/components/AppControls.jsx
 import React, { useState, useCallback } from "react";
+import { open } from "@tauri-apps/api/dialog";
+import { readTextFile } from "@tauri-apps/api/fs";
 import {
 	HiOutlineDocumentText,
 	HiOutlineCog,
@@ -9,7 +11,10 @@ import {
 } from "react-icons/hi";
 import SettingsModal from "./settings/modals/SettingsModal";
 import ExportConfirmationModal from "./settings/modals/ExportConfirmationModal";
+import ImportWarningModal from "./settings/modals/ImportWarningModal";
+import ImportProgressModal from "./settings/modals/ImportProgressModal";
 import { useConfig } from "./ConfigContext";
+import { toast } from "react-toastify";
 
 const IconButton = ({ Icon, onClick, title }) => (
 	<button
@@ -23,15 +28,57 @@ const IconButton = ({ Icon, onClick, title }) => (
 function AppControls() {
 	const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 	const [isExportModalOpen, setIsExportModalOpen] = useState(false);
-	const { config } = useConfig();
+	const [isImportWarningOpen, setIsImportWarningOpen] = useState(false);
+	const [isImportProgressOpen, setIsImportProgressOpen] = useState(false);
+	const [importProgress, setImportProgress] = useState(0);
+	const { config, updateConfig } = useConfig();
 
 	const handleLicense = useCallback(() => console.log("License clicked"), []);
 	const handleSettings = useCallback(() => setIsSettingsModalOpen(true), []);
-	const handleImport = useCallback(() => console.log("Import clicked"), []);
+
+	const importConfig = useCallback(async () => {
+		try {
+			const selected = await open({
+				multiple: false,
+				filters: [{ name: "JSON", extensions: ["json"] }],
+			});
+
+			if (selected) {
+				setIsImportProgressOpen(true);
+				setImportProgress(0);
+
+				// Simulate progress
+				for (let i = 0; i <= 100; i++) {
+					await new Promise((resolve) => setTimeout(resolve, 20)); // 20ms delay between each progress update
+					setImportProgress(i);
+				}
+
+				const contents = await readTextFile(selected);
+				const importedConfig = JSON.parse(contents);
+				updateConfig(importedConfig);
+
+				// Ensure the progress modal is shown for at least 2 seconds
+				await new Promise((resolve) => setTimeout(resolve, 2000 - 20 * 100));
+
+				setIsImportProgressOpen(false);
+				toast.success("Configuration imported successfully!");
+			}
+		} catch (error) {
+			console.error("Error importing file:", error);
+			setIsImportProgressOpen(false);
+			toast.error("Failed to import configuration file.");
+		}
+	}, [updateConfig]);
+
+	const handleImport = useCallback(() => {
+		setIsImportWarningOpen(true);
+	}, []);
+
 	const handleExport = useCallback(() => {
 		console.log("Export clicked, config:", config);
 		setIsExportModalOpen(true);
 	}, [config]);
+
 	const handleSavedConfigs = useCallback(
 		() => console.log("Saved Configs clicked"),
 		[]
@@ -74,6 +121,17 @@ function AppControls() {
 				isOpen={isExportModalOpen}
 				onClose={() => setIsExportModalOpen(false)}
 			/>
+			<ImportWarningModal
+				isOpen={isImportWarningOpen}
+				onClose={() => setIsImportWarningOpen(false)}
+				onConfirm={() => {
+					setIsImportWarningOpen(false);
+					importConfig();
+				}}
+			/>
+			{isImportProgressOpen && (
+				<ImportProgressModal progress={importProgress} />
+			)}
 		</>
 	);
 }
