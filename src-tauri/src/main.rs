@@ -10,6 +10,7 @@ use std::path::{PathBuf, Path};
 use serde_json::Value;
 use serde::Serialize;
 use std::process::Command;
+use tauri_plugin_context_menu::init as init_context_menu;
 
 #[tauri::command]
 fn save_settings_command(app_handle: tauri::AppHandle, output_path: String) -> Result<(), String> {
@@ -103,6 +104,7 @@ fn open_file_location(path: String) -> Result<(), String> {
 
 fn main() {
     tauri::Builder::default()
+        .plugin(init_context_menu())
         .setup(|app| {
             let app_handle = app.handle();
             let db_path = get_database_path(&app_handle);
