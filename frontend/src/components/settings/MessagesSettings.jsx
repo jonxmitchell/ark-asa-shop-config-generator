@@ -1,6 +1,6 @@
 // src/components/settings/MessagesSettings.jsx
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useConfig } from "../ConfigContext";
 
@@ -11,22 +11,28 @@ function MessagesSettings() {
 
 	const messagesConfig = config?.Messages || {};
 
-	useEffect(() => {
-		const filtered = Object.entries(messagesConfig)
+	const filterMessages = useCallback(() => {
+		return Object.entries(messagesConfig)
 			.filter(([key]) => key.toLowerCase().includes(searchTerm.toLowerCase()))
 			.sort((a, b) => a[0].localeCompare(b[0]));
-		setFilteredMessages(filtered);
-	}, [searchTerm, messagesConfig]);
+	}, [messagesConfig, searchTerm]);
 
-	const handleChange = (key, value) => {
-		updateConfig((prevConfig) => ({
-			...prevConfig,
-			Messages: {
-				...prevConfig.Messages,
-				[key]: value,
-			},
-		}));
-	};
+	useEffect(() => {
+		setFilteredMessages(filterMessages());
+	}, [filterMessages]);
+
+	const handleChange = useCallback(
+		(key, value) => {
+			updateConfig((prevConfig) => ({
+				...prevConfig,
+				Messages: {
+					...prevConfig.Messages,
+					[key]: value,
+				},
+			}));
+		},
+		[updateConfig]
+	);
 
 	return (
 		<div className="bg-light-black p-6 rounded-lg">

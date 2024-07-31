@@ -112,6 +112,7 @@ function DinosModal({ kitName, dinos, onSave, onClose }) {
 													}}
 													placeholder="Select or enter a blueprint"
 													value={dino.Blueprint}
+													className={"w-full bg-mid-black"}
 												/>
 											</div>
 										</div>

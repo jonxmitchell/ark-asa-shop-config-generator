@@ -135,6 +135,7 @@ function ItemsModal({ kitName, items, onSave, onClose }) {
 												}}
 												placeholder="Select or enter a blueprint"
 												value={item.Blueprint}
+												className={"w-full bg-mid-black"}
 											/>
 										</div>
 										<div className="flex items-center justify-between">
