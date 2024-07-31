@@ -13,5 +13,8 @@
 	"description": "Ark ASA Shop Config Generator",
 	"devDependencies": {
 		"@tauri-apps/cli": "^1.6.0"
+	},
+	"dependencies": {
+		"tauri-plugin-context-menu": "^0.8.0"
 	}
 }
