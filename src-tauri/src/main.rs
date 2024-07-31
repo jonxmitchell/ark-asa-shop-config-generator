@@ -6,8 +6,9 @@ mod ark_data;
 use db::{get_database_path, initialize_db, save_settings, load_settings, Settings};
 use ark_data::read_ark_data;
 use std::fs;
-use std::path::PathBuf;
+use std::path::{PathBuf, Path};
 use serde_json::Value;
+use serde::Serialize;
 use std::process::Command;
 
 #[tauri::command]
@@ -31,8 +32,14 @@ fn read_ark_data_command(app_handle: tauri::AppHandle) -> Result<Value, String> 
     read_ark_data(app_handle)
 }
 
+#[derive(Serialize)]
+struct ExportResult {
+    file_path: String,
+    file_existed: bool,
+}
+
 #[tauri::command]
-fn export_config(app_handle: tauri::AppHandle, config: Value) -> Result<String, String> {
+fn export_config(app_handle: tauri::AppHandle, config: Value) -> Result<ExportResult, String> {
     let settings = load_settings_command(app_handle.clone()).map_err(|e| e.to_string())?;
     let output_path = settings.output_path;
 
@@ -41,10 +48,25 @@ fn export_config(app_handle: tauri::AppHandle, config: Value) -> Result<String, 
     }
 
     let file_path = PathBuf::from(&output_path).join("config.json");
+    
+    let file_exists = Path::new(&file_path).exists();
+
+    if !file_exists {
+        fs::write(&file_path, serde_json::to_string_pretty(&config).unwrap())
+            .map_err(|e| format!("Failed to write file: {}", e))?;
+    }
+
+    Ok(ExportResult {
+        file_path: file_path.to_string_lossy().into_owned(),
+        file_existed: file_exists,
+    })
+}
+
+#[tauri::command]
+fn force_export_config(config: Value, file_path: String) -> Result<(), String> {
     fs::write(&file_path, serde_json::to_string_pretty(&config).unwrap())
         .map_err(|e| format!("Failed to write file: {}", e))?;
-
-    Ok(file_path.to_string_lossy().into_owned())
+    Ok(())
 }
 
 #[tauri::command]
@@ -92,6 +114,7 @@ fn main() {
             load_settings_command,
             read_ark_data_command,
             export_config,
+            force_export_config,
             open_file_location
         ])
         .run(tauri::generate_context!())

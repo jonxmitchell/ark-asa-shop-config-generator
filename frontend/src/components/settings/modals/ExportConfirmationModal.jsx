@@ -1,4 +1,4 @@
-// src/components/settings/modals/ExportConfirmationModal.jsx
+// src/components/modals/ExportConfirmationModal.jsx
 
 import React, { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -12,6 +12,7 @@ function ExportConfirmationModal({ isOpen, onClose }) {
 	const [exportedFilePath, setExportedFilePath] = useState("");
 	const [progress, setProgress] = useState(0);
 	const { config, updateConfig } = useConfig();
+	const [fileExists, setFileExists] = useState(false);
 
 	const handleExport = useCallback(async () => {
 		setModalState("progress");
@@ -32,16 +33,16 @@ function ExportConfirmationModal({ isOpen, onClose }) {
 			// Actual export
 			const result = await invoke("export_config", { config: config });
 			console.log("Export result:", result);
-			setExportedFilePath(result);
+			setExportedFilePath(result.file_path);
+			setFileExists(result.file_existed);
 
 			// Ensure the progress modal is shown for at least 2 seconds
 			await new Promise((resolve) => setTimeout(resolve, 2000 - 20 * 100));
 
-			setModalState("success");
+			setModalState(result.file_existed ? "fileExistsWarning" : "success");
 			updateConfig(config);
 		} catch (error) {
 			console.error("Export failed:", error);
-			// Handle error (e.g., show error message to user)
 			setModalState("confirmation"); // Go back to confirmation on error
 		}
 	}, [config, updateConfig]);
@@ -50,6 +51,19 @@ function ExportConfirmationModal({ isOpen, onClose }) {
 		setModalState("confirmation");
 		setProgress(0);
 		onClose();
+	};
+
+	const handleProceed = async () => {
+		try {
+			await invoke("force_export_config", {
+				config: config,
+				filePath: exportedFilePath,
+			});
+			setModalState("success");
+		} catch (error) {
+			console.error("Force export failed:", error);
+			setModalState("confirmation");
+		}
 	};
 
 	return (
@@ -66,8 +80,10 @@ function ExportConfirmationModal({ isOpen, onClose }) {
 							animate={{ scale: 1, opacity: 1 }}
 							exit={{ scale: 0.9, opacity: 0 }}
 							className="bg-mid-black p-6 rounded-lg max-w-md w-full">
-							<h2 className="text-xl font-bold mb-4">Confirm Export</h2>
-							<p className="mb-6">
+							<h2 className="text-xl font-bold mb-4 text-white">
+								Confirm Export
+							</h2>
+							<p className="mb-6 text-gray-300">
 								Are you sure you want to export the configuration to the chosen
 								location?
 							</p>
@@ -88,6 +104,32 @@ function ExportConfirmationModal({ isOpen, onClose }) {
 
 					{modalState === "progress" && (
 						<ExportProgressModal progress={progress} />
+					)}
+
+					{modalState === "fileExistsWarning" && (
+						<motion.div
+							initial={{ scale: 0.9, opacity: 0 }}
+							animate={{ scale: 1, opacity: 1 }}
+							exit={{ scale: 0.9, opacity: 0 }}
+							className="bg-mid-black p-6 rounded-lg max-w-md w-full">
+							<h2 className="text-xl font-bold mb-4 text-white">Warning</h2>
+							<p className="mb-6 text-gray-300">
+								A configuration file already exists at the specified location.
+								Do you want to overwrite it?
+							</p>
+							<div className="flex justify-end space-x-4">
+								<button
+									onClick={handleClose}
+									className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors">
+									Cancel
+								</button>
+								<button
+									onClick={handleProceed}
+									className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors">
+									Overwrite
+								</button>
+							</div>
+						</motion.div>
 					)}
 
 					{modalState === "success" && (
