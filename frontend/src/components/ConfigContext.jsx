@@ -17,16 +17,9 @@ export const ConfigProvider = ({ children }) => {
 					? newConfigOrUpdater(prevConfig)
 					: newConfigOrUpdater;
 
-			// Merge the new config with the previous config
 			const updatedConfig = {
 				...prevConfig,
 				...newConfig,
-				// Ensure nested objects are also merged
-				Kits: { ...prevConfig.Kits, ...newConfig.Kits },
-				Messages: { ...prevConfig.Messages, ...newConfig.Messages },
-				General: { ...prevConfig.General, ...newConfig.General },
-				ShopItems: { ...prevConfig.ShopItems, ...newConfig.ShopItems },
-				SellItems: { ...prevConfig.SellItems, ...newConfig.SellItems },
 			};
 
 			console.log("Updated config:", updatedConfig); // For debugging
