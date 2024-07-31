@@ -61,7 +61,15 @@ function AppControls() {
 				await new Promise((resolve) => setTimeout(resolve, 2000 - 20 * 100));
 
 				setIsImportProgressOpen(false);
-				toast.success("Configuration imported successfully!");
+				toast.success("Configuration imported successfully!", {
+					position: "bottom-right",
+					autoClose: 3000,
+					hideProgressBar: false,
+					closeOnClick: true,
+					pauseOnHover: true,
+					draggable: true,
+					theme: "dark",
+				});
 			}
 		} catch (error) {
 			console.error("Error importing file:", error);
