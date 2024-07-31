@@ -6,6 +6,7 @@ import { useContextMenu } from "./hooks/useContextMenu";
 import { ConfigProvider } from "./components/ConfigContext";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import AppControls from "./components/AppControls";
 
 function App() {
 	const [activeTab, setActiveTab] = useState("generator");
@@ -23,6 +24,9 @@ function App() {
 								activeItem={activeSidebarItem}
 								setActiveItem={setActiveSidebarItem}
 							/>
+							<div className="mt-4 bg-light-black rounded-lg p-2 ml-2 mr-2 mb-6">
+								<AppControls />
+							</div>
 						</div>
 						<div className="flex-1 bg-mid-black rounded-xl shadow-lg flex flex-col overflow-hidden">
 							<ConfigTabs

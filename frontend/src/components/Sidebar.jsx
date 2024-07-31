@@ -1,7 +1,6 @@
 // src/components/Sidebar.jsx
 
 import React from "react";
-import AppControls from "./AppControls";
 
 const menuItems = [
 	"MySQL",
@@ -34,9 +33,6 @@ function Sidebar({ activeItem, setActiveItem }) {
 						</li>
 					))}
 				</ul>
-			</div>
-			<div className="mt-4 bg-light-black rounded-lg p-2">
-				<AppControls />
 			</div>
 		</aside>
 	);
