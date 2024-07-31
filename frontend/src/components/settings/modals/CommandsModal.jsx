@@ -5,24 +5,26 @@ import { TrashIcon } from "@heroicons/react/24/solid";
 import { motion, AnimatePresence } from "framer-motion";
 
 function CommandsModal({ kitName, commands, onSave, onClose }) {
-	const [editedCommands, setEditedCommands] = useState(commands);
+	const [editedCommands, setEditedCommands] = useState(commands || []);
 	const [searchTerm, setSearchTerm] = useState("");
 	const [searchField, setSearchField] = useState("Command");
-	const [filteredCommands, setFilteredCommands] = useState(commands);
+	const [filteredCommands, setFilteredCommands] = useState([]);
 
 	useEffect(() => {
-		const filtered = editedCommands.filter((command) =>
-			command[searchField]
-				.toString()
-				.toLowerCase()
-				.includes(searchTerm.toLowerCase())
-		);
-		setFilteredCommands(filtered);
+		if (editedCommands && Array.isArray(editedCommands)) {
+			const filtered = editedCommands.filter((command) => {
+				const searchValue = (command[searchField] || "")
+					.toString()
+					.toLowerCase();
+				return searchValue.includes((searchTerm || "").toLowerCase());
+			});
+			setFilteredCommands(filtered);
+		}
 	}, [searchTerm, searchField, editedCommands]);
 
 	const handleCommandChange = (index, field, value) => {
 		const newCommands = [...editedCommands];
-		newCommands[index] = { ...newCommands[index], [field]: value };
+		newCommands[index] = { ...newCommands[index], [field]: value ?? "" };
 		setEditedCommands(newCommands);
 	};
 
@@ -80,7 +82,7 @@ function CommandsModal({ kitName, commands, onSave, onClose }) {
 										<input
 											id={`command-${index}`}
 											type="text"
-											value={command.Command}
+											value={command.Command || ""}
 											onChange={(e) =>
 												handleCommandChange(index, "Command", e.target.value)
 											}
@@ -97,7 +99,7 @@ function CommandsModal({ kitName, commands, onSave, onClose }) {
 										<input
 											id={`display-as-${index}`}
 											type="text"
-											value={command.DisplayAs}
+											value={command.DisplayAs || ""}
 											onChange={(e) =>
 												handleCommandChange(index, "DisplayAs", e.target.value)
 											}
