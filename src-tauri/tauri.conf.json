@@ -39,6 +39,12 @@
 		},
 		"allowlist": {
 			"all": true,
+			"shell": {
+				"all": true,
+				"execute": true,
+				"sidecar": true,
+				"open": true
+			},
 			"fs": {
 				"all": true,
 				"readFile": true,
@@ -49,7 +55,8 @@
 				"removeDir": true,
 				"removeFile": true,
 				"renameFile": true,
-				"exists": true
+				"exists": true,
+				"scope": ["explorer", "open", "xdg-open"]
 			},
 			"path": {
 				"all": true

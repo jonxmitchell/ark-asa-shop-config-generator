@@ -6,7 +6,9 @@ mod ark_data;
 use db::{get_database_path, initialize_db, save_settings, load_settings, Settings};
 use ark_data::read_ark_data;
 use std::fs;
+use std::path::PathBuf;
 use serde_json::Value;
+use std::process::Command;
 
 #[tauri::command]
 fn save_settings_command(app_handle: tauri::AppHandle, output_path: String) -> Result<(), String> {
@@ -38,11 +40,43 @@ fn export_config(app_handle: tauri::AppHandle, config: Value) -> Result<String, 
         return Err("No output path set. Please set an output path in the settings.".to_string());
     }
 
-    let file_path = format!("{}/config.json", output_path);
+    let file_path = PathBuf::from(&output_path).join("config.json");
     fs::write(&file_path, serde_json::to_string_pretty(&config).unwrap())
         .map_err(|e| format!("Failed to write file: {}", e))?;
 
-    Ok(file_path)
+    Ok(file_path.to_string_lossy().into_owned())
+}
+
+#[tauri::command]
+fn open_file_location(path: String) -> Result<(), String> {
+    let path_buf = PathBuf::from(path);
+    let parent = path_buf.parent().ok_or("Unable to get parent directory")?;
+
+    #[cfg(target_os = "windows")]
+    {
+        Command::new("explorer")
+            .arg(parent)
+            .spawn()
+            .map_err(|e| e.to_string())?;
+    }
+
+    #[cfg(target_os = "macos")]
+    {
+        Command::new("open")
+            .arg(parent)
+            .spawn()
+            .map_err(|e| e.to_string())?;
+    }
+
+    #[cfg(target_os = "linux")]
+    {
+        Command::new("xdg-open")
+            .arg(parent)
+            .spawn()
+            .map_err(|e| e.to_string())?;
+    }
+
+    Ok(())
 }
 
 fn main() {
@@ -57,7 +91,8 @@ fn main() {
             save_settings_command,
             load_settings_command,
             read_ark_data_command,
-            export_config
+            export_config,
+            open_file_location
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
