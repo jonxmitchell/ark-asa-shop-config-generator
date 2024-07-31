@@ -1,3 +1,5 @@
+// src/components/JsonEditor.jsx
+
 import React, { useRef, useEffect } from "react";
 import Editor from "@monaco-editor/react";
 
@@ -27,7 +29,6 @@ function JsonEditor({ config }) {
 	const handleEditorDidMount = (editor) => {
 		editorRef.current = editor;
 
-		// Customize scrollbar
 		editor.updateOptions({
 			scrollbar: {
 				vertical: "hidden",

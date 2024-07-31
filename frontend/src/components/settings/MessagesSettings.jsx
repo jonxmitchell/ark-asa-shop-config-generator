@@ -1,24 +1,32 @@
 // src/components/settings/MessagesSettings.jsx
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { useConfig } from "../ConfigContext";
 
-function MessagesSettings({ config, onConfigUpdate }) {
+function MessagesSettings() {
+	const { config, updateConfig } = useConfig();
 	const [searchTerm, setSearchTerm] = useState("");
+	const [filteredMessages, setFilteredMessages] = useState([]);
+
+	const messagesConfig = config?.Messages || {};
+
+	useEffect(() => {
+		const filtered = Object.entries(messagesConfig)
+			.filter(([key]) => key.toLowerCase().includes(searchTerm.toLowerCase()))
+			.sort((a, b) => a[0].localeCompare(b[0]));
+		setFilteredMessages(filtered);
+	}, [searchTerm, messagesConfig]);
 
 	const handleChange = (key, value) => {
-		onConfigUpdate({
-			...config,
+		updateConfig((prevConfig) => ({
+			...prevConfig,
 			Messages: {
-				...config.Messages,
+				...prevConfig.Messages,
 				[key]: value,
 			},
-		});
+		}));
 	};
-
-	const filteredMessages = Object.entries(config.Messages || {}).filter(
-		([key]) => key.toLowerCase().includes(searchTerm.toLowerCase())
-	);
 
 	return (
 		<div className="bg-light-black p-6 rounded-lg">

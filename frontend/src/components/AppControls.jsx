@@ -1,6 +1,5 @@
 // src/components/AppControls.jsx
-
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
 	HiOutlineDocumentText,
 	HiOutlineCog,
@@ -9,6 +8,8 @@ import {
 	HiOutlineCollection,
 } from "react-icons/hi";
 import SettingsModal from "./settings/modals/SettingsModal";
+import ExportConfirmationModal from "./settings/modals/ExportConfirmationModal";
+import { useConfig } from "./ConfigContext";
 
 const IconButton = ({ Icon, onClick, title }) => (
 	<button
@@ -21,12 +22,20 @@ const IconButton = ({ Icon, onClick, title }) => (
 
 function AppControls() {
 	const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+	const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+	const { config } = useConfig();
 
-	const handleLicense = () => console.log("License clicked");
-	const handleSettings = () => setIsSettingsModalOpen(true);
-	const handleImport = () => console.log("Import clicked");
-	const handleExport = () => console.log("Export clicked");
-	const handleSavedConfigs = () => console.log("Saved Configs clicked");
+	const handleLicense = useCallback(() => console.log("License clicked"), []);
+	const handleSettings = useCallback(() => setIsSettingsModalOpen(true), []);
+	const handleImport = useCallback(() => console.log("Import clicked"), []);
+	const handleExport = useCallback(() => {
+		console.log("Export clicked, config:", config);
+		setIsExportModalOpen(true);
+	}, [config]);
+	const handleSavedConfigs = useCallback(
+		() => console.log("Saved Configs clicked"),
+		[]
+	);
 
 	return (
 		<>
@@ -60,6 +69,10 @@ function AppControls() {
 			<SettingsModal
 				isOpen={isSettingsModalOpen}
 				onClose={() => setIsSettingsModalOpen(false)}
+			/>
+			<ExportConfirmationModal
+				isOpen={isExportModalOpen}
+				onClose={() => setIsExportModalOpen(false)}
 			/>
 		</>
 	);

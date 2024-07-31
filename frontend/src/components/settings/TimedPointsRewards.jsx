@@ -1,17 +1,24 @@
+// src/components/settings/TimedPointsRewards.jsx
+
 import React, { useState } from "react";
 import { TrashIcon } from "@heroicons/react/24/solid";
+import { motion, AnimatePresence } from "framer-motion";
+import { useConfig } from "../ConfigContext";
 
-function TimedPointsRewards({ config, onConfigUpdate }) {
+function TimedPointsRewards() {
+	const { config, updateConfig } = useConfig();
 	const [newGroupName, setNewGroupName] = useState("");
+
+	const timedPointsRewardConfig = config?.General?.TimedPointsReward || {};
 
 	const handleChange = (e) => {
 		const { name, value, type, checked } = e.target;
-		onConfigUpdate({
-			...config,
+		updateConfig((prevConfig) => ({
+			...prevConfig,
 			General: {
-				...config.General,
+				...prevConfig.General,
 				TimedPointsReward: {
-					...config.General.TimedPointsReward,
+					...prevConfig.General?.TimedPointsReward,
 					[name]:
 						type === "checkbox"
 							? checked
@@ -20,36 +27,36 @@ function TimedPointsRewards({ config, onConfigUpdate }) {
 							: value,
 				},
 			},
-		});
+		}));
 	};
 
 	const handleSliderChange = (value) => {
-		onConfigUpdate({
-			...config,
+		updateConfig((prevConfig) => ({
+			...prevConfig,
 			General: {
-				...config.General,
+				...prevConfig.General,
 				TimedPointsReward: {
-					...config.General.TimedPointsReward,
+					...prevConfig.General?.TimedPointsReward,
 					Interval: parseInt(value, 10),
 				},
 			},
-		});
+		}));
 	};
 
 	const handleGroupChange = (groupName, amount) => {
-		onConfigUpdate({
-			...config,
+		updateConfig((prevConfig) => ({
+			...prevConfig,
 			General: {
-				...config.General,
+				...prevConfig.General,
 				TimedPointsReward: {
-					...config.General.TimedPointsReward,
+					...prevConfig.General?.TimedPointsReward,
 					Groups: {
-						...config.General.TimedPointsReward.Groups,
+						...prevConfig.General?.TimedPointsReward?.Groups,
 						[groupName]: { Amount: parseInt(amount, 10) },
 					},
 				},
 			},
-		});
+		}));
 	};
 
 	const addGroup = () => {
@@ -60,24 +67,28 @@ function TimedPointsRewards({ config, onConfigUpdate }) {
 	};
 
 	const removeGroup = (groupName) => {
-		const updatedGroups = { ...config.General.TimedPointsReward.Groups };
-		delete updatedGroups[groupName];
-		onConfigUpdate({
-			...config,
-			General: {
-				...config.General,
-				TimedPointsReward: {
-					...config.General.TimedPointsReward,
-					Groups: updatedGroups,
+		updateConfig((prevConfig) => {
+			const updatedGroups = {
+				...prevConfig.General?.TimedPointsReward?.Groups,
+			};
+			delete updatedGroups[groupName];
+			return {
+				...prevConfig,
+				General: {
+					...prevConfig.General,
+					TimedPointsReward: {
+						...prevConfig.General?.TimedPointsReward,
+						Groups: updatedGroups,
+					},
 				},
-			},
+			};
 		});
 	};
 
-	const isEnabled = config.General.TimedPointsReward?.Enabled || false;
+	const isEnabled = timedPointsRewardConfig.Enabled || false;
 
 	const sortedGroups = Object.entries(
-		config.General.TimedPointsReward?.Groups || {}
+		timedPointsRewardConfig.Groups || {}
 	).sort((a, b) => a[0].localeCompare(b[0]));
 
 	return (
@@ -108,7 +119,7 @@ function TimedPointsRewards({ config, onConfigUpdate }) {
 							type="checkbox"
 							id="stackRewards"
 							name="StackRewards"
-							checked={config.General.TimedPointsReward?.StackRewards || false}
+							checked={timedPointsRewardConfig.StackRewards || false}
 							onChange={handleChange}
 							disabled={!isEnabled}
 							className={`w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 ${
@@ -141,7 +152,7 @@ function TimedPointsRewards({ config, onConfigUpdate }) {
 							min={1}
 							max={120}
 							step={1}
-							value={config.General.TimedPointsReward?.Interval || 30}
+							value={timedPointsRewardConfig.Interval || 30}
 							onChange={(e) => handleSliderChange(e.target.value)}
 							disabled={!isEnabled}
 							className={`w-11/12 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer ${
@@ -152,7 +163,7 @@ function TimedPointsRewards({ config, onConfigUpdate }) {
 							type="number"
 							id="rewardInterval"
 							name="Interval"
-							value={config.General.TimedPointsReward?.Interval || 30}
+							value={timedPointsRewardConfig.Interval || 30}
 							onChange={handleChange}
 							disabled={!isEnabled}
 							autoComplete="off"

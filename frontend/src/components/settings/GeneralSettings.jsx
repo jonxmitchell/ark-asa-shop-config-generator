@@ -1,14 +1,19 @@
+// src/components/settings/GeneralSettings.jsx
+
 import React from "react";
 import DiscordSettings from "./DiscordSettings";
 import TimedPointsRewards from "./TimedPointsRewards";
+import { useConfig } from "../ConfigContext";
 
-function GeneralSettings({ config, onConfigUpdate }) {
+function GeneralSettings() {
+	const { config, updateConfig } = useConfig();
+	const generalConfig = config?.General || {};
+
 	const handleChange = (e) => {
 		const { name, value, type, checked } = e.target;
-		onConfigUpdate({
-			...config,
+		updateConfig({
 			General: {
-				...config.General,
+				...generalConfig,
 				[name]:
 					type === "checkbox"
 						? checked
@@ -20,10 +25,9 @@ function GeneralSettings({ config, onConfigUpdate }) {
 	};
 
 	const handleSliderChange = (name, value) => {
-		onConfigUpdate({
-			...config,
+		updateConfig({
 			General: {
-				...config.General,
+				...generalConfig,
 				[name]: parseFloat(value),
 			},
 		});
@@ -50,7 +54,7 @@ function GeneralSettings({ config, onConfigUpdate }) {
 										min={0}
 										max={setting === "ItemsPerPage" ? 100 : 30}
 										step={setting === "ShopTextSize" ? 0.1 : 1}
-										value={config.General[setting] || 0}
+										value={generalConfig[setting] || 0}
 										onChange={(e) =>
 											handleSliderChange(setting, e.target.value)
 										}
@@ -60,7 +64,7 @@ function GeneralSettings({ config, onConfigUpdate }) {
 										type="number"
 										id={setting}
 										name={setting}
-										value={config.General[setting] || 0}
+										value={generalConfig[setting] || 0}
 										onChange={handleChange}
 										step={setting === "ShopTextSize" ? 0.1 : 1}
 										autoComplete="off"
@@ -83,7 +87,7 @@ function GeneralSettings({ config, onConfigUpdate }) {
 								type="text"
 								id={setting}
 								name={setting}
-								value={config.General[setting] || ""}
+								value={generalConfig[setting] || ""}
 								onChange={handleChange}
 								autoComplete="off"
 								className="w-full px-3 py-2 text-sm text-white bg-mid-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
@@ -108,7 +112,7 @@ function GeneralSettings({ config, onConfigUpdate }) {
 									type="checkbox"
 									id={setting}
 									name={setting}
-									checked={config.General[setting] || false}
+									checked={generalConfig[setting] || false}
 									onChange={handleChange}
 									className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
 								/>
@@ -123,8 +127,8 @@ function GeneralSettings({ config, onConfigUpdate }) {
 				</div>
 			</div>
 
-			<DiscordSettings config={config} onConfigUpdate={onConfigUpdate} />
-			<TimedPointsRewards config={config} onConfigUpdate={onConfigUpdate} />
+			<DiscordSettings />
+			<TimedPointsRewards />
 		</div>
 	);
 }

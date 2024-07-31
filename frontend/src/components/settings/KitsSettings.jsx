@@ -1,3 +1,5 @@
+// src/components/settings/KitsSettings.jsx
+
 import React, { useState, useCallback, useEffect } from "react";
 import {
 	TrashIcon,
@@ -16,8 +18,12 @@ import ItemsModal from "./modals/ItemsModal";
 import DinosModal from "./modals/DinosModal";
 import CommandsModal from "./modals/CommandsModal";
 import ConfirmationModal from "../ConfirmationModal";
+import { useConfig } from "../ConfigContext";
 
-function KitsSettings({ config, onConfigUpdate }) {
+function KitsSettings() {
+	const { config, updateConfig } = useConfig();
+	const kitsConfig = config?.Kits || {};
+
 	const [newKitName, setNewKitName] = useState("");
 	const [editingKitName, setEditingKitName] = useState("");
 	const [newKitNameInput, setNewKitNameInput] = useState("");
@@ -35,34 +41,33 @@ function KitsSettings({ config, onConfigUpdate }) {
 	const [deleteConfirmation, setDeleteConfirmation] = useState(null);
 
 	useEffect(() => {
-		const filtered = Object.entries(config.Kits || {})
+		const filtered = Object.entries(kitsConfig)
 			.filter(([kitName]) =>
 				kitName.toLowerCase().includes(searchTerm.toLowerCase())
 			)
 			.sort((a, b) => a[0].localeCompare(b[0]));
 		setFilteredItems(filtered);
-	}, [searchTerm, config.Kits]);
+	}, [searchTerm, kitsConfig]);
 
 	const validateKitName = useCallback(
 		(name, isEditing = false) => {
 			if (name.includes(" ")) {
 				return "Spaces are not allowed in kit names.";
 			}
-			if (config.Kits[name] && (!isEditing || name !== editingKitName)) {
+			if (kitsConfig[name] && (!isEditing || name !== editingKitName)) {
 				return "A kit with this name already exists.";
 			}
 			return "";
 		},
-		[config.Kits, editingKitName]
+		[kitsConfig, editingKitName]
 	);
 
 	const handleKitChange = (kitName, field, value) => {
-		onConfigUpdate({
-			...config,
+		updateConfig({
 			Kits: {
-				...config.Kits,
+				...kitsConfig,
 				[kitName]: {
-					...config.Kits[kitName],
+					...kitsConfig[kitName],
 					[field]: value,
 				},
 			},
@@ -76,11 +81,10 @@ function KitsSettings({ config, onConfigUpdate }) {
 			return;
 		}
 
-		if (newKitName && (!config.Kits || !config.Kits[newKitName])) {
-			onConfigUpdate({
-				...config,
+		if (newKitName && !kitsConfig[newKitName]) {
+			updateConfig({
 				Kits: {
-					...(config.Kits || {}),
+					...kitsConfig,
 					[newKitName]: {
 						DefaultAmount: 1,
 						Description: "",
@@ -99,12 +103,9 @@ function KitsSettings({ config, onConfigUpdate }) {
 	};
 
 	const deleteKit = (kitName) => {
-		const newKits = { ...config.Kits };
+		const newKits = { ...kitsConfig };
 		delete newKits[kitName];
-		onConfigUpdate({
-			...config,
-			Kits: newKits,
-		});
+		updateConfig({ Kits: newKits });
 		setDeleteConfirmation(null);
 		if (expandedKit === kitName) {
 			setExpandedKit(null);
@@ -125,13 +126,10 @@ function KitsSettings({ config, onConfigUpdate }) {
 		}
 
 		if (newKitNameInput && newKitNameInput !== editingKitName) {
-			const newKits = { ...config.Kits };
+			const newKits = { ...kitsConfig };
 			newKits[newKitNameInput] = newKits[editingKitName];
 			delete newKits[editingKitName];
-			onConfigUpdate({
-				...config,
-				Kits: newKits,
-			});
+			updateConfig({ Kits: newKits });
 			if (expandedKit === editingKitName) {
 				setExpandedKit(newKitNameInput);
 			}
@@ -158,30 +156,29 @@ function KitsSettings({ config, onConfigUpdate }) {
 	};
 
 	const updateKitData = (kitName, field, data) => {
-		const updatedKit = { ...config.Kits[kitName] };
+		const updatedKit = { ...kitsConfig[kitName] };
 		if (data.length > 0) {
 			updatedKit[field] = data;
 		} else {
 			delete updatedKit[field];
 		}
-		onConfigUpdate({
-			...config,
+		updateConfig({
 			Kits: {
-				...config.Kits,
+				...kitsConfig,
 				[kitName]: updatedKit,
 			},
 		});
 	};
 
 	const toggleField = (kitName, field) => {
-		const updatedKits = { ...config.Kits };
+		const updatedKits = { ...kitsConfig };
 		if (field in updatedKits[kitName]) {
 			delete updatedKits[kitName][field];
 		} else {
 			updatedKits[kitName][field] =
 				field === "Price" ? 0 : field === "MinLevel" ? 1 : 20;
 		}
-		onConfigUpdate({ ...config, Kits: updatedKits });
+		updateConfig({ Kits: updatedKits });
 	};
 
 	const toggleKitExpansion = (kitName) => {
@@ -498,22 +495,11 @@ function KitsSettings({ config, onConfigUpdate }) {
 								<button
 									onClick={() => closeModal("items")}
 									className="absolute top-4 right-4 text-gray-400 hover:text-white">
-									<svg
-										className="w-6 h-6"
-										fill="none"
-										stroke="currentColor"
-										viewBox="0 0 24 24"
-										xmlns="http://www.w3.org/2000/svg">
-										<path
-											strokeLinecap="round"
-											strokeLinejoin="round"
-											strokeWidth="2"
-											d="M6 18L18 6M6 6l12 12"></path>
-									</svg>
+									<XMarkIcon className="h-6 w-6" />
 								</button>
 								<ItemsModal
 									kitName={currentEditingKit}
-									items={config.Kits[currentEditingKit]?.Items || []}
+									items={kitsConfig[currentEditingKit]?.Items || []}
 									onSave={(items) =>
 										updateKitData(currentEditingKit, "Items", items)
 									}
@@ -541,22 +527,11 @@ function KitsSettings({ config, onConfigUpdate }) {
 								<button
 									onClick={() => closeModal("dinos")}
 									className="absolute top-4 right-4 text-gray-400 hover:text-white">
-									<svg
-										className="w-6 h-6"
-										fill="none"
-										stroke="currentColor"
-										viewBox="0 0 24 24"
-										xmlns="http://www.w3.org/2000/svg">
-										<path
-											strokeLinecap="round"
-											strokeLinejoin="round"
-											strokeWidth="2"
-											d="M6 18L18 6M6 6l12 12"></path>
-									</svg>
+									<XMarkIcon className="h-6 w-6" />
 								</button>
 								<DinosModal
 									kitName={currentEditingKit}
-									dinos={config.Kits[currentEditingKit]?.Dinos || []}
+									dinos={kitsConfig[currentEditingKit]?.Dinos || []}
 									onSave={(dinos) =>
 										updateKitData(currentEditingKit, "Dinos", dinos)
 									}
@@ -584,22 +559,11 @@ function KitsSettings({ config, onConfigUpdate }) {
 								<button
 									onClick={() => closeModal("commands")}
 									className="absolute top-4 right-4 text-gray-400 hover:text-white">
-									<svg
-										className="w-6 h-6"
-										fill="none"
-										stroke="currentColor"
-										viewBox="0 0 24 24"
-										xmlns="http://www.w3.org/2000/svg">
-										<path
-											strokeLinecap="round"
-											strokeLinejoin="round"
-											strokeWidth="2"
-											d="M6 18L18 6M6 6l12 12"></path>
-									</svg>
+									<XMarkIcon className="h-6 w-6" />
 								</button>
 								<CommandsModal
 									kitName={currentEditingKit}
-									commands={config.Kits[currentEditingKit]?.Commands || []}
+									commands={kitsConfig[currentEditingKit]?.Commands || []}
 									onSave={(commands) =>
 										updateKitData(currentEditingKit, "Commands", commands)
 									}

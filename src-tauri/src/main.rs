@@ -1,6 +1,12 @@
+// src-tauri/src/main.rs
+
 mod db;
+mod ark_data;
 
 use db::{get_database_path, initialize_db, save_settings, load_settings, Settings};
+use ark_data::read_ark_data;
+use std::fs;
+use serde_json::Value;
 
 #[tauri::command]
 fn save_settings_command(app_handle: tauri::AppHandle, output_path: String) -> Result<(), String> {
@@ -18,6 +24,27 @@ fn load_settings_command(app_handle: tauri::AppHandle) -> Result<Settings, Strin
     load_settings(&conn).map_err(|e| e.to_string())
 }
 
+#[tauri::command]
+fn read_ark_data_command(app_handle: tauri::AppHandle) -> Result<Value, String> {
+    read_ark_data(app_handle)
+}
+
+#[tauri::command]
+fn export_config(app_handle: tauri::AppHandle, config: Value) -> Result<String, String> {
+    let settings = load_settings_command(app_handle.clone()).map_err(|e| e.to_string())?;
+    let output_path = settings.output_path;
+
+    if output_path.is_empty() {
+        return Err("No output path set. Please set an output path in the settings.".to_string());
+    }
+
+    let file_path = format!("{}/config.json", output_path);
+    fs::write(&file_path, serde_json::to_string_pretty(&config).unwrap())
+        .map_err(|e| format!("Failed to write file: {}", e))?;
+
+    Ok(file_path)
+}
+
 fn main() {
     tauri::Builder::default()
         .setup(|app| {
@@ -26,7 +53,12 @@ fn main() {
             initialize_db(&db_path).expect("Failed to initialize database");
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![save_settings_command, load_settings_command])
+        .invoke_handler(tauri::generate_handler![
+            save_settings_command,
+            load_settings_command,
+            read_ark_data_command,
+            export_config
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

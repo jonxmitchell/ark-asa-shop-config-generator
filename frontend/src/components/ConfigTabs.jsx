@@ -1,16 +1,14 @@
+// src/components/ConfigTabs.jsx
+
 import React, { useState, useEffect, useRef } from "react";
 import ConfigForm from "./ConfigForm";
 import JsonEditor from "./JsonEditor";
+import { useConfig } from "./ConfigContext"; // Import useConfig hook
 
-function ConfigTabs({
-	activeTab,
-	setActiveTab,
-	config,
-	onConfigUpdate,
-	activeSidebarItem,
-}) {
+function ConfigTabs({ activeTab, setActiveTab, activeSidebarItem }) {
 	const [showShadow, setShowShadow] = useState(false);
 	const contentRef = useRef(null);
+	const { config } = useConfig(); // Use the useConfig hook to get the current config
 
 	useEffect(() => {
 		const handleScroll = () => {
@@ -65,11 +63,7 @@ function ConfigTabs({
 			<div className="flex-grow overflow-auto bg-mid-black" ref={contentRef}>
 				{activeTab === "generator" ? (
 					<div className="p-6">
-						<ConfigForm
-							config={config}
-							onConfigUpdate={onConfigUpdate}
-							activeSidebarItem={activeSidebarItem}
-						/>
+						<ConfigForm activeSidebarItem={activeSidebarItem} />
 					</div>
 				) : (
 					<div className="h-full">

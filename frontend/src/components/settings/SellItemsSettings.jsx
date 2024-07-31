@@ -14,8 +14,12 @@ import { useArkData } from "../../hooks/useArkData";
 import ConfirmationModal from "../ConfirmationModal";
 import SellItemEntry from "./sell_shop_entries/SellItemEntry";
 import SellDinoEntry from "./sell_shop_entries/SellDinoEntry";
+import { useConfig } from "../ConfigContext";
 
-function SellItemsSettings({ config, onConfigUpdate }) {
+function SellItemsSettings() {
+	const { config, updateConfig } = useConfig();
+	const sellItemsConfig = config?.SellItems || {};
+
 	const [newItemName, setNewItemName] = useState("");
 	const [newItemType, setNewItemType] = useState("item");
 	const [editingName, setEditingName] = useState(null);
@@ -29,42 +33,38 @@ function SellItemsSettings({ config, onConfigUpdate }) {
 	const { arkData } = useArkData();
 
 	useEffect(() => {
-		const filtered = Object.entries(config.SellItems || {})
+		const filtered = Object.entries(sellItemsConfig)
 			.filter(([itemName]) =>
 				itemName.toLowerCase().includes(searchTerm.toLowerCase())
 			)
 			.sort((a, b) => a[0].localeCompare(b[0]));
 		setFilteredItems(filtered);
-	}, [searchTerm, config.SellItems]);
+	}, [searchTerm, sellItemsConfig]);
 
 	const validateItemName = useCallback(
 		(name, isEditing = false) => {
 			if (name.includes(" ")) {
 				return "Spaces are not allowed in item names.";
 			}
-			if (
-				config.SellItems &&
-				config.SellItems[name] &&
-				(!isEditing || name !== editingName)
-			) {
+			if (sellItemsConfig[name] && (!isEditing || name !== editingName)) {
 				return "An item with this name already exists.";
 			}
 			return "";
 		},
-		[config.SellItems, editingName]
+		[sellItemsConfig, editingName]
 	);
 
 	const handleItemChange = (itemName, field, value) => {
-		onConfigUpdate({
-			...config,
+		updateConfig((prevConfig) => ({
+			...prevConfig,
 			SellItems: {
-				...(config.SellItems || {}),
+				...prevConfig.SellItems,
 				[itemName]: {
-					...(config.SellItems?.[itemName] || {}),
+					...prevConfig.SellItems[itemName],
 					[field]: value,
 				},
 			},
-		});
+		}));
 	};
 
 	const addNewItem = () => {
@@ -75,10 +75,10 @@ function SellItemsSettings({ config, onConfigUpdate }) {
 		}
 
 		if (newItemName) {
-			onConfigUpdate({
-				...config,
+			updateConfig((prevConfig) => ({
+				...prevConfig,
 				SellItems: {
-					...(config.SellItems || {}),
+					...prevConfig.SellItems,
 					[newItemName]: {
 						Type: newItemType,
 						Description: "",
@@ -88,7 +88,7 @@ function SellItemsSettings({ config, onConfigUpdate }) {
 						Blueprint: "",
 					},
 				},
-			});
+			}));
 			setNewItemName("");
 			setExpandedItem(newItemName);
 			setNameValidationMessage("");
@@ -96,13 +96,11 @@ function SellItemsSettings({ config, onConfigUpdate }) {
 	};
 
 	const deleteItem = (itemName) => {
-		const newSellItems = { ...config.SellItems };
-		delete newSellItems[itemName];
-		onConfigUpdate({
-			...config,
-			SellItems: newSellItems,
+		updateConfig((prevConfig) => {
+			const newSellItems = { ...prevConfig.SellItems };
+			delete newSellItems[itemName];
+			return { ...prevConfig, SellItems: newSellItems };
 		});
-		setDeleteConfirmation(null);
 		if (expandedItem === itemName) {
 			setExpandedItem(null);
 		}
@@ -122,12 +120,11 @@ function SellItemsSettings({ config, onConfigUpdate }) {
 		}
 
 		if (editedName && editedName !== editingName) {
-			const newSellItems = { ...config.SellItems };
-			newSellItems[editedName] = newSellItems[editingName];
-			delete newSellItems[editingName];
-			onConfigUpdate({
-				...config,
-				SellItems: newSellItems,
+			updateConfig((prevConfig) => {
+				const newSellItems = { ...prevConfig.SellItems };
+				newSellItems[editedName] = newSellItems[editingName];
+				delete newSellItems[editingName];
+				return { ...prevConfig, SellItems: newSellItems };
 			});
 			if (expandedItem === editingName) {
 				setExpandedItem(editedName);

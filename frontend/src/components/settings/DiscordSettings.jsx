@@ -1,21 +1,27 @@
-import React from "react";
+// src/components/settings/DiscordSettings.jsx
 
-function DiscordSettings({ config, onConfigUpdate }) {
+import React from "react";
+import { useConfig } from "../ConfigContext";
+
+function DiscordSettings() {
+	const { config, updateConfig } = useConfig();
+	const discordConfig = config?.General?.Discord || {};
+
 	const handleChange = (e) => {
 		const { name, value, type, checked } = e.target;
-		onConfigUpdate({
-			...config,
+		updateConfig((prevConfig) => ({
+			...prevConfig,
 			General: {
-				...config.General,
+				...prevConfig.General,
 				Discord: {
-					...config.General.Discord,
+					...prevConfig.General?.Discord,
 					[name]: type === "checkbox" ? checked : value,
 				},
 			},
-		});
+		}));
 	};
 
-	const isEnabled = config.General.Discord?.Enabled || false;
+	const isEnabled = discordConfig.Enabled || false;
 
 	return (
 		<div className="bg-light-black p-6 rounded-lg mb-6">
@@ -51,7 +57,7 @@ function DiscordSettings({ config, onConfigUpdate }) {
 						type="text"
 						id="senderName"
 						name="SenderName"
-						value={config.General.Discord?.SenderName || ""}
+						value={discordConfig.SenderName || ""}
 						onChange={handleChange}
 						disabled={!isEnabled}
 						autoComplete="off"
@@ -73,7 +79,7 @@ function DiscordSettings({ config, onConfigUpdate }) {
 						type="text"
 						id="webhookURL"
 						name="URL"
-						value={config.General.Discord?.URL || ""}
+						value={discordConfig.URL || ""}
 						onChange={handleChange}
 						disabled={!isEnabled}
 						autoComplete="off"

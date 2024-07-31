@@ -1,6 +1,6 @@
 // src/components/settings/ShopItemsSettings.jsx
 
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
 	TrashIcon,
@@ -18,8 +18,12 @@ import UnlockEngramShopEntry from "./shop_entries/UnlockEngramShopEntry";
 import CommandShopEntry from "./shop_entries/CommandShopEntry";
 import DinoShopEntry from "./shop_entries/DinoShopEntry";
 import ConfirmationModal from "../ConfirmationModal";
+import { useConfig } from "../ConfigContext";
 
-function ShopItemsSettings({ config, onConfigUpdate }) {
+function ShopItemsSettings() {
+	const { config, updateConfig } = useConfig();
+	const shopItemsConfig = useMemo(() => config?.ShopItems || {}, [config]);
+
 	const [newItemName, setNewItemName] = useState("");
 	const [newItemType, setNewItemType] = useState("item");
 	const [editingName, setEditingName] = useState(null);
@@ -31,147 +35,57 @@ function ShopItemsSettings({ config, onConfigUpdate }) {
 	const { arkData } = useArkData();
 	const [searchTerm, setSearchTerm] = useState("");
 	const [filteredItems, setFilteredItems] = useState([]);
-	const [nameError, setNameError] = useState("");
 
 	useEffect(() => {
-		const filtered = Object.entries(config.ShopItems || {})
+		const filtered = Object.entries(shopItemsConfig)
 			.filter(([itemName]) =>
 				itemName.toLowerCase().includes(searchTerm.toLowerCase())
 			)
 			.sort((a, b) => a[0].localeCompare(b[0]));
 		setFilteredItems(filtered);
-	}, [searchTerm, config.ShopItems]);
-
-	useEffect(() => {
-		const cleanupBeaconEntries = () => {
-			const updatedShopItems = { ...config.ShopItems };
-			let hasChanges = false;
-
-			Object.entries(updatedShopItems).forEach(([itemName, itemData]) => {
-				if (itemData.Type === "beacon" && "Items" in itemData) {
-					delete itemData.Items;
-					hasChanges = true;
-				}
-			});
-
-			if (hasChanges) {
-				onConfigUpdate({
-					...config,
-					ShopItems: updatedShopItems,
-				});
-			}
-		};
-
-		cleanupBeaconEntries();
-	}, [config, onConfigUpdate]);
-
-	const handleNewItemNameChange = (e) => {
-		const value = e.target.value.replace(/\s/g, "");
-		setNewItemName(value);
-		setNameError("");
-		setNewItemValidationMessage("");
-	};
+	}, [searchTerm, shopItemsConfig]);
 
 	const validateItemName = useCallback(
 		(name, isEditing = false) => {
 			if (name.includes(" ")) {
 				return "Spaces are not allowed in item names.";
 			}
-			if (config.ShopItems[name] && (!isEditing || name !== editingName)) {
+			if (shopItemsConfig[name] && (!isEditing || name !== editingName)) {
 				return "An item with this name already exists.";
 			}
 			return "";
 		},
-		[config.ShopItems, editingName]
+		[shopItemsConfig, editingName]
 	);
-
-	const handleAddItem = useCallback(() => {
-		if (!newItemName.trim()) {
-			setNameError("Item name cannot be empty");
-			return;
-		}
-
-		const validationError = validateItemName(newItemName);
-		if (validationError) {
-			setNewItemValidationMessage(validationError);
-			return;
-		}
-
-		let newItemStructure = {
-			Type: newItemType,
-			Description: "",
-			Price: 0,
-		};
-
-		// Add type-specific fields
-		switch (newItemType) {
-			case "item":
-				newItemStructure.Items = [];
-				break;
-			case "dino":
-				newItemStructure.Level = 1;
-				newItemStructure.Blueprint = "";
-				newItemStructure.Neutered = false;
-				newItemStructure.Gender = "random";
-				break;
-			case "beacon":
-				newItemStructure.ClassName = "";
-				break;
-			case "experience":
-				newItemStructure.Amount = 0;
-				newItemStructure.GiveToDino = false;
-				break;
-			case "unlockengram":
-				newItemStructure.Items = [];
-				break;
-			case "command":
-				newItemStructure.Items = [{ Command: "", DisplayAs: "" }];
-				break;
-			default:
-				break;
-		}
-
-		onConfigUpdate({
-			...config,
-			ShopItems: {
-				...config.ShopItems,
-				[newItemName]: newItemStructure,
-			},
-		});
-		setNewItemName("");
-		setExpandedItem(newItemName);
-		setNewItemValidationMessage("");
-		setNameError("");
-	}, [config, newItemName, newItemType, onConfigUpdate, validateItemName]);
 
 	const handleItemChange = useCallback(
 		(itemName, field, value) => {
-			onConfigUpdate({
-				...config,
+			updateConfig((prevConfig) => ({
+				...prevConfig,
 				ShopItems: {
-					...config.ShopItems,
+					...prevConfig.ShopItems,
 					[itemName]: {
-						...config.ShopItems[itemName],
+						...prevConfig.ShopItems[itemName],
 						[field]: value,
 					},
 				},
-			});
+			}));
 		},
-		[config, onConfigUpdate]
+		[updateConfig]
 	);
 
 	const handleItemEntryChange = useCallback(
 		(itemName, index, field, value) => {
-			const newItems = [...config.ShopItems[itemName].Items];
+			const newItems = [...shopItemsConfig[itemName].Items];
 			newItems[index] = { ...newItems[index], [field]: value };
 			handleItemChange(itemName, "Items", newItems);
 		},
-		[config.ShopItems, handleItemChange]
+		[handleItemChange, shopItemsConfig]
 	);
 
 	const addItemEntry = useCallback(
 		(itemName) => {
-			const itemType = config.ShopItems[itemName].Type;
+			const itemType = shopItemsConfig[itemName].Type;
 			let newEntry;
 
 			switch (itemType) {
@@ -193,36 +107,96 @@ function ShopItemsSettings({ config, onConfigUpdate }) {
 					newEntry = {};
 			}
 
-			const newItems = [...(config.ShopItems[itemName].Items || []), newEntry];
+			const newItems = [...(shopItemsConfig[itemName].Items || []), newEntry];
 			handleItemChange(itemName, "Items", newItems);
 		},
-		[config.ShopItems, handleItemChange]
+		[handleItemChange, shopItemsConfig]
 	);
 
 	const removeItemEntry = useCallback(
 		(itemName, index) => {
-			const newItems = config.ShopItems[itemName].Items.filter(
+			const newItems = shopItemsConfig[itemName].Items.filter(
 				(_, i) => i !== index
 			);
 			handleItemChange(itemName, "Items", newItems);
 		},
-		[config.ShopItems, handleItemChange]
+		[handleItemChange, shopItemsConfig]
 	);
 
-	const removeItem = useCallback(
+	const addNewItem = useCallback(() => {
+		const validationError = validateItemName(newItemName);
+		if (validationError) {
+			setNewItemValidationMessage(validationError);
+			return;
+		}
+
+		if (newItemName) {
+			updateConfig((prevConfig) => ({
+				...prevConfig,
+				ShopItems: {
+					...prevConfig.ShopItems,
+					[newItemName]: {
+						Type: newItemType,
+						Description: "",
+						Price: 0,
+						Items: [],
+					},
+				},
+			}));
+			setNewItemName("");
+			setExpandedItem(newItemName);
+			setNewItemValidationMessage("");
+		}
+	}, [newItemName, newItemType, updateConfig, validateItemName]);
+
+	const deleteItem = useCallback(
 		(itemName) => {
-			const newShopItems = { ...config.ShopItems };
-			delete newShopItems[itemName];
-			onConfigUpdate({
-				...config,
-				ShopItems: newShopItems,
+			updateConfig((prevConfig) => {
+				const newShopItems = { ...prevConfig.ShopItems };
+				delete newShopItems[itemName];
+				return { ...prevConfig, ShopItems: newShopItems };
 			});
 			if (expandedItem === itemName) {
 				setExpandedItem(null);
 			}
 		},
-		[config, onConfigUpdate, expandedItem]
+		[updateConfig, expandedItem]
 	);
+
+	const startRenameItem = useCallback((itemName) => {
+		setEditingName(itemName);
+		setEditedName(itemName);
+		setEditValidationMessage("");
+	}, []);
+
+	const finishRenameItem = useCallback(() => {
+		const validationError = validateItemName(editedName, true);
+		if (validationError) {
+			setEditValidationMessage(validationError);
+			return;
+		}
+
+		if (editedName && editedName !== editingName) {
+			updateConfig((prevConfig) => {
+				const newShopItems = { ...prevConfig.ShopItems };
+				newShopItems[editedName] = newShopItems[editingName];
+				delete newShopItems[editingName];
+				return { ...prevConfig, ShopItems: newShopItems };
+			});
+			if (expandedItem === editingName) {
+				setExpandedItem(editedName);
+			}
+		}
+		setEditingName(null);
+		setEditedName("");
+		setEditValidationMessage("");
+	}, [editedName, editingName, expandedItem, updateConfig, validateItemName]);
+
+	const cancelRenameItem = useCallback(() => {
+		setEditingName(null);
+		setEditedName("");
+		setEditValidationMessage("");
+	}, []);
 
 	const toggleItemExpansion = useCallback((itemName) => {
 		setExpandedItem((prevExpanded) =>
@@ -230,177 +204,125 @@ function ShopItemsSettings({ config, onConfigUpdate }) {
 		);
 	}, []);
 
-	const startEditingName = useCallback((itemName) => {
-		setEditingName(itemName);
-		setEditedName(itemName);
-		setEditValidationMessage("");
-	}, []);
-
-	const cancelEditingName = useCallback(() => {
-		setEditingName(null);
-		setEditedName("");
-		setEditValidationMessage("");
-	}, []);
-
-	const confirmNameEdit = useCallback(
-		(oldName) => {
-			const validationError = validateItemName(editedName, true);
-			if (validationError) {
-				setEditValidationMessage(validationError);
-				return;
+	const renderShopEntry = useCallback(
+		(itemName, itemData) => {
+			switch (itemData.Type) {
+				case "item":
+					return (
+						<ItemShopEntry
+							itemName={itemName}
+							itemData={itemData}
+							expanded={expandedItem === itemName}
+							handleItemChange={handleItemChange}
+							handleItemEntryChange={handleItemEntryChange}
+							addItemEntry={addItemEntry}
+							removeItemEntry={removeItemEntry}
+							arkData={arkData}
+						/>
+					);
+				case "dino":
+					return (
+						<DinoShopEntry
+							itemName={itemName}
+							itemData={itemData}
+							expanded={expandedItem === itemName}
+							handleItemChange={handleItemChange}
+						/>
+					);
+				case "beacon":
+					return (
+						<BeaconShopEntry
+							itemName={itemName}
+							itemData={itemData}
+							expanded={expandedItem === itemName}
+							handleItemChange={handleItemChange}
+							arkData={arkData}
+						/>
+					);
+				case "experience":
+					return (
+						<ExperienceShopEntry
+							itemName={itemName}
+							itemData={itemData}
+							expanded={expandedItem === itemName}
+							handleItemChange={handleItemChange}
+						/>
+					);
+				case "unlockengram":
+					return (
+						<UnlockEngramShopEntry
+							itemName={itemName}
+							itemData={itemData}
+							expanded={expandedItem === itemName}
+							handleItemChange={handleItemChange}
+							handleItemEntryChange={handleItemEntryChange}
+							addItemEntry={addItemEntry}
+							removeItemEntry={removeItemEntry}
+							arkData={arkData}
+						/>
+					);
+				case "command":
+					return (
+						<CommandShopEntry
+							itemName={itemName}
+							itemData={itemData}
+							expanded={expandedItem === itemName}
+							handleItemChange={handleItemChange}
+							handleItemEntryChange={handleItemEntryChange}
+							addItemEntry={addItemEntry}
+							removeItemEntry={removeItemEntry}
+						/>
+					);
+				default:
+					return null;
 			}
-
-			if (editedName && editedName !== oldName) {
-				const { [oldName]: item, ...rest } = config.ShopItems;
-				onConfigUpdate({
-					...config,
-					ShopItems: {
-						...rest,
-						[editedName]: item,
-					},
-				});
-				if (expandedItem === oldName) {
-					setExpandedItem(editedName);
-				}
-			}
-			setEditingName(null);
-			setEditedName("");
-			setEditValidationMessage("");
 		},
-		[config, editedName, onConfigUpdate, validateItemName, expandedItem]
+		[
+			expandedItem,
+			handleItemChange,
+			handleItemEntryChange,
+			addItemEntry,
+			removeItemEntry,
+			arkData,
+		]
 	);
-
-	const handleDeleteConfirmation = (itemName) => {
-		setDeleteConfirmation(itemName);
-	};
-
-	const handleDeleteCancel = () => {
-		setDeleteConfirmation(null);
-	};
-
-	const handleDeleteConfirm = () => {
-		if (deleteConfirmation) {
-			removeItem(deleteConfirmation);
-			setDeleteConfirmation(null);
-		}
-	};
-
-	const renderShopEntry = (itemName, itemData) => {
-		switch (itemData.Type) {
-			case "item":
-				return (
-					<ItemShopEntry
-						itemName={itemName}
-						itemData={itemData}
-						expanded={expandedItem === itemName}
-						handleItemChange={handleItemChange}
-						handleItemEntryChange={handleItemEntryChange}
-						addItemEntry={addItemEntry}
-						removeItemEntry={removeItemEntry}
-						arkData={arkData}
-					/>
-				);
-			case "dino":
-				return (
-					<DinoShopEntry
-						itemName={itemName}
-						itemData={itemData}
-						expanded={expandedItem === itemName}
-						handleItemChange={handleItemChange}
-					/>
-				);
-			case "beacon":
-				return (
-					<BeaconShopEntry
-						itemName={itemName}
-						itemData={itemData}
-						expanded={expandedItem === itemName}
-						handleItemChange={handleItemChange}
-						arkData={arkData}
-					/>
-				);
-			case "experience":
-				return (
-					<ExperienceShopEntry
-						itemName={itemName}
-						itemData={itemData}
-						expanded={expandedItem === itemName}
-						handleItemChange={handleItemChange}
-					/>
-				);
-			case "unlockengram":
-				return (
-					<UnlockEngramShopEntry
-						itemName={itemName}
-						itemData={itemData}
-						expanded={expandedItem === itemName}
-						handleItemChange={handleItemChange}
-						handleItemEntryChange={handleItemEntryChange}
-						addItemEntry={addItemEntry}
-						removeItemEntry={removeItemEntry}
-						arkData={arkData}
-					/>
-				);
-			case "command":
-				return (
-					<CommandShopEntry
-						itemName={itemName}
-						itemData={itemData}
-						expanded={expandedItem === itemName}
-						handleItemChange={handleItemChange}
-						handleItemEntryChange={handleItemEntryChange}
-						addItemEntry={addItemEntry}
-						removeItemEntry={removeItemEntry}
-					/>
-				);
-			default:
-				return null;
-		}
-	};
 
 	return (
 		<div className="bg-light-black p-6 rounded-lg">
 			<div className="space-y-4">
-				<div className="flex flex-col space-y-2">
-					<div className="flex space-x-2">
-						<input
-							type="text"
-							value={newItemName}
-							onChange={handleNewItemNameChange}
-							placeholder="New item name (no spaces)"
-							className={`flex-grow px-3 py-2 text-sm text-white bg-mid-black rounded border ${
-								nameError || newItemValidationMessage
-									? "border-red-500"
-									: "border-gray-600"
-							} focus:ring-blue-500 focus:border-blue-500`}
-							autoComplete="off"
-						/>
-						<select
-							value={newItemType}
-							onChange={(e) => setNewItemType(e.target.value)}
-							className="px-3 py-2 text-sm text-white bg-mid-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500">
-							<option value="item">Item</option>
-							<option value="dino">Dino</option>
-							<option value="beacon">Beacon</option>
-							<option value="experience">Experience</option>
-							<option value="unlockengram">Unlock Engram</option>
-							<option value="command">Command</option>
-						</select>
-						<button
-							onClick={handleAddItem}
-							className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
-							Add Item
-						</button>
-					</div>
-					{nameError && (
-						<p className="text-red-500 text-xs mt-1 mb-2">{nameError}</p>
-					)}
-					{newItemValidationMessage && (
-						<p className="text-red-500 text-xs mt-1 mb-2">
-							{newItemValidationMessage}
-						</p>
-					)}
+				<div className="flex space-x-2">
+					<input
+						type="text"
+						value={newItemName}
+						onChange={(e) => setNewItemName(e.target.value.replace(/\s/g, ""))}
+						placeholder="New item name (no spaces)"
+						className={`flex-grow px-3 py-2 text-sm text-white bg-mid-black rounded border ${
+							newItemValidationMessage ? "border-red-500" : "border-gray-600"
+						} focus:ring-blue-500 focus:border-blue-500`}
+						autoComplete="off"
+					/>
+					<select
+						value={newItemType}
+						onChange={(e) => setNewItemType(e.target.value)}
+						className="px-3 py-2 text-sm text-white bg-mid-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500">
+						<option value="item">Item</option>
+						<option value="dino">Dino</option>
+						<option value="beacon">Beacon</option>
+						<option value="experience">Experience</option>
+						<option value="unlockengram">Unlock Engram</option>
+						<option value="command">Command</option>
+					</select>
+					<button
+						onClick={addNewItem}
+						className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
+						Add Item
+					</button>
 				</div>
+				{newItemValidationMessage && (
+					<p className="text-red-500 text-xs mt-1 mb-2">
+						{newItemValidationMessage}
+					</p>
+				)}
 
 				<div className="flex space-x-2 mb-4">
 					<input
@@ -445,13 +367,13 @@ function ShopItemsSettings({ config, onConfigUpdate }) {
 												autoFocus
 											/>
 											<button
-												onClick={() => confirmNameEdit(itemName)}
+												onClick={finishRenameItem}
 												className="text-green-500 hover:text-green-400"
 												disabled={!!editValidationMessage}>
 												<CheckIcon className="h-5 w-5" />
 											</button>
 											<button
-												onClick={cancelEditingName}
+												onClick={cancelRenameItem}
 												className="text-red-500 hover:text-red-400">
 												<XMarkIcon className="h-5 w-5" />
 											</button>
@@ -483,13 +405,13 @@ function ShopItemsSettings({ config, onConfigUpdate }) {
 									onClick={(e) => e.stopPropagation()}>
 									{editingName !== itemName && (
 										<button
-											onClick={() => startEditingName(itemName)}
+											onClick={() => startRenameItem(itemName)}
 											className="text-blue-500 hover:text-blue-400">
 											<PencilIcon className="h-5 w-5" />
 										</button>
 									)}
 									<button
-										onClick={() => handleDeleteConfirmation(itemName)}
+										onClick={() => setDeleteConfirmation(itemName)}
 										className="text-red-500 hover:text-red-400">
 										<TrashIcon className="h-5 w-5" />
 									</button>
@@ -521,8 +443,11 @@ function ShopItemsSettings({ config, onConfigUpdate }) {
 				{deleteConfirmation && (
 					<ConfirmationModal
 						isOpen={true}
-						onClose={handleDeleteCancel}
-						onConfirm={handleDeleteConfirm}
+						onClose={() => setDeleteConfirmation(null)}
+						onConfirm={() => {
+							deleteItem(deleteConfirmation);
+							setDeleteConfirmation(null);
+						}}
 						title="Confirm Deletion"
 						message={`Are you sure you want to delete the item "${deleteConfirmation}"?`}
 					/>

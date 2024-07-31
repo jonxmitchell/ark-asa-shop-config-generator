@@ -1,10 +1,15 @@
+// src/components/settings/MySQLSettings.jsx
+
 import React from "react";
 import PasswordInput from "./PasswordInput";
+import { useConfig } from "../ConfigContext";
 
-function MySQLSettings({ config, onConfigUpdate }) {
+function MySQLSettings() {
+	const { config, updateConfig } = useConfig();
+
 	const handleChange = (e) => {
 		const { name, value, type, checked } = e.target;
-		onConfigUpdate({
+		updateConfig({
 			...config,
 			Mysql: {
 				...config.Mysql,
@@ -18,7 +23,9 @@ function MySQLSettings({ config, onConfigUpdate }) {
 		});
 	};
 
-	const isMySQL = config.Mysql?.UseMysql || false;
+	// Ensure config and config.Mysql exist before accessing properties
+	const mysqlConfig = config?.Mysql || {};
+	const isMySQL = mysqlConfig.UseMysql || false;
 
 	return (
 		<div className="bg-light-black p-6 rounded-lg">
@@ -49,7 +56,7 @@ function MySQLSettings({ config, onConfigUpdate }) {
 							type="text"
 							id={setting}
 							name={setting}
-							value={config.Mysql[setting] || ""}
+							value={mysqlConfig[setting] || ""}
 							onChange={handleChange}
 							disabled={!isMySQL}
 							autoComplete="off"
@@ -66,7 +73,7 @@ function MySQLSettings({ config, onConfigUpdate }) {
 						MysqlPass
 					</label>
 					<PasswordInput
-						value={config.Mysql.MysqlPass || ""}
+						value={mysqlConfig.MysqlPass || ""}
 						onChange={handleChange}
 						disabled={!isMySQL}
 					/>
@@ -81,7 +88,7 @@ function MySQLSettings({ config, onConfigUpdate }) {
 						type="number"
 						id="MysqlPort"
 						name="MysqlPort"
-						value={config.Mysql.MysqlPort || 3306}
+						value={mysqlConfig.MysqlPort || 3306}
 						onChange={handleChange}
 						disabled={!isMySQL}
 						autoComplete="off"

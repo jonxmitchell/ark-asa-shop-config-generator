@@ -1,4 +1,5 @@
 // src/hooks/useArkData.js
+
 import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/tauri";
 
@@ -15,7 +16,7 @@ export function useArkData() {
 	useEffect(() => {
 		async function loadArkData() {
 			try {
-				const data = await invoke("read_ark_data");
+				const data = await invoke("read_ark_data_command");
 				setArkData(data);
 			} catch (err) {
 				console.error("Failed to load ark data:", err);
