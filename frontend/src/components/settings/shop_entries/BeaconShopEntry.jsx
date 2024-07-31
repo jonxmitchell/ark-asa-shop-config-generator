@@ -44,7 +44,24 @@ function BeaconShopEntry({ itemName, itemData, expanded, handleItemChange }) {
 					transition={{ duration: 0.3 }}
 					className="space-y-2 mt-2">
 					<div className="grid grid-cols-12 gap-2">
-						<div className="col-span-5">
+						<div className="col-span-4">
+							<label
+								htmlFor={`title-${itemName}`}
+								className="block text-sm font-medium text-gray-300">
+								Title
+							</label>
+							<input
+								id={`title-${itemName}`}
+								type="text"
+								value={itemData.Title || ""}
+								onChange={(e) =>
+									handleItemChange(itemName, "Title", e.target.value)
+								}
+								className="w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+								autoComplete="off"
+							/>
+						</div>
+						<div className="col-span-6">
 							<label
 								htmlFor={`description-${itemName}`}
 								className="block text-sm font-medium text-gray-300">
@@ -78,26 +95,11 @@ function BeaconShopEntry({ itemName, itemData, expanded, handleItemChange }) {
 								autoComplete="off"
 							/>
 						</div>
-						<div className="col-span-5">
-							<label
-								htmlFor={`className-${itemName}`}
-								className="block text-sm font-medium text-gray-300">
-								Beacon Class Name
-							</label>
-							<SearchableDropdown
-								options={beaconOptions}
-								onSelect={handleBeaconSelect}
-								placeholder="Select or enter a beacon class name"
-								value={itemData.ClassName || ""}
-								className="w-full bg-dark-black"
-							/>
-						</div>
 					</div>
 
-					{/* New fields: MinLevel, MaxLevel, Permissions */}
-					<div className="grid grid-cols-3 gap-2">
+					<div className="grid grid-cols-12 gap-2">
 						{["MinLevel", "MaxLevel", "Permissions"].map((field) => (
-							<div key={field} className="relative">
+							<div key={field} className="col-span-4 relative">
 								<label
 									htmlFor={`${field}-${itemName}`}
 									className="block text-sm font-medium text-gray-300">
@@ -117,7 +119,7 @@ function BeaconShopEntry({ itemName, itemData, expanded, handleItemChange }) {
 													: parseInt(e.target.value)
 											)
 										}
-										className={`w-full px-3 py-2 pr-8 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
+										className={`w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
 											itemData[field] === undefined &&
 											"opacity-50 cursor-not-allowed"
 										}`}
@@ -141,6 +143,22 @@ function BeaconShopEntry({ itemName, itemData, expanded, handleItemChange }) {
 								</div>
 							</div>
 						))}
+					</div>
+
+					<div>
+						<label
+							htmlFor={`className-${itemName}`}
+							className="block text-sm font-medium text-gray-300">
+							Beacon Class Name
+						</label>
+						<SearchableDropdown
+							id={`className-${itemName}`}
+							options={beaconOptions}
+							onSelect={handleBeaconSelect}
+							placeholder="Select or enter a beacon class name"
+							value={itemData.ClassName || ""}
+							className="w-full bg-dark-black"
+						/>
 					</div>
 				</motion.div>
 			)}

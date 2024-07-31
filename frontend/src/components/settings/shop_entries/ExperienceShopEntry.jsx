@@ -28,7 +28,24 @@ function ExperienceShopEntry({
 					transition={{ duration: 0.3 }}
 					className="space-y-2 mt-2">
 					<div className="grid grid-cols-12 gap-2">
-						<div className="col-span-6">
+						<div className="col-span-3">
+							<label
+								htmlFor={`title-${itemName}`}
+								className="block text-sm font-medium text-gray-300">
+								Title
+							</label>
+							<input
+								id={`title-${itemName}`}
+								type="text"
+								value={itemData.Title || ""}
+								onChange={(e) =>
+									handleItemChange(itemName, "Title", e.target.value)
+								}
+								className="w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+								autoComplete="off"
+							/>
+						</div>
+						<div className="col-span-5">
 							<label
 								htmlFor={`description-${itemName}`}
 								className="block text-sm font-medium text-gray-300">
@@ -45,7 +62,7 @@ function ExperienceShopEntry({
 								autoComplete="off"
 							/>
 						</div>
-						<div className="col-span-3">
+						<div className="col-span-2">
 							<label
 								htmlFor={`price-${itemName}`}
 								className="block text-sm font-medium text-gray-300">
@@ -62,7 +79,7 @@ function ExperienceShopEntry({
 								autoComplete="off"
 							/>
 						</div>
-						<div className="col-span-3">
+						<div className="col-span-2">
 							<label
 								htmlFor={`amount-${itemName}`}
 								className="block text-sm font-medium text-gray-300">
@@ -85,10 +102,9 @@ function ExperienceShopEntry({
 						</div>
 					</div>
 
-					{/* New fields: MinLevel, MaxLevel, Permissions */}
-					<div className="grid grid-cols-3 gap-2">
+					<div className="grid grid-cols-12 gap-2">
 						{["MinLevel", "MaxLevel", "Permissions"].map((field) => (
-							<div key={field} className="relative">
+							<div key={field} className="col-span-4 relative">
 								<label
 									htmlFor={`${field}-${itemName}`}
 									className="block text-sm font-medium text-gray-300">
@@ -108,7 +124,7 @@ function ExperienceShopEntry({
 													: parseInt(e.target.value)
 											)
 										}
-										className={`w-full px-3 py-2 pr-8 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
+										className={`w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
 											itemData[field] === undefined &&
 											"opacity-50 cursor-not-allowed"
 										}`}
@@ -136,8 +152,8 @@ function ExperienceShopEntry({
 
 					<div className="flex items-center">
 						<input
-							type="checkbox"
 							id={`giveToDino-${itemName}`}
+							type="checkbox"
 							checked={itemData.GiveToDino || false}
 							onChange={(e) =>
 								handleItemChange(itemName, "GiveToDino", e.target.checked)

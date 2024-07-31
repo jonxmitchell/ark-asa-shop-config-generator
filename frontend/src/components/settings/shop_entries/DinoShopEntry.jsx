@@ -135,6 +135,23 @@ function DinoShopEntry({ itemName, itemData, expanded, handleItemChange }) {
 			{expanded && (
 				<>
 					<div className="grid grid-cols-12 gap-2">
+						<div className="col-span-4">
+							<label
+								htmlFor={`title-${itemName}`}
+								className="block text-sm font-medium text-gray-300">
+								Title
+							</label>
+							<input
+								id={`title-${itemName}`}
+								type="text"
+								value={itemData.Title || ""}
+								onChange={(e) =>
+									handleItemChange(itemName, "Title", e.target.value)
+								}
+								className="w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+								autoComplete="off"
+							/>
+						</div>
 						<div className="col-span-6">
 							<label
 								htmlFor={`description-${itemName}`}
@@ -152,7 +169,7 @@ function DinoShopEntry({ itemName, itemData, expanded, handleItemChange }) {
 								autoComplete="off"
 							/>
 						</div>
-						<div className="col-span-3">
+						<div className="col-span-2">
 							<label
 								htmlFor={`price-${itemName}`}
 								className="block text-sm font-medium text-gray-300">
@@ -169,29 +186,11 @@ function DinoShopEntry({ itemName, itemData, expanded, handleItemChange }) {
 								autoComplete="off"
 							/>
 						</div>
-						<div className="col-span-3">
-							<label
-								htmlFor={`level-${itemName}`}
-								className="block text-sm font-medium text-gray-300">
-								Level
-							</label>
-							<input
-								id={`level-${itemName}`}
-								type="number"
-								value={itemData.Level || 1}
-								onChange={(e) =>
-									handleItemChange(itemName, "Level", parseInt(e.target.value))
-								}
-								className="w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
-								autoComplete="off"
-							/>
-						</div>
 					</div>
 
-					{/* New fields: MinLevel, MaxLevel, Permissions */}
-					<div className="grid grid-cols-3 gap-2">
+					<div className="grid grid-cols-12 gap-2">
 						{["MinLevel", "MaxLevel", "Permissions"].map((field) => (
-							<div key={field} className="relative">
+							<div key={field} className="col-span-4 relative">
 								<label
 									htmlFor={`${field}-${itemName}`}
 									className="block text-sm font-medium text-gray-300">
@@ -211,7 +210,7 @@ function DinoShopEntry({ itemName, itemData, expanded, handleItemChange }) {
 													: parseInt(e.target.value)
 											)
 										}
-										className={`w-full px-3 py-2 pr-8 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
+										className={`w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
 											itemData[field] === undefined &&
 											"opacity-50 cursor-not-allowed"
 										}`}
@@ -237,8 +236,8 @@ function DinoShopEntry({ itemName, itemData, expanded, handleItemChange }) {
 						))}
 					</div>
 
-					<div className="flex items-center space-x-2">
-						<div className="flex-grow">
+					<div className="grid grid-cols-9 gap-3 items-center">
+						<div className="col-span-7">
 							<label
 								htmlFor={`blueprint-${itemName}`}
 								className="block text-sm font-medium text-gray-300">
@@ -254,21 +253,40 @@ function DinoShopEntry({ itemName, itemData, expanded, handleItemChange }) {
 								className="bg-dark-black"
 							/>
 						</div>
-						<div className="flex items-center space-x-2 mt-6">
-							<input
-								type="checkbox"
-								id={`neutered-${itemName}`}
-								checked={itemData.Neutered || false}
-								onChange={(e) =>
-									handleItemChange(itemName, "Neutered", e.target.checked)
-								}
-								className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
-							/>
+						<div className="col-span-1">
 							<label
-								htmlFor={`neutered-${itemName}`}
-								className="text-sm font-medium text-gray-300">
-								Neutered
+								htmlFor={`level-${itemName}`}
+								className="block text-sm font-medium text-gray-300">
+								Level
 							</label>
+							<input
+								id={`level-${itemName}`}
+								type="number"
+								value={itemData.Level || 1}
+								onChange={(e) =>
+									handleItemChange(itemName, "Level", parseInt(e.target.value))
+								}
+								className="w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+								autoComplete="off"
+							/>
+						</div>
+						<div className="col-span-1 flex items-center mt-5 ml-2">
+							<div className="flex items-center space-x-2">
+								<input
+									type="checkbox"
+									id={`neutered-${itemName}`}
+									checked={itemData.Neutered || false}
+									onChange={(e) =>
+										handleItemChange(itemName, "Neutered", e.target.checked)
+									}
+									className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
+								/>
+								<label
+									htmlFor={`neutered-${itemName}`}
+									className="text-sm font-medium text-gray-300">
+									Neutered
+								</label>
+							</div>
 						</div>
 					</div>
 

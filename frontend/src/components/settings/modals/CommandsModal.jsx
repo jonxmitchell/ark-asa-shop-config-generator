@@ -27,7 +27,10 @@ function CommandsModal({ kitName, commands, onSave, onClose }) {
 	};
 
 	const addCommand = () => {
-		setEditedCommands([...editedCommands, { Command: "", DisplayAs: "" }]);
+		setEditedCommands([
+			...editedCommands,
+			{ Command: "", DisplayAs: "", ExecuteAsAdmin: false },
+		]);
 	};
 
 	const removeCommand = (index) => {
@@ -67,7 +70,7 @@ function CommandsModal({ kitName, commands, onSave, onClose }) {
 							transition={{ type: "tween", duration: 0.2 }}
 							className="bg-light-black rounded-lg overflow-hidden">
 							<div className="p-4">
-								<div className="grid grid-cols-2 gap-4 mb-4">
+								<div className="grid grid-cols-1 gap-4 mb-4">
 									<div>
 										<label
 											htmlFor={`command-${index}`}
@@ -101,6 +104,26 @@ function CommandsModal({ kitName, commands, onSave, onClose }) {
 											className="w-full px-3 py-2 text-sm text-white bg-mid-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
 											autoComplete="off"
 										/>
+									</div>
+									<div className="flex items-center">
+										<input
+											id={`execute-as-admin-${index}`}
+											type="checkbox"
+											checked={command.ExecuteAsAdmin || false}
+											onChange={(e) =>
+												handleCommandChange(
+													index,
+													"ExecuteAsAdmin",
+													e.target.checked
+												)
+											}
+											className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
+										/>
+										<label
+											htmlFor={`execute-as-admin-${index}`}
+											className="ml-2 text-sm font-medium text-gray-300">
+											Execute As Admin
+										</label>
 									</div>
 								</div>
 								<div className="flex justify-end">
