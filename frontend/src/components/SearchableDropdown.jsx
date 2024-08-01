@@ -92,7 +92,7 @@ function SearchableDropdown({
 				</button>
 			</div>
 			{isOpen && (
-				<div className="absolute z-10 w-full mt-1 bg-mid-black border-[2px] border-blue-600 rounded-lg shadow-lg">
+				<div className="absolute z-10 w-full mt-1 bg-mid-black border-[2px] shadow-md border-blue-600 rounded-lg">
 					<ul className="py-1 text-sm text-gray-200 max-h-40  overflow-auto">
 						{filteredOptions.map((option) => (
 							<li
