@@ -1,5 +1,8 @@
 // src/App.jsx
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
+import { invoke } from "@tauri-apps/api/tauri";
+import LicenseManager from "./components/LicenseManager";
 import Sidebar from "./components/Sidebar";
 import ConfigTabs from "./components/ConfigTabs";
 import { useContextMenu } from "./hooks/useContextMenu";
@@ -9,10 +12,28 @@ import "react-toastify/dist/ReactToastify.css";
 import AppControls from "./components/AppControls";
 
 function App() {
+	const [isLicensed, setIsLicensed] = useState(false);
 	const [activeTab, setActiveTab] = useState("generator");
 	const [activeSidebarItem, setActiveSidebarItem] = useState("MySQL");
 
 	useContextMenu();
+
+	useEffect(() => {
+		const checkLicense = async () => {
+			try {
+				const licenseState = await invoke("get_license_state");
+				setIsLicensed(licenseState);
+			} catch (error) {
+				console.error("Failed to check license state:", error);
+			}
+		};
+
+		checkLicense();
+	}, []);
+
+	if (!isLicensed) {
+		return <LicenseManager setIsLicensed={setIsLicensed} />;
+	}
 
 	return (
 		<ConfigProvider>

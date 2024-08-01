@@ -1,5 +1,7 @@
 mod db;
 mod ark_data;
+mod hwid;
+mod license;
 
 use db::{get_database_path, initialize_db, save_settings, load_settings, Settings, SavedConfig, save_config, load_configs, delete_config, config_name_exists, update_config};
 use ark_data::read_ark_data;
@@ -9,6 +11,21 @@ use serde_json::Value;
 use serde::Serialize;
 use std::process::Command;
 use tauri_plugin_context_menu::init as init_context_menu;
+use std::sync::Mutex;
+use tokio::task;
+use std::fs::OpenOptions;
+use std::io::Write;
+
+struct LicenseState(Mutex<bool>);
+
+fn log_to_file(message: &str) {
+    let mut file = OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open("app_log.txt")
+        .unwrap();
+    writeln!(file, "{}: {}", chrono::Local::now(), message).unwrap();
+}
 
 #[tauri::command]
 fn save_settings_command(app_handle: tauri::AppHandle, output_path: String) -> Result<(), String> {
@@ -138,26 +155,115 @@ fn delete_config_command(app_handle: tauri::AppHandle, id: i64) -> Result<(), St
     delete_config(&conn, id).map_err(|e| e.to_string())
 }
 
+#[tauri::command]
+fn get_hwid() -> String {
+    hwid::generate_hwid()
+}
+
+#[tauri::command]
+async fn validate_license(license_key: String, state: tauri::State<'_, LicenseState>) -> Result<bool, String> {
+    let hwid = hwid::generate_hwid();
+    log_to_file(&format!("Validating license. HWID: {}", hwid));
+    
+    let result = task::spawn_blocking(move || {
+        license::verify_license(&license_key, &hwid)
+    }).await.map_err(|e| format!("Task join error: {}", e))?;
+
+    match result {
+        Ok(is_valid) => {
+            log_to_file(&format!("License validation result: {}", is_valid));
+            if is_valid {
+                let mut license_state = state.0.lock().unwrap();
+                *license_state = true;
+                Ok(true)
+            } else {
+                Err("License key is not valid for the current HWID or is expired".to_string())
+            }
+        }
+        Err(e) => {
+            log_to_file(&format!("License validation error: {}", e));
+            Err(format!("License validation failed: {}", e))
+        }
+    }
+}
+
+#[tauri::command]
+fn get_license_state(state: tauri::State<LicenseState>) -> bool {
+    *state.0.lock().unwrap()
+}
+
 fn main() {
-    tauri::Builder::default()
-        .plugin(init_context_menu())
-        .setup(|app| {
-            let app_handle = app.handle();
-            let db_path = get_database_path(&app_handle);
-            initialize_db(&db_path).expect("Failed to initialize database");
-            Ok(())
-        })
-        .invoke_handler(tauri::generate_handler![
-            save_settings_command,
-            load_settings_command,
-            read_ark_data_command,
-            export_config,
-            force_export_config,
-            open_file_location,
-            save_config_command,
-            load_configs_command,
-            delete_config_command
-        ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+    std::panic::set_hook(Box::new(|panic_info| {
+        if let Some(location) = panic_info.location() {
+            log_to_file(&format!("Panic occurred in file '{}' at line {}", location.file(), location.line()));
+        }
+        if let Some(s) = panic_info.payload().downcast_ref::<String>() {
+            log_to_file(&format!("Panic message: {}", s));
+        } else if let Some(s) = panic_info.payload().downcast_ref::<&str>() {
+            log_to_file(&format!("Panic message: {}", s));
+        }
+    }));
+
+    let result = std::panic::catch_unwind(|| {
+        log_to_file("Starting application");
+        tauri::Builder::default()
+            .plugin(init_context_menu())
+            .setup(|app| {
+                let app_handle = app.handle();
+                let db_path = get_database_path(&app_handle);
+                initialize_db(&db_path).expect("Failed to initialize database");
+
+                #[cfg(not(debug_assertions))]
+                {
+                    use tauri::Manager;
+                    let window = app.get_window("main").unwrap();
+                    let hwid = hwid::generate_hwid();
+                    log_to_file(&format!("Startup HWID: {}", hwid));
+                    
+                    // TODO: Implement proper license key storage and retrieval
+                    let license_key = ""; // Retrieve stored license key
+                    log_to_file(&format!("Startup license key: {}", license_key));
+                    
+                    match license::verify_license(license_key, &hwid) {
+                        Ok(valid) => {
+                            if !valid {
+                                log_to_file("License verification failed on startup");
+                                // Instead of closing, show an error message
+                                window.emit("license-error", "License verification failed").unwrap();
+                            } else {
+                                log_to_file("License verification succeeded on startup");
+                            }
+                        },
+                        Err(e) => {
+                            log_to_file(&format!("License verification error on startup: {}", e));
+                            // Instead of closing, show an error message
+                            window.emit("license-error", &format!("License error: {}", e)).unwrap();
+                        }
+                    }
+                }
+                Ok(())
+            })
+            .manage(LicenseState(Mutex::new(false)))
+            .invoke_handler(tauri::generate_handler![
+                save_settings_command,
+                load_settings_command,
+                read_ark_data_command,
+                export_config,
+                force_export_config,
+                open_file_location,
+                save_config_command,
+                load_configs_command,
+                delete_config_command,
+                get_hwid,
+                validate_license,
+                get_license_state
+            ])
+            .run(tauri::generate_context!())
+            .expect("error while running tauri application");
+    });
+
+    if let Err(e) = result {
+        log_to_file("Application panicked");
+        // You might want to show an error message to the user here
+    }
 }
