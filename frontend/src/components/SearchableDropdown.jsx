@@ -1,7 +1,7 @@
 // src/components/SearchableDropdown.jsx
 
 import React, { useState, useEffect, useRef } from "react";
-import ReactDOM from "react-dom";
+import { ChevronDownIcon } from "@heroicons/react/24/solid";
 
 function SearchableDropdown({
 	options,
@@ -9,12 +9,12 @@ function SearchableDropdown({
 	placeholder,
 	value,
 	className,
+	onDropdownToggle,
 }) {
 	const [isOpen, setIsOpen] = useState(false);
 	const [inputValue, setInputValue] = useState(value || "");
 	const [filteredOptions, setFilteredOptions] = useState(options);
-	const containerRef = useRef(null);
-	const inputRef = useRef(null);
+	const dropdownRef = useRef(null);
 
 	useEffect(() => {
 		setInputValue(value || "");
@@ -37,64 +37,74 @@ function SearchableDropdown({
 		}
 	}, [inputValue, options]);
 
+	useEffect(() => {
+		function handleClickOutside(event) {
+			if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+				setIsOpen(false);
+				onDropdownToggle && onDropdownToggle(false);
+			}
+		}
+		document.addEventListener("mousedown", handleClickOutside);
+		return () => {
+			document.removeEventListener("mousedown", handleClickOutside);
+		};
+	}, [dropdownRef, onDropdownToggle]);
+
 	const handleInputChange = (e) => {
 		const newValue = e.target.value;
 		setInputValue(newValue);
 		onSelect(newValue);
 		setIsOpen(true);
+		onDropdownToggle && onDropdownToggle(true);
 	};
 
 	const handleOptionSelect = (option) => {
-		const selectedValue =
-			option.ClassName || option.Blueprint || option.Name || "";
+		const selectedValue = option.Blueprint || option.Name || "";
 		setInputValue(selectedValue);
 		onSelect(option);
 		setIsOpen(false);
+		onDropdownToggle && onDropdownToggle(false);
 	};
 
-	const DropdownContent = () => {
-		const rect = inputRef.current.getBoundingClientRect();
-		return ReactDOM.createPortal(
-			<div
-				className="fixed z-50 bg-mid-black rounded-lg shadow-xl"
-				style={{
-					top: `${rect.bottom + window.scrollY + 5}px`,
-					left: `${rect.left + window.scrollX}px`,
-					width: `${rect.width}px`,
-					maxHeight: "300px",
-					overflowY: "auto",
-				}}>
-				<ul className="py-1">
-					{filteredOptions.map((option) => (
-						<li
-							key={option.ID || option.Blueprint}
-							onMouseDown={(e) => {
-								e.preventDefault(); // Prevent input blur
-								handleOptionSelect(option);
-							}}
-							className="px-3 py-2 text-sm text-white hover:bg-gray-700 cursor-pointer">
-							{option.Name || option.ClassName}
-						</li>
-					))}
-				</ul>
-			</div>,
-			document.body
-		);
+	const toggleDropdown = () => {
+		setIsOpen(!isOpen);
+		onDropdownToggle && onDropdownToggle(!isOpen);
 	};
 
 	return (
-		<div ref={containerRef} className="relative">
-			<input
-				ref={inputRef}
-				type="text"
-				value={inputValue}
-				onChange={handleInputChange}
-				onFocus={() => setIsOpen(true)}
-				onBlur={() => setTimeout(() => setIsOpen(false), 200)}
-				placeholder={placeholder}
-				className={`w-full px-3 py-2 text-sm text-white rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${className}`}
-			/>
-			{isOpen && filteredOptions.length > 0 && <DropdownContent />}
+		<div className="relative" ref={dropdownRef}>
+			<div className="relative">
+				<input
+					type="text"
+					value={inputValue}
+					onChange={handleInputChange}
+					onFocus={() => {
+						setIsOpen(true);
+						onDropdownToggle && onDropdownToggle(true);
+					}}
+					placeholder={placeholder}
+					className={`w-full px-3 py-2 pr-10 text-sm text-white bg-mid-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${className}`}
+				/>
+				<button
+					onClick={toggleDropdown}
+					className="absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+					<ChevronDownIcon className="w-5 h-5" />
+				</button>
+			</div>
+			{isOpen && (
+				<div className="absolute z-10 w-full mt-1 bg-mid-black border-[2px] border-blue-600 rounded-lg shadow-lg">
+					<ul className="py-1 text-sm text-gray-200 max-h-40  overflow-auto">
+						{filteredOptions.map((option) => (
+							<li
+								key={option.ID || option.Blueprint}
+								onClick={() => handleOptionSelect(option)}
+								className="px-4 py-2 hover:bg-gray-700 cursor-pointer">
+								{option.Name || option.ClassName}
+							</li>
+						))}
+					</ul>
+				</div>
+			)}
 		</div>
 	);
 }

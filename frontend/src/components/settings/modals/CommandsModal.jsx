@@ -70,9 +70,9 @@ function CommandsModal({ kitName, commands, onSave, onClose }) {
 							animate={{ opacity: 1, height: "auto" }}
 							exit={{ opacity: 0, height: 0 }}
 							transition={{ type: "tween", duration: 0.2 }}
-							className="bg-light-black rounded-lg overflow-hidden">
+							className="bg-light-black rounded-lg overflow-visible relative z-10">
 							<div className="p-4">
-								<div className="grid grid-cols-1 gap-4 mb-4">
+								<div className="space-y-4 mb-4">
 									<div>
 										<label
 											htmlFor={`command-${index}`}
@@ -107,33 +107,33 @@ function CommandsModal({ kitName, commands, onSave, onClose }) {
 											autoComplete="off"
 										/>
 									</div>
-									<div className="flex items-center">
-										<input
-											id={`execute-as-admin-${index}`}
-											type="checkbox"
-											checked={command.ExecuteAsAdmin || false}
-											onChange={(e) =>
-												handleCommandChange(
-													index,
-													"ExecuteAsAdmin",
-													e.target.checked
-												)
-											}
-											className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
-										/>
-										<label
-											htmlFor={`execute-as-admin-${index}`}
-											className="ml-2 text-sm font-medium text-gray-300">
-											Execute As Admin
-										</label>
+									<div className="flex items-center justify-between">
+										<div className="flex items-center">
+											<input
+												id={`execute-as-admin-${index}`}
+												type="checkbox"
+												checked={command.ExecuteAsAdmin || false}
+												onChange={(e) =>
+													handleCommandChange(
+														index,
+														"ExecuteAsAdmin",
+														e.target.checked
+													)
+												}
+												className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
+											/>
+											<label
+												htmlFor={`execute-as-admin-${index}`}
+												className="ml-2 text-sm font-medium text-gray-300">
+												Execute As Admin
+											</label>
+										</div>
+										<button
+											onClick={() => removeCommand(index)}
+											className="text-red-500 hover:text-red-700">
+											<TrashIcon className="h-5 w-5" />
+										</button>
 									</div>
-								</div>
-								<div className="flex justify-end">
-									<button
-										onClick={() => removeCommand(index)}
-										className="text-red-500 hover:text-red-700">
-										<TrashIcon className="h-5 w-5" />
-									</button>
 								</div>
 							</div>
 						</motion.div>

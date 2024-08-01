@@ -12,6 +12,7 @@ function ItemsModal({ kitName, items, onSave, onClose }) {
 	const [searchTerm, setSearchTerm] = useState("");
 	const [searchField, setSearchField] = useState("Blueprint");
 	const [filteredItems, setFilteredItems] = useState([]);
+	const [expandedItem, setExpandedItem] = useState(null);
 
 	useEffect(() => {
 		if (editedItems && Array.isArray(editedItems)) {
@@ -45,7 +46,7 @@ function ItemsModal({ kitName, items, onSave, onClose }) {
 	if (!arkData || !arkData.Items) return <p>No item data available</p>;
 
 	return (
-		<div className="text-white" style={{ zIndex: 40 }}>
+		<div className="text-white">
 			<h3 className="text-2xl font-semibold mb-4">Edit Items for {kitName}</h3>
 			<div className="flex space-x-2 mb-4">
 				<input
@@ -71,10 +72,14 @@ function ItemsModal({ kitName, items, onSave, onClose }) {
 						<motion.div
 							key={index}
 							initial={{ opacity: 0, height: 0 }}
-							animate={{ opacity: 1, height: "auto" }}
+							animate={{
+								opacity: 1,
+								height: "auto",
+								marginBottom: expandedItem === index ? "120px" : "0px",
+							}}
 							exit={{ opacity: 0, height: 0 }}
 							transition={{ type: "tween", duration: 0.2 }}
-							className="bg-light-black rounded-lg overflow-hidden">
+							className="bg-light-black rounded-lg overflow-visible relative z-10">
 							<div className="p-4">
 								<div className="grid grid-cols-2 gap-4 mb-4">
 									<div>
@@ -134,10 +139,14 @@ function ItemsModal({ kitName, items, onSave, onClose }) {
 												"Blueprint",
 												selected?.Blueprint || ""
 											);
+											setExpandedItem(null);
 										}}
 										placeholder="Select or enter a blueprint"
 										value={item.Blueprint || ""}
 										className={"w-full bg-mid-black"}
+										onDropdownToggle={(isOpen) =>
+											setExpandedItem(isOpen ? index : null)
+										}
 									/>
 								</div>
 								<div className="flex items-center justify-between">
