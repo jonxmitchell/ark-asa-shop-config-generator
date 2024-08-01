@@ -15,14 +15,21 @@ use std::sync::Mutex;
 use tokio::task;
 use std::fs::OpenOptions;
 use std::io::Write;
+use std::env;
 
 struct LicenseState(Mutex<bool>);
 
 fn log_to_file(message: &str) {
+    let log_path = env::current_exe()
+        .unwrap()
+        .parent()
+        .unwrap()
+        .join("app_log.txt");
+    
     let mut file = OpenOptions::new()
         .create(true)
         .append(true)
-        .open("app_log.txt")
+        .open(log_path)
         .unwrap();
     writeln!(file, "{}: {}", chrono::Local::now(), message).unwrap();
 }
@@ -262,7 +269,7 @@ fn main() {
             .expect("error while running tauri application");
     });
 
-    if let Err(e) = result {
+    if let Err(_) = result {
         log_to_file("Application panicked");
         // You might want to show an error message to the user here
     }

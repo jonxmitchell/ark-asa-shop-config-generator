@@ -22,3 +22,4 @@ run_tree.bat
 # Ark Data Example
 /ark_data_example.json
 src-tauri/app.log
+src-tauri/app_log.txt
