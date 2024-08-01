@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { invoke } from "@tauri-apps/api/tauri";
 import { useConfig } from "../../ConfigContext";
 import { toast } from "react-toastify";
