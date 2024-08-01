@@ -15,6 +15,14 @@ module.exports = {
 				// prettier-ignore
 				'tabs': "0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.46)",
 			},
+			backdropBlur: {
+				sm: "4px",
+			},
+		},
+	},
+	variants: {
+		extend: {
+			backdropBlur: ["responsive"],
 		},
 	},
 	plugins: [

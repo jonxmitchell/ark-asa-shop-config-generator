@@ -1,9 +1,7 @@
-// src-tauri/src/main.rs
-
 mod db;
 mod ark_data;
 
-use db::{get_database_path, initialize_db, save_settings, load_settings, Settings};
+use db::{get_database_path, initialize_db, save_settings, load_settings, Settings, SavedConfig, save_config, load_configs, delete_config, config_name_exists, update_config};
 use ark_data::read_ark_data;
 use std::fs;
 use std::path::{PathBuf, Path};
@@ -102,6 +100,44 @@ fn open_file_location(path: String) -> Result<(), String> {
     Ok(())
 }
 
+#[tauri::command]
+fn save_config_command(app_handle: tauri::AppHandle, id: Option<i64>, name: String, config: Value) -> Result<i64, String> {
+    let db_path = get_database_path(&app_handle);
+    let conn = initialize_db(&db_path).map_err(|e| e.to_string())?;
+    
+    if let Some(id) = id {
+        // This is an update operation
+        update_config(&conn, id, &name, &serde_json::to_string(&config).map_err(|e| e.to_string())?).map_err(|e| e.to_string())?;
+        Ok(id)
+    } else {
+        // This is a new save operation
+        if config_name_exists(&conn, &name).map_err(|e| e.to_string())? {
+            return Err("A configuration with this name already exists".to_string());
+        }
+        
+        let saved_config = SavedConfig {
+            id: None,
+            name,
+            config: serde_json::to_string(&config).map_err(|e| e.to_string())?,
+        };
+        save_config(&conn, &saved_config).map_err(|e| e.to_string())
+    }
+}
+
+#[tauri::command]
+fn load_configs_command(app_handle: tauri::AppHandle) -> Result<Vec<SavedConfig>, String> {
+    let db_path = get_database_path(&app_handle);
+    let conn = initialize_db(&db_path).map_err(|e| e.to_string())?;
+    load_configs(&conn).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn delete_config_command(app_handle: tauri::AppHandle, id: i64) -> Result<(), String> {
+    let db_path = get_database_path(&app_handle);
+    let conn = initialize_db(&db_path).map_err(|e| e.to_string())?;
+    delete_config(&conn, id).map_err(|e| e.to_string())
+}
+
 fn main() {
     tauri::Builder::default()
         .plugin(init_context_menu())
@@ -117,7 +153,10 @@ fn main() {
             read_ark_data_command,
             export_config,
             force_export_config,
-            open_file_location
+            open_file_location,
+            save_config_command,
+            load_configs_command,
+            delete_config_command
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
