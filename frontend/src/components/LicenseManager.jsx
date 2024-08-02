@@ -45,6 +45,7 @@ function LicenseManager({ setIsLicensed, initialError }) {
 						<input
 							id="licenseKey"
 							type="text"
+							autoComplete="off"
 							value={licenseKey}
 							onChange={(e) => setLicenseKey(e.target.value)}
 							placeholder="Enter your license key"
