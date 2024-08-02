@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/tauri";
+import { ClipboardDocumentIcon, CheckIcon } from "@heroicons/react/24/solid";
 
 function LicenseManager({ setIsLicensed, initialError }) {
 	const [hwid, setHwid] = useState("");
 	const [licenseKey, setLicenseKey] = useState("");
 	const [error, setError] = useState(initialError || "");
 	const [isLoading, setIsLoading] = useState(false);
+	const [copied, setCopied] = useState(false);
 
 	useEffect(() => {
 		invoke("get_hwid").then(setHwid).catch(console.error);
@@ -30,11 +32,39 @@ function LicenseManager({ setIsLicensed, initialError }) {
 		}
 	};
 
+	const handleCopyHwid = () => {
+		navigator.clipboard.writeText(hwid).then(() => {
+			setCopied(true);
+			setTimeout(() => setCopied(false), 2000); // Reset after 2 seconds
+		});
+	};
+
 	return (
 		<div className="flex items-center justify-center min-h-screen bg-deep-black text-white">
 			<div className="bg-mid-black p-8 rounded-xl shadow-lg max-w-md w-full">
 				<h2 className="text-2xl font-bold mb-6">License Activation</h2>
-				<p className="mb-4">Your HWID: {hwid}</p>
+				<div className="mb-4">
+					<label className="block text-sm font-medium text-gray-300 mb-1">
+						Your HWID
+					</label>
+					<div className="flex bg-dark-black rounded-lg p-2 items-start">
+						<p className="text-sm text-gray-400 mr-2 flex-grow break-all">
+							{hwid}
+						</p>
+						<div className="flex-shrink-0 ml-2 self-stretch flex items-center">
+							<button
+								onClick={handleCopyHwid}
+								className="text-gray-400 hover:text-white transition-colors"
+								title="Copy HWID">
+								{copied ? (
+									<CheckIcon className="h-5 w-5 text-green-500" />
+								) : (
+									<ClipboardDocumentIcon className="h-5 w-5" />
+								)}
+							</button>
+						</div>
+					</div>
+				</div>
 				<form onSubmit={handleSubmit} className="space-y-4">
 					<div>
 						<label
@@ -49,7 +79,7 @@ function LicenseManager({ setIsLicensed, initialError }) {
 							value={licenseKey}
 							onChange={(e) => setLicenseKey(e.target.value)}
 							placeholder="Enter your license key"
-							className="w-full px-3 py-2 bg-light-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+							className="w-full px-3 py-2 bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
 							disabled={isLoading}
 						/>
 					</div>

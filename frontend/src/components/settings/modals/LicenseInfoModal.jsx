@@ -3,10 +3,17 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { invoke } from "@tauri-apps/api/tauri";
+import {
+	ClipboardDocumentIcon,
+	CheckIcon,
+	XMarkIcon,
+} from "@heroicons/react/24/solid";
 
 function LicenseInfoModal({ isOpen, onClose }) {
 	const [licenseInfo, setLicenseInfo] = useState(null);
 	const [remainingTime, setRemainingTime] = useState({});
+	const [copiedHWID, setCopiedHWID] = useState(false);
+	const [copiedLicenseKey, setCopiedLicenseKey] = useState(false);
 
 	useEffect(() => {
 		if (isOpen) {
@@ -44,6 +51,13 @@ function LicenseInfoModal({ isOpen, onClose }) {
 		}
 	}, [licenseInfo]);
 
+	const handleCopy = (text, setCopiedState) => {
+		navigator.clipboard.writeText(text).then(() => {
+			setCopiedState(true);
+			setTimeout(() => setCopiedState(false), 2000); // Reset after 2 seconds
+		});
+	};
+
 	if (!isOpen || !licenseInfo) return null;
 
 	return (
@@ -56,8 +70,14 @@ function LicenseInfoModal({ isOpen, onClose }) {
 				initial={{ scale: 0.9, opacity: 0 }}
 				animate={{ scale: 1, opacity: 1 }}
 				exit={{ scale: 0.9, opacity: 0 }}
-				className="bg-mid-black p-6 rounded-lg max-w-md w-full">
-				<h2 className="text-xl font-bold mb-4 text-white">
+				className="bg-mid-black p-6 rounded-lg max-w-md w-full relative">
+				<button
+					onClick={onClose}
+					className="absolute top-2 right-2 text-gray-400 hover:text-white transition-colors"
+					aria-label="Close">
+					<XMarkIcon className="h-6 w-6" />
+				</button>
+				<h2 className="text-xl font-bold mb-4 text-white pr-8">
 					License Information
 				</h2>
 				<div className="space-y-4">
@@ -65,13 +85,47 @@ function LicenseInfoModal({ isOpen, onClose }) {
 						<label className="block text-sm font-medium text-gray-400">
 							HWID
 						</label>
-						<p className="text-white">{licenseInfo.hwid}</p>
+						<div className="flex bg-dark-black rounded-lg p-2 items-start">
+							<p className="text-sm text-white mr-2 flex-grow break-all">
+								{licenseInfo.hwid}
+							</p>
+							<div className="flex-shrink-0 ml-2 self-stretch flex items-center">
+								<button
+									onClick={() => handleCopy(licenseInfo.hwid, setCopiedHWID)}
+									className="text-gray-400 hover:text-white transition-colors"
+									title="Copy HWID">
+									{copiedHWID ? (
+										<CheckIcon className="h-5 w-5 text-green-500" />
+									) : (
+										<ClipboardDocumentIcon className="h-5 w-5" />
+									)}
+								</button>
+							</div>
+						</div>
 					</div>
 					<div>
 						<label className="block text-sm font-medium text-gray-400">
 							License Key
 						</label>
-						<p className="text-white">{licenseInfo.license_key}</p>
+						<div className="flex bg-dark-black rounded-lg p-2 items-start">
+							<p className="text-sm text-white mr-2 flex-grow break-all">
+								{licenseInfo.license_key}
+							</p>
+							<div className="flex-shrink-0 ml-2 self-stretch flex items-center">
+								<button
+									onClick={() =>
+										handleCopy(licenseInfo.license_key, setCopiedLicenseKey)
+									}
+									className="text-gray-400 hover:text-white transition-colors"
+									title="Copy License Key">
+									{copiedLicenseKey ? (
+										<CheckIcon className="h-5 w-5 text-green-500" />
+									) : (
+										<ClipboardDocumentIcon className="h-5 w-5" />
+									)}
+								</button>
+							</div>
+						</div>
 					</div>
 					<div>
 						<label className="block text-sm font-medium text-gray-400">
@@ -91,11 +145,6 @@ function LicenseInfoModal({ isOpen, onClose }) {
 						</p>
 					</div>
 				</div>
-				<button
-					onClick={onClose}
-					className="mt-6 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
-					Close
-				</button>
 			</motion.div>
 		</motion.div>
 	);
