@@ -1,3 +1,5 @@
+// src/components/AppControls.jsx
+
 import React, { useState, useCallback } from "react";
 import { open } from "@tauri-apps/api/dialog";
 import { readTextFile } from "@tauri-apps/api/fs";
@@ -13,6 +15,7 @@ import ExportConfirmationModal from "./settings/modals/ExportConfirmationModal";
 import ImportWarningModal from "./settings/modals/ImportWarningModal";
 import ImportProgressModal from "./settings/modals/ImportProgressModal";
 import SavedConfigsModal from "./settings/modals/SavedConfigsModal";
+import LicenseInfoModal from "../components/settings/modals/LicenseInfoModal";
 import { useConfig } from "./ConfigContext";
 import { toast } from "react-toastify";
 
@@ -32,9 +35,13 @@ function AppControls() {
 	const [isImportProgressOpen, setIsImportProgressOpen] = useState(false);
 	const [importProgress, setImportProgress] = useState(0);
 	const [isSavedConfigsModalOpen, setIsSavedConfigsModalOpen] = useState(false);
+	const [isLicenseModalOpen, setIsLicenseModalOpen] = useState(false);
 	const { config, updateConfig } = useConfig();
 
-	const handleLicense = useCallback(() => console.log("License clicked"), []);
+	const handleLicense = useCallback(() => {
+		setIsLicenseModalOpen(true);
+	}, []);
+
 	const handleSettings = useCallback(() => setIsSettingsModalOpen(true), []);
 
 	const importConfig = useCallback(async () => {
@@ -143,6 +150,10 @@ function AppControls() {
 			<SavedConfigsModal
 				isOpen={isSavedConfigsModalOpen}
 				onClose={() => setIsSavedConfigsModalOpen(false)}
+			/>
+			<LicenseInfoModal
+				isOpen={isLicenseModalOpen}
+				onClose={() => setIsLicenseModalOpen(false)}
 			/>
 		</>
 	);

@@ -1,9 +1,11 @@
+// src-tauri/src/main.rs
+
 mod db;
 mod ark_data;
 mod hwid;
 mod license;
 
-use db::{get_database_path, initialize_db, save_settings, load_settings, Settings, SavedConfig, save_config, load_configs, delete_config, config_name_exists, update_config};
+use db::{get_database_path, initialize_db, save_settings, load_settings, Settings, SavedConfig, save_config, load_configs, delete_config, config_name_exists, update_config, LicenseInfo, save_license_info, load_license_info};
 use ark_data::read_ark_data;
 use std::fs;
 use std::path::{PathBuf, Path};
@@ -16,6 +18,7 @@ use tokio::task;
 use std::fs::OpenOptions;
 use std::io::Write;
 use std::env;
+use chrono::Utc;
 
 struct LicenseState(Mutex<bool>);
 
@@ -31,7 +34,7 @@ fn log_to_file(message: &str) {
         .append(true)
         .open(log_path)
         .unwrap();
-    writeln!(file, "{}: {}", chrono::Local::now(), message).unwrap();
+    writeln!(file, "{}: {}", Utc::now(), message).unwrap();
 }
 
 #[tauri::command]
@@ -168,23 +171,37 @@ fn get_hwid() -> String {
 }
 
 #[tauri::command]
-async fn validate_license(license_key: String, state: tauri::State<'_, LicenseState>) -> Result<bool, String> {
+async fn validate_license(license_key: String, state: tauri::State<'_, LicenseState>, app_handle: tauri::AppHandle) -> Result<bool, String> {
     let hwid = hwid::generate_hwid();
     log_to_file(&format!("Validating license. HWID: {}", hwid));
     
+    let license_key_clone = license_key.clone();
+    let hwid_clone = hwid.clone();
+    
     let result = task::spawn_blocking(move || {
-        license::verify_license(&license_key, &hwid)
+        license::verify_license(&license_key_clone, &hwid_clone)
     }).await.map_err(|e| format!("Task join error: {}", e))?;
 
     match result {
-        Ok(is_valid) => {
+        Ok((is_valid, expiration_date)) => {
             log_to_file(&format!("License validation result: {}", is_valid));
             if is_valid {
                 let mut license_state = state.0.lock().unwrap();
                 *license_state = true;
+
+                // Save license info to database
+                let db_path = get_database_path(&app_handle);
+                let conn = initialize_db(&db_path).map_err(|e| e.to_string())?;
+                let license_info = LicenseInfo {
+                    license_key,
+                    expiration_date,
+                    hwid,
+                };
+                save_license_info(&conn, &license_info).map_err(|e| e.to_string())?;
+
                 Ok(true)
             } else {
-                Err("License key is not valid for the current HWID or is expired".to_string())
+                Ok(false)
             }
         }
         Err(e) => {
@@ -197,6 +214,53 @@ async fn validate_license(license_key: String, state: tauri::State<'_, LicenseSt
 #[tauri::command]
 fn get_license_state(state: tauri::State<LicenseState>) -> bool {
     *state.0.lock().unwrap()
+}
+
+#[tauri::command]
+fn get_license_info(app_handle: tauri::AppHandle) -> Result<serde_json::Value, String> {
+    let db_path = get_database_path(&app_handle);
+    let conn = initialize_db(&db_path).map_err(|e| e.to_string())?;
+    
+    if let Some(license_info) = load_license_info(&conn).map_err(|e| e.to_string())? {
+        Ok(serde_json::json!({
+            "license_key": license_info.license_key,
+            "expiration_date": license_info.expiration_date.to_string(),
+            "hwid": license_info.hwid,
+        }))
+    } else {
+        Err("No license information found".to_string())
+    }
+}
+
+#[tauri::command]
+async fn check_license_on_startup(app_handle: tauri::AppHandle, state: tauri::State<'_, LicenseState>) -> Result<bool, String> {
+    let db_path = get_database_path(&app_handle);
+    let conn = initialize_db(&db_path).map_err(|e| e.to_string())?;
+    
+    if let Some(license_info) = load_license_info(&conn).map_err(|e| e.to_string())? {
+        let hwid = hwid::generate_hwid();
+        
+        if license_info.hwid != hwid {
+            return Err("HWID mismatch".to_string());
+        }
+        
+        let result = license::verify_license(&license_info.license_key, &hwid);
+        
+        match result {
+            Ok((is_valid, _)) => {
+                if is_valid {
+                    let mut license_state = state.0.lock().unwrap();
+                    *license_state = true;
+                    Ok(true)
+                } else {
+                    Err("License is no longer valid".to_string())
+                }
+            }
+            Err(e) => Err(format!("License verification failed: {}", e)),
+        }
+    } else {
+        Ok(false) // No license found, but not an error
+    }
 }
 
 fn main() {
@@ -218,34 +282,40 @@ fn main() {
             .setup(|app| {
                 let app_handle = app.handle();
                 let db_path = get_database_path(&app_handle);
-                initialize_db(&db_path).expect("Failed to initialize database");
+                let _conn = initialize_db(&db_path).expect("Failed to initialize database");
 
                 #[cfg(not(debug_assertions))]
                 {
                     use tauri::Manager;
                     let window = app.get_window("main").unwrap();
-                    let hwid = hwid::generate_hwid();
-                    log_to_file(&format!("Startup HWID: {}", hwid));
                     
-                    // TODO: Implement proper license key storage and retrieval
-                    let license_key = ""; // Retrieve stored license key
-                    log_to_file(&format!("Startup license key: {}", license_key));
-                    
-                    match license::verify_license(license_key, &hwid) {
-                        Ok(valid) => {
-                            if !valid {
-                                log_to_file("License verification failed on startup");
-                                // Instead of closing, show an error message
-                                window.emit("license-error", "License verification failed").unwrap();
-                            } else {
-                                log_to_file("License verification succeeded on startup");
+                    // Check for existing license
+                    if let Ok(Some(license_info)) = load_license_info(&_conn) {
+                        let hwid = hwid::generate_hwid();
+                        log_to_file(&format!("Startup HWID: {}", hwid));
+                        
+                        if license_info.hwid == hwid {
+                            match license::verify_license(&license_info.license_key, &hwid) {
+                                Ok((valid, _)) => {
+                                    if valid {
+                                        log_to_file("License verification succeeded on startup");
+                                    } else {
+                                        log_to_file("License verification failed on startup");
+                                        window.emit("license-error", "License verification failed").unwrap();
+                                    }
+                                },
+                                Err(e) => {
+                                    log_to_file(&format!("License verification error on startup: {}", e));
+                                    window.emit("license-error", &format!("License error: {}", e)).unwrap();
+                                }
                             }
-                        },
-                        Err(e) => {
-                            log_to_file(&format!("License verification error on startup: {}", e));
-                            // Instead of closing, show an error message
-                            window.emit("license-error", &format!("License error: {}", e)).unwrap();
+                        } else {
+                            log_to_file("HWID mismatch on startup");
+                            window.emit("license-error", "HWID mismatch").unwrap();
                         }
+                    } else {
+                        log_to_file("No license found on startup");
+                        window.emit("license-error", "No license found").unwrap();
                     }
                 }
                 Ok(())
@@ -263,7 +333,9 @@ fn main() {
                 delete_config_command,
                 get_hwid,
                 validate_license,
-                get_license_state
+                get_license_state,
+                get_license_info,
+                check_license_on_startup
             ])
             .run(tauri::generate_context!())
             .expect("error while running tauri application");

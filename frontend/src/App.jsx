@@ -1,4 +1,4 @@
-// src/App.jsx
+// In src/App.jsx
 
 import React, { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/tauri";
@@ -7,12 +7,14 @@ import Sidebar from "./components/Sidebar";
 import ConfigTabs from "./components/ConfigTabs";
 import { useContextMenu } from "./hooks/useContextMenu";
 import { ConfigProvider } from "./components/ConfigContext";
-import { ToastContainer } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import AppControls from "./components/AppControls";
 
 function App() {
 	const [isLicensed, setIsLicensed] = useState(false);
+	const [licenseError, setLicenseError] = useState("");
+	const [isLoading, setIsLoading] = useState(true);
 	const [activeTab, setActiveTab] = useState("generator");
 	const [activeSidebarItem, setActiveSidebarItem] = useState("MySQL");
 
@@ -21,18 +23,34 @@ function App() {
 	useEffect(() => {
 		const checkLicense = async () => {
 			try {
-				const licenseState = await invoke("get_license_state");
-				setIsLicensed(licenseState);
+				setIsLoading(true);
+				const result = await invoke("check_license_on_startup");
+				setIsLicensed(result);
+				setLicenseError("");
 			} catch (error) {
-				console.error("Failed to check license state:", error);
+				console.error("License check failed:", error);
+				setIsLicensed(false);
+				setLicenseError(error);
+				toast.error(`License error: ${error}`);
+			} finally {
+				setIsLoading(false);
 			}
 		};
 
 		checkLicense();
 	}, []);
 
+	if (isLoading) {
+		return <div>Loading...</div>; // Or a more sophisticated loading screen
+	}
+
 	if (!isLicensed) {
-		return <LicenseManager setIsLicensed={setIsLicensed} />;
+		return (
+			<LicenseManager
+				setIsLicensed={setIsLicensed}
+				initialError={licenseError}
+			/>
+		);
 	}
 
 	return (

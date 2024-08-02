@@ -62,7 +62,10 @@
 				"all": true
 			},
 			"dialog": {
-				"all": true,
+				"all": false,
+				"ask": false,
+				"confirm": false,
+				"message": false,
 				"open": true,
 				"save": true
 			}

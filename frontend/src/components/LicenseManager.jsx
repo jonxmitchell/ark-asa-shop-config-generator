@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/tauri";
 
-function LicenseManager({ setIsLicensed }) {
+function LicenseManager({ setIsLicensed, initialError }) {
 	const [hwid, setHwid] = useState("");
 	const [licenseKey, setLicenseKey] = useState("");
-	const [error, setError] = useState("");
+	const [error, setError] = useState(initialError || "");
 	const [isLoading, setIsLoading] = useState(false);
 
 	useEffect(() => {
@@ -19,7 +19,6 @@ function LicenseManager({ setIsLicensed }) {
 			const valid = await invoke("validate_license", { licenseKey });
 			if (valid) {
 				setIsLicensed(true);
-				// You might want to store the license key securely here
 			} else {
 				setError("Invalid license key");
 			}

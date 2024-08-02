@@ -1,3 +1,5 @@
+// src-tauri/src/license.rs
+
 use base64::{Engine as _, engine::general_purpose};
 use chrono::NaiveDate;
 use hmac::{Hmac, Mac};
@@ -7,7 +9,7 @@ type HmacSha256 = Hmac<Sha256>;
 
 const SECRET_KEY: &str = "qq0300WCLU7URZH3Xif7"; // Must match the C# secret key
 
-pub fn verify_license(license_key: &str, hwid: &str) -> Result<bool, String> {
+pub fn verify_license(license_key: &str, hwid: &str) -> Result<(bool, NaiveDate), String> {
     println!("Verifying license. Key: {}, HWID: {}", license_key, hwid);
 
     // Decode the license key
@@ -42,7 +44,7 @@ pub fn verify_license(license_key: &str, hwid: &str) -> Result<bool, String> {
     let today = chrono::Local::now().naive_local().date();
 
     if today > expiration_date {
-        return Err("License has expired".to_string());
+        return Ok((false, expiration_date));
     }
 
     // Verify the signature
@@ -57,5 +59,5 @@ pub fn verify_license(license_key: &str, hwid: &str) -> Result<bool, String> {
         return Err("Invalid license signature".to_string());
     }
 
-    Ok(true)
+    Ok((true, expiration_date))
 }

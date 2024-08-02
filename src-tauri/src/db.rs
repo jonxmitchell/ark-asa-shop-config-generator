@@ -1,7 +1,10 @@
-use rusqlite::{Connection, Result, Error};
+// src-tauri/src/db.rs
+
+use rusqlite::{Connection, Result, Error, OptionalExtension};
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
 use tauri::AppHandle;
+use chrono::NaiveDate;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Settings {
@@ -13,6 +16,13 @@ pub struct SavedConfig {
     pub id: Option<i64>,
     pub name: String,
     pub config: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct LicenseInfo {
+    pub license_key: String,
+    pub expiration_date: NaiveDate,
+    pub hwid: String,
 }
 
 pub fn get_database_path(handle: &AppHandle) -> PathBuf {
@@ -45,6 +55,15 @@ pub fn initialize_db(db_path: &Path) -> Result<Connection> {
             id INTEGER PRIMARY KEY,
             name TEXT NOT NULL UNIQUE,
             config TEXT NOT NULL
+        )",
+        [],
+    )?;
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS license_info (
+            id INTEGER PRIMARY KEY,
+            license_key TEXT NOT NULL,
+            expiration_date TEXT NOT NULL,
+            hwid TEXT NOT NULL
         )",
         [],
     )?;
@@ -120,4 +139,24 @@ pub fn update_config(conn: &Connection, id: i64, name: &str, config: &str) -> Re
         [name, config, &id.to_string()],
     )?;
     Ok(())
+}
+
+pub fn save_license_info(conn: &Connection, info: &LicenseInfo) -> Result<()> {
+    conn.execute(
+        "INSERT OR REPLACE INTO license_info (id, license_key, expiration_date, hwid) VALUES (1, ?1, ?2, ?3)",
+        (&info.license_key, &info.expiration_date.to_string(), &info.hwid),
+    )?;
+    Ok(())
+}
+
+pub fn load_license_info(conn: &Connection) -> Result<Option<LicenseInfo>> {
+    conn.query_row(
+        "SELECT license_key, expiration_date, hwid FROM license_info WHERE id = 1",
+        [],
+        |row| Ok(LicenseInfo {
+            license_key: row.get(0)?,
+            expiration_date: NaiveDate::parse_from_str(&row.get::<_, String>(1)?, "%Y-%m-%d").unwrap(),
+            hwid: row.get(2)?,
+        })
+    ).optional()
 }
