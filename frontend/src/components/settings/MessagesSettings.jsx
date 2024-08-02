@@ -36,7 +36,6 @@ function MessagesSettings() {
 
 	return (
 		<div className="bg-light-black p-6 rounded-lg">
-			<h2 className="text-xl font-bold mb-4 text-white">Messages</h2>
 			<input
 				type="text"
 				placeholder="Search messages..."
