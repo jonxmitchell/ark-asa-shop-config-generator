@@ -1,20 +1,59 @@
 // src/components/modals/ExportConfirmationModal.jsx
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { invoke } from "@tauri-apps/api/tauri";
 import ExportProgressModal from "./ExportProgressModal";
 import ExportSuccessModal from "./ExportSuccessModal";
 import { useConfig } from "../../ConfigContext";
+import { toast } from "react-toastify";
 
 function ExportConfirmationModal({ isOpen, onClose }) {
 	const [modalState, setModalState] = useState("confirmation");
 	const [exportedFilePath, setExportedFilePath] = useState("");
 	const [progress, setProgress] = useState(0);
 	const { config, updateConfig } = useConfig();
-	const [fileExists, setFileExists] = useState(false);
+	const [outputPath, setOutputPath] = useState("");
+
+	useEffect(() => {
+		if (isOpen) {
+			// Load the output path from settings when the modal opens
+			invoke("load_settings_command")
+				.then((settings) => {
+					setOutputPath(settings.output_path);
+				})
+				.catch((error) => {
+					console.error("Failed to load settings:", error);
+					toast.error("Failed to load settings", {
+						position: "bottom-right",
+						autoClose: 3000,
+						hideProgressBar: false,
+						closeOnClick: true,
+						pauseOnHover: true,
+						draggable: true,
+						theme: "dark",
+					});
+				});
+		}
+	}, [isOpen]);
 
 	const handleExport = useCallback(async () => {
+		if (!outputPath) {
+			toast.error(
+				"Please set an output location in Settings before exporting.",
+				{
+					position: "bottom-right",
+					autoClose: 3000,
+					hideProgressBar: false,
+					closeOnClick: true,
+					pauseOnHover: true,
+					draggable: true,
+					theme: "dark",
+				}
+			);
+			return;
+		}
+
 		setModalState("progress");
 		setProgress(0);
 
@@ -26,7 +65,7 @@ function ExportConfirmationModal({ isOpen, onClose }) {
 
 			// Simulate progress
 			for (let i = 0; i <= 100; i++) {
-				await new Promise((resolve) => setTimeout(resolve, 20)); // 20ms delay between each progress update
+				await new Promise((resolve) => setTimeout(resolve, 20));
 				setProgress(i);
 			}
 
@@ -34,7 +73,6 @@ function ExportConfirmationModal({ isOpen, onClose }) {
 			const result = await invoke("export_config", { config: config });
 			console.log("Export result:", result);
 			setExportedFilePath(result.file_path);
-			setFileExists(result.file_existed);
 
 			// Ensure the progress modal is shown for at least 2 seconds
 			await new Promise((resolve) => setTimeout(resolve, 2000 - 20 * 100));
@@ -43,9 +81,18 @@ function ExportConfirmationModal({ isOpen, onClose }) {
 			updateConfig(config);
 		} catch (error) {
 			console.error("Export failed:", error);
-			setModalState("confirmation"); // Go back to confirmation on error
+			setModalState("confirmation");
+			toast.error("Export failed: " + error.toString(), {
+				position: "bottom-right",
+				autoClose: 3000,
+				hideProgressBar: false,
+				closeOnClick: true,
+				pauseOnHover: true,
+				draggable: true,
+				theme: "dark",
+			});
 		}
-	}, [config, updateConfig]);
+	}, [config, updateConfig, outputPath]);
 
 	const handleClose = () => {
 		setModalState("confirmation");
@@ -63,6 +110,15 @@ function ExportConfirmationModal({ isOpen, onClose }) {
 		} catch (error) {
 			console.error("Force export failed:", error);
 			setModalState("confirmation");
+			toast.error("Force export failed: " + error.toString(), {
+				position: "bottom-right",
+				autoClose: 3000,
+				hideProgressBar: false,
+				closeOnClick: true,
+				pauseOnHover: true,
+				draggable: true,
+				theme: "dark",
+			});
 		}
 	};
 
