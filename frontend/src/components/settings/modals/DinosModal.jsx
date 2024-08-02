@@ -33,7 +33,7 @@ function DinosModal({ kitName, dinos, onSave, onClose }) {
 	const addDino = () => {
 		setEditedDinos([
 			...editedDinos,
-			{ Level: 1, Blueprint: "", Neutered: false },
+			{ Level: 1, Blueprint: "", Neutered: false, PreventCryo: false },
 		]);
 	};
 
@@ -128,21 +128,43 @@ function DinosModal({ kitName, dinos, onSave, onClose }) {
 									</div>
 								</div>
 								<div className="flex items-center justify-between">
-									<div className="flex items-center">
-										<input
-											type="checkbox"
-											id={`dino-neutered-${index}`}
-											checked={dino.Neutered || false}
-											onChange={(e) =>
-												handleDinoChange(index, "Neutered", e.target.checked)
-											}
-											className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 mr-2"
-										/>
-										<label
-											htmlFor={`dino-neutered-${index}`}
-											className="text-sm font-medium text-gray-300">
-											Neutered
-										</label>
+									<div className="flex items-center space-x-4">
+										<div className="flex items-center">
+											<input
+												type="checkbox"
+												id={`dino-neutered-${index}`}
+												checked={dino.Neutered || false}
+												onChange={(e) =>
+													handleDinoChange(index, "Neutered", e.target.checked)
+												}
+												className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 mr-2"
+											/>
+											<label
+												htmlFor={`dino-neutered-${index}`}
+												className="text-sm font-medium text-gray-300">
+												Neutered
+											</label>
+										</div>
+										<div className="flex items-center">
+											<input
+												type="checkbox"
+												id={`dino-preventcryo-${index}`}
+												checked={dino.PreventCryo || false}
+												onChange={(e) =>
+													handleDinoChange(
+														index,
+														"PreventCryo",
+														e.target.checked
+													)
+												}
+												className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 mr-2"
+											/>
+											<label
+												htmlFor={`dino-preventcryo-${index}`}
+												className="text-sm font-medium text-gray-300">
+												Prevent Cryo
+											</label>
+										</div>
 									</div>
 									<button
 										onClick={() => removeDino(index)}
