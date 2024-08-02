@@ -5,6 +5,100 @@ import { motion, AnimatePresence } from "framer-motion";
 import { TrashIcon, PlusIcon, PowerIcon } from "@heroicons/react/24/solid";
 import SearchableDropdown from "../../SearchableDropdown";
 
+const ItemEntry = ({
+	entry,
+	index,
+	handleItemEntryChange,
+	removeItemEntry,
+	arkData,
+}) => {
+	return (
+		<motion.div
+			initial={{ opacity: 0, y: -10 }}
+			animate={{ opacity: 1, y: 0 }}
+			exit={{ opacity: 0, y: -10 }}
+			transition={{ duration: 0.2 }}
+			className="bg-light-black p-4 rounded-lg space-y-2">
+			<div className="grid grid-cols-12 gap-2">
+				<div className="col-span-2">
+					<label
+						htmlFor={`quality-${index}`}
+						className="block text-sm font-medium text-gray-300">
+						Quality
+					</label>
+					<input
+						id={`quality-${index}`}
+						type="number"
+						value={entry.Quality}
+						onChange={(e) =>
+							handleItemEntryChange(index, "Quality", parseInt(e.target.value))
+						}
+						className="w-full px-3 py-2 text-sm text-white bg-mid-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+						autoComplete="off"
+					/>
+				</div>
+				<div className="col-span-2">
+					<label
+						htmlFor={`amount-${index}`}
+						className="block text-sm font-medium text-gray-300">
+						Amount
+					</label>
+					<input
+						id={`amount-${index}`}
+						type="number"
+						value={entry.Amount}
+						onChange={(e) =>
+							handleItemEntryChange(index, "Amount", parseInt(e.target.value))
+						}
+						className="w-full px-3 py-2 text-sm text-white bg-mid-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+						autoComplete="off"
+					/>
+				</div>
+				<div className="col-span-8">
+					<label
+						htmlFor={`blueprint-${index}`}
+						className="block text-sm font-medium text-gray-300">
+						Blueprint
+					</label>
+					<SearchableDropdown
+						id={`blueprint-${index}`}
+						options={Object.values(arkData.Items)}
+						onSelect={(selected) =>
+							handleItemEntryChange(index, "Blueprint", selected.Blueprint)
+						}
+						placeholder="Select or enter a blueprint"
+						value={entry.Blueprint}
+						className={"w-full bg-mid-black"}
+					/>
+				</div>
+			</div>
+			<div className="flex justify-between items-center">
+				<div className="flex items-center space-x-2">
+					<input
+						id={`forceBlueprint-${index}`}
+						type="checkbox"
+						checked={entry.ForceBlueprint}
+						onChange={(e) =>
+							handleItemEntryChange(index, "ForceBlueprint", e.target.checked)
+						}
+						className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
+					/>
+					<label
+						htmlFor={`forceBlueprint-${index}`}
+						className="text-sm text-gray-300">
+						Force Blueprint
+					</label>
+				</div>
+				<button
+					onClick={() => removeItemEntry(index)}
+					className="text-red-500 hover:text-red-700">
+					<TrashIcon className="h-5 w-5" />
+				</button>
+			</div>
+		</motion.div>
+	);
+};
+
 function ItemShopEntry({
 	itemName,
 	itemData,
@@ -15,14 +109,6 @@ function ItemShopEntry({
 	removeItemEntry,
 	arkData,
 }) {
-	const toggleField = (field) => {
-		handleItemChange(
-			itemName,
-			field,
-			itemData[field] === undefined ? 0 : undefined
-		);
-	};
-
 	return (
 		<AnimatePresence>
 			{expanded && (
@@ -86,61 +172,157 @@ function ItemShopEntry({
 						</div>
 					</div>
 
-					{/* MinLevel, MaxLevel, Permissions, and Add Entry button */}
 					<div className="grid grid-cols-12 gap-2">
-						{["MinLevel", "MaxLevel", "Permissions"].map((field) => (
-							<div key={field} className="col-span-3 relative">
-								<label
-									htmlFor={`${field}-${itemName}`}
-									className="block text-sm font-medium text-gray-300">
-									{field}
-								</label>
-								<div className="relative">
-									<input
-										id={`${field}-${itemName}`}
-										type={field === "Permissions" ? "text" : "number"}
-										value={itemData[field] !== undefined ? itemData[field] : ""}
-										onChange={(e) =>
-											handleItemChange(
-												itemName,
-												field,
-												field === "Permissions"
-													? e.target.value
-													: parseInt(e.target.value)
-											)
-										}
-										className={`w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
-											itemData[field] === undefined &&
-											"opacity-50 cursor-not-allowed"
-										}`}
-										disabled={itemData[field] === undefined}
-										autoComplete="off"
-									/>
-									<button
-										onClick={() => toggleField(field)}
-										className={`absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 transition-colors ${
-											itemData[field] !== undefined
-												? "hover:text-red-500"
-												: "hover:text-green-500"
-										}`}
-										title={
-											itemData[field] !== undefined
-												? "Disable field"
-												: "Enable field"
-										}>
-										<PowerIcon className="h-4 w-4" />
-									</button>
-								</div>
-							</div>
-						))}
-						<div className="col-span-3">
-							<label className="block text-sm font-medium text-gray-300 invisible">
-								Add Entry
+						<div className="col-span-2">
+							<label
+								htmlFor={`MinLevel-${itemName}`}
+								className="block text-sm font-medium text-gray-300">
+								MinLevel
 							</label>
+							<div className="relative">
+								<input
+									id={`MinLevel-${itemName}`}
+									type="number"
+									value={
+										itemData.MinLevel !== undefined ? itemData.MinLevel : ""
+									}
+									onChange={(e) =>
+										handleItemChange(
+											itemName,
+											"MinLevel",
+											parseInt(e.target.value)
+										)
+									}
+									className={`w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
+										itemData.MinLevel === undefined &&
+										"opacity-50 cursor-not-allowed"
+									}`}
+									disabled={itemData.MinLevel === undefined}
+									autoComplete="off"
+								/>
+								<button
+									onClick={() =>
+										handleItemChange(
+											itemName,
+											"MinLevel",
+											itemData.MinLevel === undefined ? 0 : undefined
+										)
+									}
+									className={`absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 transition-colors ${
+										itemData.MinLevel !== undefined
+											? "hover:text-red-500"
+											: "hover:text-green-500"
+									}`}
+									title={
+										itemData.MinLevel !== undefined
+											? "Disable field"
+											: "Enable field"
+									}>
+									<PowerIcon className="h-4 w-4" />
+								</button>
+							</div>
+						</div>
+						<div className="col-span-2">
+							<label
+								htmlFor={`MaxLevel-${itemName}`}
+								className="block text-sm font-medium text-gray-300">
+								MaxLevel
+							</label>
+							<div className="relative">
+								<input
+									id={`MaxLevel-${itemName}`}
+									type="number"
+									value={
+										itemData.MaxLevel !== undefined ? itemData.MaxLevel : ""
+									}
+									onChange={(e) =>
+										handleItemChange(
+											itemName,
+											"MaxLevel",
+											parseInt(e.target.value)
+										)
+									}
+									className={`w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
+										itemData.MaxLevel === undefined &&
+										"opacity-50 cursor-not-allowed"
+									}`}
+									disabled={itemData.MaxLevel === undefined}
+									autoComplete="off"
+								/>
+								<button
+									onClick={() =>
+										handleItemChange(
+											itemName,
+											"MaxLevel",
+											itemData.MaxLevel === undefined ? 0 : undefined
+										)
+									}
+									className={`absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 transition-colors ${
+										itemData.MaxLevel !== undefined
+											? "hover:text-red-500"
+											: "hover:text-green-500"
+									}`}
+									title={
+										itemData.MaxLevel !== undefined
+											? "Disable field"
+											: "Enable field"
+									}>
+									<PowerIcon className="h-4 w-4" />
+								</button>
+							</div>
+						</div>
+						<div className="col-span-6">
+							<label
+								htmlFor={`Permissions-${itemName}`}
+								className="block text-sm font-medium text-gray-300">
+								Permissions
+							</label>
+							<div className="relative">
+								<input
+									id={`Permissions-${itemName}`}
+									type="text"
+									value={
+										itemData.Permissions !== undefined
+											? itemData.Permissions
+											: ""
+									}
+									onChange={(e) =>
+										handleItemChange(itemName, "Permissions", e.target.value)
+									}
+									className={`w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
+										itemData.Permissions === undefined &&
+										"opacity-50 cursor-not-allowed"
+									}`}
+									disabled={itemData.Permissions === undefined}
+									autoComplete="off"
+								/>
+								<button
+									onClick={() =>
+										handleItemChange(
+											itemName,
+											"Permissions",
+											itemData.Permissions === undefined ? "" : undefined
+										)
+									}
+									className={`absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 transition-colors ${
+										itemData.Permissions !== undefined
+											? "hover:text-red-500"
+											: "hover:text-green-500"
+									}`}
+									title={
+										itemData.Permissions !== undefined
+											? "Disable field"
+											: "Enable field"
+									}>
+									<PowerIcon className="h-4 w-4" />
+								</button>
+							</div>
+						</div>
+						<div className="col-span-2 flex items-end">
 							<button
 								onClick={() => addItemEntry(itemName)}
-								className="w-full px-3 py-2 bg-blue-600 text-sm text-white rounded hover:bg-blue-700 transition-colors flex items-center justify-center">
-								<PlusIcon className="h-4 w-4 mr-1" />
+								className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
+								<PlusIcon className="h-4 w-4 mr-1 inline" />
 								Add Entry
 							</button>
 						</div>
@@ -149,110 +331,16 @@ function ItemShopEntry({
 					<AnimatePresence>
 						{itemData.Items &&
 							itemData.Items.map((entry, index) => (
-								<motion.div
+								<ItemEntry
 									key={index}
-									initial={{ opacity: 0, y: -10 }}
-									animate={{ opacity: 1, y: 0 }}
-									exit={{ opacity: 0, y: -10 }}
-									transition={{ duration: 0.2 }}
-									className="bg-light-black p-4 rounded-lg space-y-2">
-									<div className="grid grid-cols-2 gap-2">
-										<div>
-											<label
-												htmlFor={`quality-${itemName}-${index}`}
-												className="block text-sm font-medium text-gray-300">
-												Quality
-											</label>
-											<input
-												id={`quality-${itemName}-${index}`}
-												type="number"
-												value={entry.Quality}
-												onChange={(e) =>
-													handleItemEntryChange(
-														itemName,
-														index,
-														"Quality",
-														parseInt(e.target.value)
-													)
-												}
-												className="w-full px-3 py-2 text-sm text-white bg-mid-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
-												autoComplete="off"
-											/>
-										</div>
-										<div>
-											<label
-												htmlFor={`amount-${itemName}-${index}`}
-												className="block text-sm font-medium text-gray-300">
-												Amount
-											</label>
-											<input
-												id={`amount-${itemName}-${index}`}
-												type="number"
-												value={entry.Amount}
-												onChange={(e) =>
-													handleItemEntryChange(
-														itemName,
-														index,
-														"Amount",
-														parseInt(e.target.value)
-													)
-												}
-												className="w-full px-3 py-2 text-sm text-white bg-mid-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
-												autoComplete="off"
-											/>
-										</div>
-									</div>
-									<div>
-										<label
-											htmlFor={`blueprint-${itemName}-${index}`}
-											className="block text-sm font-medium text-gray-300">
-											Blueprint
-										</label>
-										<SearchableDropdown
-											id={`blueprint-${itemName}-${index}`}
-											options={Object.values(arkData.Items)}
-											onSelect={(selected) =>
-												handleItemEntryChange(
-													itemName,
-													index,
-													"Blueprint",
-													selected.Blueprint
-												)
-											}
-											placeholder="Select or enter a blueprint"
-											value={entry.Blueprint}
-											className={"w-full bg-mid-black"}
-										/>
-									</div>
-									<div className="flex justify-between items-center">
-										<div className="flex items-center space-x-2">
-											<input
-												id={`forceBlueprint-${itemName}-${index}`}
-												type="checkbox"
-												checked={entry.ForceBlueprint}
-												onChange={(e) =>
-													handleItemEntryChange(
-														itemName,
-														index,
-														"ForceBlueprint",
-														e.target.checked
-													)
-												}
-												className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
-											/>
-											<label
-												htmlFor={`forceBlueprint-${itemName}-${index}`}
-												className="text-sm text-gray-300">
-												Force Blueprint
-											</label>
-										</div>
-										<button
-											onClick={() => removeItemEntry(itemName, index)}
-											className="text-red-500 hover:text-red-700">
-											<TrashIcon className="h-5 w-5" />
-										</button>
-									</div>
-								</motion.div>
+									entry={entry}
+									index={index}
+									handleItemEntryChange={(index, field, value) =>
+										handleItemEntryChange(itemName, index, field, value)
+									}
+									removeItemEntry={() => removeItemEntry(itemName, index)}
+									arkData={arkData}
+								/>
 							))}
 					</AnimatePresence>
 				</motion.div>
