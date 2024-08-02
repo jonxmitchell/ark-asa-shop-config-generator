@@ -1,36 +1,42 @@
 // src/components/settings/shop_entries/BeaconShopEntry.jsx
 
-import React from "react";
+import React, { useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import SearchableDropdown from "../../SearchableDropdown";
-import { useArkData } from "../../../hooks/useArkData";
 import { PowerIcon } from "@heroicons/react/24/solid";
 
-function BeaconShopEntry({ itemName, itemData, expanded, handleItemChange }) {
-	const { arkData, loading, error } = useArkData();
+function BeaconShopEntry({
+	itemName,
+	itemData,
+	expanded,
+	handleItemChange,
+	arkData,
+}) {
+	const handleBeaconSelect = useCallback(
+		(selected) => {
+			if (selected && typeof selected === "object") {
+				handleItemChange(
+					itemName,
+					"ClassName",
+					selected.ClassName || selected.Name || ""
+				);
+			} else if (typeof selected === "string") {
+				handleItemChange(itemName, "ClassName", selected);
+			}
+		},
+		[itemName, handleItemChange]
+	);
 
-	const handleBeaconSelect = (selected) => {
-		if (selected && typeof selected === "object") {
+	const toggleField = useCallback(
+		(field) => {
 			handleItemChange(
 				itemName,
-				"ClassName",
-				selected.ClassName || selected.Name || ""
+				field,
+				itemData[field] === undefined ? 0 : undefined
 			);
-		} else if (typeof selected === "string") {
-			handleItemChange(itemName, "ClassName", selected);
-		}
-	};
-
-	const toggleField = (field) => {
-		handleItemChange(
-			itemName,
-			field,
-			itemData[field] === undefined ? 0 : undefined
-		);
-	};
-
-	if (loading) return <div>Loading...</div>;
-	if (error) return <div>Error loading data</div>;
+		},
+		[itemName, itemData, handleItemChange]
+	);
 
 	const beaconOptions = Object.values(arkData.Beacons || {});
 
@@ -166,4 +172,4 @@ function BeaconShopEntry({ itemName, itemData, expanded, handleItemChange }) {
 	);
 }
 
-export default BeaconShopEntry;
+export default React.memo(BeaconShopEntry);

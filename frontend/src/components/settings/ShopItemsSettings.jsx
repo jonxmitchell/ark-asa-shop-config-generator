@@ -32,9 +32,12 @@ function ShopItemsSettings() {
 	const [deleteConfirmation, setDeleteConfirmation] = useState(null);
 	const [newItemValidationMessage, setNewItemValidationMessage] = useState("");
 	const [editValidationMessage, setEditValidationMessage] = useState("");
-	const { arkData } = useArkData();
+	const { arkData, loading, error } = useArkData();
 	const [searchTerm, setSearchTerm] = useState("");
 	const [filteredItems, setFilteredItems] = useState([]);
+
+	// Memoize the ark data
+	const memoizedArkData = useMemo(() => arkData, [arkData]);
 
 	useEffect(() => {
 		const filtered = Object.entries(shopItemsConfig)
@@ -76,51 +79,87 @@ function ShopItemsSettings() {
 
 	const handleItemEntryChange = useCallback(
 		(itemName, index, field, value) => {
-			const newItems = [...shopItemsConfig[itemName].Items];
-			newItems[index] = { ...newItems[index], [field]: value };
-			handleItemChange(itemName, "Items", newItems);
+			updateConfig((prevConfig) => {
+				const newItems = [...prevConfig.ShopItems[itemName].Items];
+				newItems[index] = { ...newItems[index], [field]: value };
+				return {
+					...prevConfig,
+					ShopItems: {
+						...prevConfig.ShopItems,
+						[itemName]: {
+							...prevConfig.ShopItems[itemName],
+							Items: newItems,
+						},
+					},
+				};
+			});
 		},
-		[handleItemChange, shopItemsConfig]
+		[updateConfig]
 	);
 
 	const addItemEntry = useCallback(
 		(itemName) => {
-			const itemType = shopItemsConfig[itemName].Type;
-			let newEntry;
+			updateConfig((prevConfig) => {
+				const itemType = prevConfig.ShopItems[itemName].Type;
+				let newEntry;
 
-			switch (itemType) {
-				case "item":
-					newEntry = {
-						Quality: 0,
-						ForceBlueprint: false,
-						Amount: 1,
-						Blueprint: "",
-					};
-					break;
-				case "unlockengram":
-					newEntry = { Blueprint: "" };
-					break;
-				case "command":
-					newEntry = { Command: "", DisplayAs: "" };
-					break;
-				default:
-					newEntry = {};
-			}
+				switch (itemType) {
+					case "item":
+						newEntry = {
+							Quality: 0,
+							ForceBlueprint: false,
+							Amount: 1,
+							Blueprint: "",
+						};
+						break;
+					case "unlockengram":
+						newEntry = { Blueprint: "" };
+						break;
+					case "command":
+						newEntry = { Command: "", DisplayAs: "" };
+						break;
+					default:
+						newEntry = {};
+				}
 
-			const newItems = [...(shopItemsConfig[itemName].Items || []), newEntry];
-			handleItemChange(itemName, "Items", newItems);
+				const newItems = [
+					...(prevConfig.ShopItems[itemName].Items || []),
+					newEntry,
+				];
+				return {
+					...prevConfig,
+					ShopItems: {
+						...prevConfig.ShopItems,
+						[itemName]: {
+							...prevConfig.ShopItems[itemName],
+							Items: newItems,
+						},
+					},
+				};
+			});
 		},
-		[handleItemChange, shopItemsConfig]
+		[updateConfig]
 	);
 
 	const removeItemEntry = useCallback(
 		(itemName, index) => {
-			const newItems = shopItemsConfig[itemName].Items.filter(
-				(_, i) => i !== index
-			);
-			handleItemChange(itemName, "Items", newItems);
+			updateConfig((prevConfig) => {
+				const newItems = prevConfig.ShopItems[itemName].Items.filter(
+					(_, i) => i !== index
+				);
+				return {
+					...prevConfig,
+					ShopItems: {
+						...prevConfig.ShopItems,
+						[itemName]: {
+							...prevConfig.ShopItems[itemName],
+							Items: newItems,
+						},
+					},
+				};
+			});
 		},
-		[handleItemChange, shopItemsConfig]
+		[updateConfig]
 	);
 
 	const addNewItem = useCallback(() => {
@@ -206,68 +245,43 @@ function ShopItemsSettings() {
 
 	const renderShopEntry = useCallback(
 		(itemName, itemData) => {
+			const commonProps = {
+				itemName,
+				itemData,
+				expanded: expandedItem === itemName,
+				handleItemChange,
+				arkData: memoizedArkData,
+			};
+
 			switch (itemData.Type) {
 				case "item":
 					return (
 						<ItemShopEntry
-							itemName={itemName}
-							itemData={itemData}
-							expanded={expandedItem === itemName}
-							handleItemChange={handleItemChange}
+							{...commonProps}
 							handleItemEntryChange={handleItemEntryChange}
 							addItemEntry={addItemEntry}
 							removeItemEntry={removeItemEntry}
-							arkData={arkData}
 						/>
 					);
 				case "dino":
-					return (
-						<DinoShopEntry
-							itemName={itemName}
-							itemData={itemData}
-							expanded={expandedItem === itemName}
-							handleItemChange={handleItemChange}
-						/>
-					);
+					return <DinoShopEntry {...commonProps} />;
 				case "beacon":
-					return (
-						<BeaconShopEntry
-							itemName={itemName}
-							itemData={itemData}
-							expanded={expandedItem === itemName}
-							handleItemChange={handleItemChange}
-							arkData={arkData}
-						/>
-					);
+					return <BeaconShopEntry {...commonProps} />;
 				case "experience":
-					return (
-						<ExperienceShopEntry
-							itemName={itemName}
-							itemData={itemData}
-							expanded={expandedItem === itemName}
-							handleItemChange={handleItemChange}
-						/>
-					);
+					return <ExperienceShopEntry {...commonProps} />;
 				case "unlockengram":
 					return (
 						<UnlockEngramShopEntry
-							itemName={itemName}
-							itemData={itemData}
-							expanded={expandedItem === itemName}
-							handleItemChange={handleItemChange}
+							{...commonProps}
 							handleItemEntryChange={handleItemEntryChange}
 							addItemEntry={addItemEntry}
 							removeItemEntry={removeItemEntry}
-							arkData={arkData}
 						/>
 					);
 				case "command":
 					return (
 						<CommandShopEntry
-							itemName={itemName}
-							itemData={itemData}
-							expanded={expandedItem === itemName}
-							handleItemChange={handleItemChange}
+							{...commonProps}
 							handleItemEntryChange={handleItemEntryChange}
 							addItemEntry={addItemEntry}
 							removeItemEntry={removeItemEntry}
@@ -283,9 +297,12 @@ function ShopItemsSettings() {
 			handleItemEntryChange,
 			addItemEntry,
 			removeItemEntry,
-			arkData,
+			memoizedArkData,
 		]
 	);
+
+	if (loading) return <div>Loading...</div>;
+	if (error) return <div>Error: {error.message}</div>;
 
 	return (
 		<div className="bg-light-black p-6 rounded-lg">
@@ -457,4 +474,4 @@ function ShopItemsSettings() {
 	);
 }
 
-export default ShopItemsSettings;
+export default React.memo(ShopItemsSettings);
