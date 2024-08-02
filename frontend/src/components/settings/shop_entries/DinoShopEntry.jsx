@@ -1,7 +1,7 @@
 // src/components/settings/shop_entries/DinoShopEntry.jsx
 
 import React, { useEffect, useMemo } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import SearchableDropdown from "../../SearchableDropdown";
 import { useArkData } from "../../../hooks/useArkData";
 import { PowerIcon } from "@heroicons/react/24/solid";
@@ -126,19 +126,19 @@ function DinoShopEntry({ itemName, itemData, expanded, handleItemChange }) {
 	};
 
 	return (
-		<motion.div
-			initial={{ opacity: 0, height: 0 }}
-			animate={{ opacity: expanded ? 1 : 0, height: expanded ? "auto" : 0 }}
-			exit={{ opacity: 0, height: 0 }}
-			transition={{ duration: 0.3 }}
-			className="space-y-2 mt-2 overflow-hidden">
+		<AnimatePresence>
 			{expanded && (
-				<>
+				<motion.div
+					initial={{ opacity: 0, height: 0 }}
+					animate={{ opacity: 1, height: "auto" }}
+					exit={{ opacity: 0, height: 0 }}
+					transition={{ duration: 0.3 }}
+					className="space-y-2 mt-2 overflow-visible">
 					<div className="grid grid-cols-12 gap-2">
 						<div className="col-span-4">
 							<label
 								htmlFor={`title-${itemName}`}
-								className="block text-sm font-medium text-gray-300">
+								className="block text-sm font-medium text-gray-300 mb-1">
 								Title
 							</label>
 							<input
@@ -155,7 +155,7 @@ function DinoShopEntry({ itemName, itemData, expanded, handleItemChange }) {
 						<div className="col-span-6">
 							<label
 								htmlFor={`description-${itemName}`}
-								className="block text-sm font-medium text-gray-300">
+								className="block text-sm font-medium text-gray-300 mb-1">
 								Description
 							</label>
 							<input
@@ -172,7 +172,7 @@ function DinoShopEntry({ itemName, itemData, expanded, handleItemChange }) {
 						<div className="col-span-2">
 							<label
 								htmlFor={`price-${itemName}`}
-								className="block text-sm font-medium text-gray-300">
+								className="block text-sm font-medium text-gray-300 mb-1">
 								Price
 							</label>
 							<input
@@ -193,7 +193,7 @@ function DinoShopEntry({ itemName, itemData, expanded, handleItemChange }) {
 							<div key={field} className="col-span-4 relative">
 								<label
 									htmlFor={`${field}-${itemName}`}
-									className="block text-sm font-medium text-gray-300">
+									className="block text-sm font-medium text-gray-300 mb-1">
 									{field}
 								</label>
 								<div className="relative">
@@ -236,11 +236,11 @@ function DinoShopEntry({ itemName, itemData, expanded, handleItemChange }) {
 						))}
 					</div>
 
-					<div className="grid grid-cols-9 gap-3 items-center">
-						<div className="col-span-7">
+					<div className="grid grid-cols-9 gap-3 items-start">
+						<div className="col-span-7 relative z-30">
 							<label
 								htmlFor={`blueprint-${itemName}`}
-								className="block text-sm font-medium text-gray-300">
+								className="block text-sm font-medium text-gray-300 mb-1">
 								Dino Blueprint
 							</label>
 							<SearchableDropdown
@@ -250,13 +250,13 @@ function DinoShopEntry({ itemName, itemData, expanded, handleItemChange }) {
 								}
 								placeholder="Select or enter a dino blueprint"
 								value={itemData.Blueprint || ""}
-								className="bg-dark-black"
+								className="w-full bg-dark-black"
 							/>
 						</div>
-						<div className="col-span-1">
+						<div className="col-span-2">
 							<label
 								htmlFor={`level-${itemName}`}
-								className="block text-sm font-medium text-gray-300">
+								className="block text-sm font-medium text-gray-300 mb-1">
 								Level
 							</label>
 							<input
@@ -270,31 +270,30 @@ function DinoShopEntry({ itemName, itemData, expanded, handleItemChange }) {
 								autoComplete="off"
 							/>
 						</div>
-						<div className="col-span-1 flex items-center mt-5 ml-2">
-							<div className="flex items-center space-x-2">
-								<input
-									type="checkbox"
-									id={`neutered-${itemName}`}
-									checked={itemData.Neutered || false}
-									onChange={(e) =>
-										handleItemChange(itemName, "Neutered", e.target.checked)
-									}
-									className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
-								/>
-								<label
-									htmlFor={`neutered-${itemName}`}
-									className="text-sm font-medium text-gray-300">
-									Neutered
-								</label>
-							</div>
-						</div>
+					</div>
+
+					<div className="flex items-center space-x-2 mb-2">
+						<input
+							type="checkbox"
+							id={`neutered-${itemName}`}
+							checked={itemData.Neutered || false}
+							onChange={(e) =>
+								handleItemChange(itemName, "Neutered", e.target.checked)
+							}
+							className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
+						/>
+						<label
+							htmlFor={`neutered-${itemName}`}
+							className="text-sm font-medium text-gray-300">
+							Neutered
+						</label>
 					</div>
 
 					{!isStryder && !isGacha && (
-						<div>
+						<div className="relative z-20">
 							<label
 								htmlFor={`gender-${itemName}`}
-								className="block text-sm font-medium text-gray-300">
+								className="block text-sm font-medium text-gray-300 mb-1">
 								Gender
 							</label>
 							<select
@@ -311,10 +310,10 @@ function DinoShopEntry({ itemName, itemData, expanded, handleItemChange }) {
 						</div>
 					)}
 					{!isStryder && (
-						<div>
+						<div className="relative z-10">
 							<label
 								htmlFor={`saddle-${itemName}`}
-								className="block text-sm font-medium text-gray-300">
+								className="block text-sm font-medium text-gray-300 mb-1">
 								Saddle Blueprint
 							</label>
 							<SearchableDropdown
@@ -334,10 +333,10 @@ function DinoShopEntry({ itemName, itemData, expanded, handleItemChange }) {
 					)}
 					{isStryder && (
 						<>
-							<div>
+							<div className="relative z-10">
 								<label
 									htmlFor={`stryderHead-${itemName}`}
-									className="block text-sm font-medium text-gray-300">
+									className="block text-sm font-medium text-gray-300 mb-1">
 									Stryder Head
 								</label>
 								<select
@@ -358,10 +357,10 @@ function DinoShopEntry({ itemName, itemData, expanded, handleItemChange }) {
 									<option value={3}>Radar</option>
 								</select>
 							</div>
-							<div>
+							<div className="relative z-10">
 								<label
 									htmlFor={`stryderChest-${itemName}`}
-									className="block text-sm font-medium text-gray-300">
+									className="block text-sm font-medium text-gray-300 mb-1">
 									Stryder Chest
 								</label>
 								<select
@@ -382,7 +381,7 @@ function DinoShopEntry({ itemName, itemData, expanded, handleItemChange }) {
 									<option value={3}>Saddlebags</option>
 								</select>
 							</div>
-							<div className="flex items-center space-x-2">
+							<div className="flex items-center space-x-2 mt-2">
 								<input
 									type="checkbox"
 									id={`preventCryo-${itemName}`}
@@ -400,10 +399,12 @@ function DinoShopEntry({ itemName, itemData, expanded, handleItemChange }) {
 							</div>
 						</>
 					)}
-					{isGacha && renderGachaResources()}
-				</>
+					{isGacha && (
+						<div className="relative z-10">{renderGachaResources()}</div>
+					)}
+				</motion.div>
 			)}
-		</motion.div>
+		</AnimatePresence>
 	);
 }
 

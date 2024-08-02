@@ -15,6 +15,7 @@ function SearchableDropdown({
 	const [inputValue, setInputValue] = useState(value || "");
 	const [filteredOptions, setFilteredOptions] = useState(options);
 	const dropdownRef = useRef(null);
+	const containerRef = useRef(null);
 
 	useEffect(() => {
 		setInputValue(value || "");
@@ -39,7 +40,10 @@ function SearchableDropdown({
 
 	useEffect(() => {
 		function handleClickOutside(event) {
-			if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+			if (
+				containerRef.current &&
+				!containerRef.current.contains(event.target)
+			) {
 				setIsOpen(false);
 				onDropdownToggle && onDropdownToggle(false);
 			}
@@ -48,7 +52,7 @@ function SearchableDropdown({
 		return () => {
 			document.removeEventListener("mousedown", handleClickOutside);
 		};
-	}, [dropdownRef, onDropdownToggle]);
+	}, [onDropdownToggle]);
 
 	const handleInputChange = (e) => {
 		const newValue = e.target.value;
@@ -72,7 +76,7 @@ function SearchableDropdown({
 	};
 
 	return (
-		<div className="relative" ref={dropdownRef}>
+		<div ref={containerRef} className="relative">
 			<div className="relative">
 				<input
 					type="text"
@@ -83,7 +87,7 @@ function SearchableDropdown({
 						onDropdownToggle && onDropdownToggle(true);
 					}}
 					placeholder={placeholder}
-					className={`w-full px-3 py-2 pr-10 text-sm text-white bg-mid-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${className}`}
+					className={`w-full px-3 py-2 pr-10 text-sm text-white rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${className}`}
 				/>
 				<button
 					onClick={toggleDropdown}
@@ -92,8 +96,17 @@ function SearchableDropdown({
 				</button>
 			</div>
 			{isOpen && (
-				<div className="absolute z-10 w-full mt-1 bg-mid-black border-[2px] shadow-md border-blue-600 rounded-lg">
-					<ul className="py-1 text-sm text-gray-200 max-h-40  overflow-auto">
+				<div
+					ref={dropdownRef}
+					className="absolute z-50 w-full mt-1 bg-mid-black border-2 border-blue-600 rounded-lg shadow-md"
+					style={{
+						maxHeight: "200px",
+						overflowY: "auto",
+						position: "absolute",
+						top: "100%",
+						left: 0,
+					}}>
+					<ul className="py-1 text-sm text-gray-200">
 						{filteredOptions.map((option) => (
 							<li
 								key={option.ID || option.Blueprint}
