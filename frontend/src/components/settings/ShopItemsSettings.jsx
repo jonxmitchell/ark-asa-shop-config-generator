@@ -32,7 +32,7 @@ function ShopItemsSettings() {
 	const [deleteConfirmation, setDeleteConfirmation] = useState(null);
 	const [newItemValidationMessage, setNewItemValidationMessage] = useState("");
 	const [editValidationMessage, setEditValidationMessage] = useState("");
-	const { arkData, loading, error } = useArkData();
+	const { arkData } = useArkData();
 	const [searchTerm, setSearchTerm] = useState("");
 	const [filteredItems, setFilteredItems] = useState([]);
 
@@ -300,9 +300,6 @@ function ShopItemsSettings() {
 			memoizedArkData,
 		]
 	);
-
-	if (loading) return <div>Loading...</div>;
-	if (error) return <div>Error: {error.message}</div>;
 
 	return (
 		<div className="bg-light-black p-6 rounded-lg">
