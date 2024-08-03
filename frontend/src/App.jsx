@@ -11,6 +11,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import AppControls from "./components/AppControls";
 import AutoSave from "./components/AutoSave";
+import Loader from "./components/Loader";
 
 function App() {
 	const [isLicensed, setIsLicensed] = useState(false);
@@ -42,7 +43,11 @@ function App() {
 	}, []);
 
 	if (isLoading) {
-		return <div>Loading...</div>; // Or a more sophisticated loading screen
+		return (
+			<div className="h-screen flex items-center justify-center bg-deep-black">
+				<Loader />
+			</div>
+		);
 	}
 
 	if (!isLicensed) {
