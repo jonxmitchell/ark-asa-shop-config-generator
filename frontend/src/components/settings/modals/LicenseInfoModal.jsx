@@ -8,15 +8,19 @@ import {
 	CheckIcon,
 	XMarkIcon,
 } from "@heroicons/react/24/solid";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
 function LicenseInfoModal({ isOpen, onClose }) {
 	const [licenseInfo, setLicenseInfo] = useState(null);
-	const [remainingTime, setRemainingTime] = useState({});
+	const [remainingTime, setRemainingTime] = useState(null);
+	const [isCalculatingTime, setIsCalculatingTime] = useState(true);
 	const [copiedHWID, setCopiedHWID] = useState(false);
 	const [copiedLicenseKey, setCopiedLicenseKey] = useState(false);
 
 	useEffect(() => {
 		if (isOpen) {
+			setIsCalculatingTime(true);
 			invoke("get_license_info")
 				.then((info) => {
 					setLicenseInfo(info);
@@ -27,7 +31,7 @@ function LicenseInfoModal({ isOpen, onClose }) {
 
 	useEffect(() => {
 		if (licenseInfo) {
-			const interval = setInterval(() => {
+			const calculateRemainingTime = () => {
 				const now = new Date();
 				const expirationDate = new Date(licenseInfo.expiration_date);
 				const diff = expirationDate.getTime() - now.getTime();
@@ -42,10 +46,13 @@ function LicenseInfoModal({ isOpen, onClose }) {
 
 					setRemainingTime({ days, hours, minutes, seconds });
 				} else {
-					setRemainingTime({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-					clearInterval(interval);
+					setRemainingTime(null);
 				}
-			}, 1000);
+				setIsCalculatingTime(false);
+			};
+
+			calculateRemainingTime();
+			const interval = setInterval(calculateRemainingTime, 1000);
 
 			return () => clearInterval(interval);
 		}
@@ -54,9 +61,18 @@ function LicenseInfoModal({ isOpen, onClose }) {
 	const handleCopy = (text, setCopiedState) => {
 		navigator.clipboard.writeText(text).then(() => {
 			setCopiedState(true);
-			setTimeout(() => setCopiedState(false), 2000); // Reset after 2 seconds
+			setTimeout(() => setCopiedState(false), 2000);
 		});
 	};
+
+	const RemainingTimeBubble = ({ value, unit }) => (
+		<div className="flex flex-col items-center bg-dark-black rounded-lg p-2 min-w-[60px]">
+			<span className="text-lg font-bold text-white">{value}</span>
+			<span className="text-xs text-gray-400">
+				{value === 1 ? unit.slice(0, -1) : unit}
+			</span>
+		</div>
+	);
 
 	if (!isOpen || !licenseInfo) return null;
 
@@ -136,13 +152,32 @@ function LicenseInfoModal({ isOpen, onClose }) {
 						</p>
 					</div>
 					<div>
-						<label className="block text-sm font-medium text-gray-400">
+						<label className="block text-sm font-medium text-gray-400 mb-2">
 							Remaining Time
 						</label>
-						<p className="text-white">
-							{remainingTime.days} days, {remainingTime.hours} hours,{" "}
-							{remainingTime.minutes} minutes, {remainingTime.seconds} seconds
-						</p>
+						{isCalculatingTime ? (
+							<Skeleton
+								count={1}
+								height={60}
+								baseColor="#2D2D2D"
+								highlightColor="#3B3B3B"
+							/>
+						) : remainingTime ? (
+							<div className="flex justify-around space-x-2">
+								<RemainingTimeBubble value={remainingTime.days} unit="days" />
+								<RemainingTimeBubble value={remainingTime.hours} unit="hours" />
+								<RemainingTimeBubble
+									value={remainingTime.minutes}
+									unit="minutes"
+								/>
+								<RemainingTimeBubble
+									value={remainingTime.seconds}
+									unit="seconds"
+								/>
+							</div>
+						) : (
+							<p className="text-white">License has expired</p>
+						)}
 					</div>
 				</div>
 			</motion.div>
