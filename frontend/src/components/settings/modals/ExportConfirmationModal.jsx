@@ -168,7 +168,7 @@ function ExportConfirmationModal({ isOpen, onClose }) {
 							animate={{ scale: 1, opacity: 1 }}
 							exit={{ scale: 0.9, opacity: 0 }}
 							className="bg-mid-black p-6 rounded-lg max-w-md w-full">
-							<h2 className="text-xl font-bold mb-4 text-white">Warning</h2>
+							<h2 className="text-xl font-bold mb-4 text-white">⚠️ Warning</h2>
 							<p className="mb-6 text-gray-300">
 								A configuration file already exists at the specified location.
 								Do you want to overwrite it?

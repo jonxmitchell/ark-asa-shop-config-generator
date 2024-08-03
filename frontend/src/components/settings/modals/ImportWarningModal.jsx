@@ -21,7 +21,7 @@ function ImportWarningModal({ isOpen, onClose, onConfirm }) {
 					transition={{ type: "spring", damping: 15 }}
 					className="bg-mid-black p-6 rounded-lg max-w-md w-full"
 					onClick={(e) => e.stopPropagation()}>
-					<h2 className="text-xl font-bold mb-4 text-white">Warning</h2>
+					<h2 className="text-xl font-bold mb-4 text-white">⚠️ Warning</h2>
 					<p className="mb-6 text-gray-300">
 						Importing a new configuration file will overwrite your current
 						configuration. Make sure you have saved your changes before
