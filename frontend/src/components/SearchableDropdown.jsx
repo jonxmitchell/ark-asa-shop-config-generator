@@ -10,6 +10,8 @@ function SearchableDropdown({
 	value,
 	className,
 	onDropdownToggle,
+	displayKey = "Name",
+	valueKey = "ClassName",
 }) {
 	const [isOpen, setIsOpen] = useState(false);
 	const [inputValue, setInputValue] = useState(value || "");
@@ -25,18 +27,18 @@ function SearchableDropdown({
 		if (Array.isArray(options)) {
 			setFilteredOptions(
 				options.filter((option) => {
-					const optionName = option.Name || option.ClassName || "";
-					const optionBlueprint = option.Blueprint || option.ClassName || "";
+					const optionDisplay = option[displayKey] || "";
+					const optionValue = option[valueKey] || "";
 					return (
-						optionName.toLowerCase().includes(inputValue.toLowerCase()) ||
-						optionBlueprint.toLowerCase().includes(inputValue.toLowerCase())
+						optionDisplay.toLowerCase().includes(inputValue.toLowerCase()) ||
+						optionValue.toLowerCase().includes(inputValue.toLowerCase())
 					);
 				})
 			);
 		} else {
 			setFilteredOptions([]);
 		}
-	}, [inputValue, options]);
+	}, [inputValue, options, displayKey, valueKey]);
 
 	useEffect(() => {
 		function handleClickOutside(event) {
@@ -63,7 +65,7 @@ function SearchableDropdown({
 	};
 
 	const handleOptionSelect = (option) => {
-		const selectedValue = option.Blueprint || option.Name || "";
+		const selectedValue = option[valueKey] || "";
 		setInputValue(selectedValue);
 		onSelect(option);
 		setIsOpen(false);
@@ -109,10 +111,10 @@ function SearchableDropdown({
 					<ul className="py-1 text-sm text-gray-200">
 						{filteredOptions.map((option) => (
 							<li
-								key={option.ID || option.Blueprint}
+								key={option[valueKey] || option[displayKey]}
 								onClick={() => handleOptionSelect(option)}
 								className="px-4 py-2 hover:bg-gray-700 cursor-pointer">
-								{option.Name || option.ClassName}
+								{option[displayKey]}
 							</li>
 						))}
 					</ul>

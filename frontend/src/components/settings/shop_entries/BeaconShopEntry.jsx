@@ -1,6 +1,6 @@
 // src/components/settings/shop_entries/BeaconShopEntry.jsx
 
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import SearchableDropdown from "../../SearchableDropdown";
 import { PowerIcon } from "@heroicons/react/24/solid";
@@ -15,11 +15,7 @@ function BeaconShopEntry({
 	const handleBeaconSelect = useCallback(
 		(selected) => {
 			if (selected && typeof selected === "object") {
-				handleItemChange(
-					itemName,
-					"ClassName",
-					selected.ClassName || selected.Name || ""
-				);
+				handleItemChange(itemName, "ClassName", selected.ClassName || "");
 			} else if (typeof selected === "string") {
 				handleItemChange(itemName, "ClassName", selected);
 			}
@@ -46,7 +42,10 @@ function BeaconShopEntry({
 		[itemName, itemData, handleItemChange]
 	);
 
-	const beaconOptions = Object.values(arkData.Beacons || {});
+	const beaconOptions = useMemo(
+		() => Object.values(arkData.Beacons || {}),
+		[arkData.Beacons]
+	);
 
 	return (
 		<AnimatePresence>
@@ -179,6 +178,8 @@ function BeaconShopEntry({
 							placeholder="Select or enter a beacon class name"
 							value={itemData.ClassName || ""}
 							className="w-full bg-dark-black"
+							displayKey="Name"
+							valueKey="ClassName"
 						/>
 					</div>
 				</motion.div>
