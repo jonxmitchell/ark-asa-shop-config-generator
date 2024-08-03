@@ -44,18 +44,16 @@ fn log_to_file(message: &str) {
 }
 
 #[tauri::command]
-fn save_settings_command(app_handle: tauri::AppHandle, output_path: String, auto_save_enabled: bool, auto_save_interval: i32) -> Result<(), String> {
-    let db_path = get_database_path(&app_handle);
-    let conn = initialize_db(&db_path).map_err(|e| e.to_string())?;
+fn save_settings_command(state: tauri::State<AppState>, output_path: String, auto_save_enabled: bool, auto_save_interval: i32) -> Result<(), String> {
+    let conn = state.0.lock().unwrap();
     let settings = Settings { output_path, auto_save_enabled, auto_save_interval };
     save_settings(&conn, &settings).map_err(|e| e.to_string())?;
     Ok(())
 }
 
 #[tauri::command]
-fn load_settings_command(app_handle: tauri::AppHandle) -> Result<Settings, String> {
-    let db_path = get_database_path(&app_handle);
-    let conn = initialize_db(&db_path).map_err(|e| e.to_string())?;
+fn load_settings_command(state: tauri::State<AppState>) -> Result<Settings, String> {
+    let conn = state.0.lock().unwrap();
     load_settings(&conn).map_err(|e| e.to_string())
 }
 
@@ -71,8 +69,9 @@ struct ExportResult {
 }
 
 #[tauri::command]
-fn export_config(app_handle: tauri::AppHandle, config: Value) -> Result<ExportResult, String> {
-    let settings = load_settings_command(app_handle.clone()).map_err(|e| e.to_string())?;
+fn export_config(state: tauri::State<AppState>, config: Value) -> Result<ExportResult, String> {
+    let conn = state.0.lock().unwrap();
+    let settings = load_settings(&conn).map_err(|e| e.to_string())?;
     let output_path = settings.output_path;
 
     if output_path.is_empty() {
@@ -134,9 +133,8 @@ fn open_file_location(path: String) -> Result<(), String> {
 }
 
 #[tauri::command]
-fn save_config_command(app_handle: tauri::AppHandle, id: Option<i64>, name: String, config: Value) -> Result<i64, String> {
-    let db_path = get_database_path(&app_handle);
-    let conn = initialize_db(&db_path).map_err(|e| e.to_string())?;
+fn save_config_command(state: tauri::State<AppState>, id: Option<i64>, name: String, config: Value) -> Result<i64, String> {
+    let conn = state.0.lock().unwrap();
     
     if let Some(id) = id {
         // This is an update operation
@@ -158,16 +156,14 @@ fn save_config_command(app_handle: tauri::AppHandle, id: Option<i64>, name: Stri
 }
 
 #[tauri::command]
-fn load_configs_command(app_handle: tauri::AppHandle) -> Result<Vec<SavedConfig>, String> {
-    let db_path = get_database_path(&app_handle);
-    let conn = initialize_db(&db_path).map_err(|e| e.to_string())?;
+fn load_configs_command(state: tauri::State<AppState>) -> Result<Vec<SavedConfig>, String> {
+    let conn = state.0.lock().unwrap();
     load_configs(&conn).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-fn delete_config_command(app_handle: tauri::AppHandle, id: i64) -> Result<(), String> {
-    let db_path = get_database_path(&app_handle);
-    let conn = initialize_db(&db_path).map_err(|e| e.to_string())?;
+fn delete_config_command(state: tauri::State<AppState>, id: i64) -> Result<(), String> {
+    let conn = state.0.lock().unwrap();
     delete_config(&conn, id).map_err(|e| e.to_string())
 }
 
@@ -177,7 +173,7 @@ fn get_hwid() -> String {
 }
 
 #[tauri::command]
-async fn validate_license(license_key: String, state: tauri::State<'_, LicenseState>, app_handle: tauri::AppHandle) -> Result<bool, String> {
+async fn validate_license(license_key: String, state: tauri::State<'_, LicenseState>, app_state: tauri::State<'_, AppState>) -> Result<bool, String> {
     let hwid = hwid::generate_hwid();
     log_to_file(&format!("Validating license. HWID: {}", hwid));
     
@@ -196,8 +192,7 @@ async fn validate_license(license_key: String, state: tauri::State<'_, LicenseSt
                 *license_state = true;
 
                 // Save license info to database
-                let db_path = get_database_path(&app_handle);
-                let conn = initialize_db(&db_path).map_err(|e| e.to_string())?;
+                let conn = app_state.0.lock().unwrap();
                 let license_info = LicenseInfo {
                     license_key,
                     expiration_date,
@@ -223,9 +218,8 @@ fn get_license_state(state: tauri::State<LicenseState>) -> bool {
 }
 
 #[tauri::command]
-fn get_license_info(app_handle: tauri::AppHandle) -> Result<serde_json::Value, String> {
-    let db_path = get_database_path(&app_handle);
-    let conn = initialize_db(&db_path).map_err(|e| e.to_string())?;
+fn get_license_info(state: tauri::State<AppState>) -> Result<serde_json::Value, String> {
+    let conn = state.0.lock().unwrap();
     
     if let Some(license_info) = load_license_info(&conn).map_err(|e| e.to_string())? {
         Ok(serde_json::json!({
@@ -239,9 +233,8 @@ fn get_license_info(app_handle: tauri::AppHandle) -> Result<serde_json::Value, S
 }
 
 #[tauri::command]
-async fn check_license_on_startup(app_handle: tauri::AppHandle, state: tauri::State<'_, LicenseState>) -> Result<bool, String> {
-    let db_path = get_database_path(&app_handle);
-    let conn = initialize_db(&db_path).map_err(|e| e.to_string())?;
+async fn check_license_on_startup(state: tauri::State<'_, AppState>, license_state: tauri::State<'_, LicenseState>) -> Result<bool, String> {
+    let conn = state.0.lock().unwrap();
     
     if let Some(license_info) = load_license_info(&conn).map_err(|e| e.to_string())? {
         let hwid = hwid::generate_hwid();
@@ -255,7 +248,7 @@ async fn check_license_on_startup(app_handle: tauri::AppHandle, state: tauri::St
         match result {
             Ok((is_valid, _)) => {
                 if is_valid {
-                    let mut license_state = state.0.lock().unwrap();
+                    let mut license_state = license_state.0.lock().unwrap();
                     *license_state = true;
                     Ok(true)
                 } else {
@@ -320,6 +313,8 @@ fn main() {
                     let window = app.get_window("main").unwrap();
                     
                     // Check for existing license
+                    let state = app.state::<AppState>();
+                    let conn = state.0.lock().unwrap();
                     if let Ok(Some(license_info)) = load_license_info(&conn) {
                         let hwid = hwid::generate_hwid();
                         log_to_file(&format!("Startup HWID: {}", hwid));
