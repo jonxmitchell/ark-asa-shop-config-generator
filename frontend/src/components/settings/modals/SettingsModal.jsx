@@ -1,3 +1,5 @@
+// src/components/settings/modals/SettingsModal.jsx
+
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { HiOutlineFolder, HiX } from "react-icons/hi";
@@ -6,19 +8,37 @@ import { invoke } from "@tauri-apps/api/tauri";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+// Custom Toggle component
+const Toggle = ({ checked, onChange }) => (
+	<div
+		className={`w-10 h-5 flex items-center rounded-full p-1 cursor-pointer ${
+			checked ? "bg-blue-600" : "bg-gray-700"
+		}`}
+		onClick={() => onChange(!checked)}>
+		<motion.div
+			className="bg-white w-3 h-3 rounded-full shadow-md"
+			animate={{ x: checked ? 20 : 0 }}
+		/>
+	</div>
+);
+
 function SettingsModal({ isOpen, onClose }) {
 	const [outputPath, setOutputPath] = useState("");
+	const [autoSaveEnabled, setAutoSaveEnabled] = useState(false);
+	const [autoSaveInterval, setAutoSaveInterval] = useState(5);
 
 	useEffect(() => {
 		if (isOpen) {
-			loadSavedPath();
+			loadSavedSettings();
 		}
 	}, [isOpen]);
 
-	const loadSavedPath = async () => {
+	const loadSavedSettings = async () => {
 		try {
 			const settings = await invoke("load_settings_command");
 			setOutputPath(settings.output_path);
+			setAutoSaveEnabled(settings.auto_save_enabled);
+			setAutoSaveInterval(settings.auto_save_interval);
 		} catch (error) {
 			console.error("Failed to load settings:", error);
 			toast.error("Failed to load settings");
@@ -43,8 +63,16 @@ function SettingsModal({ isOpen, onClose }) {
 
 	const handleSave = async () => {
 		try {
-			await invoke("save_settings_command", { outputPath });
-			console.log("Saved output path:", outputPath);
+			await invoke("save_settings_command", {
+				outputPath,
+				autoSaveEnabled,
+				autoSaveInterval,
+			});
+			console.log("Saved settings:", {
+				outputPath,
+				autoSaveEnabled,
+				autoSaveInterval,
+			});
 			toast.success("Settings saved successfully", {
 				position: "bottom-right",
 				autoClose: 3000,
@@ -80,12 +108,12 @@ function SettingsModal({ isOpen, onClose }) {
 					<HiX className="h-6 w-6" />
 				</button>
 				<h2 className="text-2xl font-bold mb-6 text-white">Settings</h2>
-				<div className="mb-6">
-					<label
-						htmlFor="outputPath"
-						className="block text-sm font-medium text-gray-300 mb-2">
+
+				{/* Export Output Location */}
+				<div className="mb-6 bg-light-black p-4 rounded-lg">
+					<h3 className="text-lg font-semibold mb-2 text-white">
 						Export Output Location
-					</label>
+					</h3>
 					<div className="relative">
 						<input
 							type="text"
@@ -102,6 +130,46 @@ function SettingsModal({ isOpen, onClose }) {
 						</button>
 					</div>
 				</div>
+
+				{/* Auto-save Settings */}
+				<div className="mb-6 bg-light-black p-4 rounded-lg">
+					<h3 className="text-lg font-semibold mb-2 text-white">
+						Auto-save Settings
+					</h3>
+					<div className="flex flex-col space-y-2 mb-4">
+						<span className="text-sm text-gray-400">Enable auto-save</span>
+						<Toggle checked={autoSaveEnabled} onChange={setAutoSaveEnabled} />
+					</div>
+					<div className={`space-y-2 ${!autoSaveEnabled && "opacity-50"}`}>
+						<span className="text-sm text-gray-400">
+							Auto-Save Duration (in minutes)
+						</span>
+						<div className="flex items-center space-x-4">
+							<input
+								type="range"
+								id="autoSaveInterval"
+								min="1"
+								max="60"
+								value={autoSaveInterval}
+								onChange={(e) => setAutoSaveInterval(parseInt(e.target.value))}
+								disabled={!autoSaveEnabled}
+								className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+							/>
+							<input
+								type="number"
+								value={autoSaveInterval}
+								onChange={(e) =>
+									setAutoSaveInterval(
+										Math.max(1, Math.min(60, parseInt(e.target.value) || 1))
+									)
+								}
+								disabled={!autoSaveEnabled}
+								className="w-16 px-2 py-1 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+							/>
+						</div>
+					</div>
+				</div>
+
 				<div className="flex justify-end">
 					<button
 						onClick={handleSave}

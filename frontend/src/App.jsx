@@ -1,4 +1,4 @@
-// In src/App.jsx
+// src/App.jsx
 
 import React, { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/tauri";
@@ -10,6 +10,7 @@ import { ConfigProvider } from "./components/ConfigContext";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import AppControls from "./components/AppControls";
+import AutoSave from "./components/AutoSave";
 
 function App() {
 	const [isLicensed, setIsLicensed] = useState(false);
@@ -77,6 +78,7 @@ function App() {
 					</div>
 				</div>
 				<ToastContainer />
+				<AutoSave />
 			</div>
 		</ConfigProvider>
 	);

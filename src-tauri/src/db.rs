@@ -1,6 +1,6 @@
 // src-tauri/src/db.rs
 
-use rusqlite::{Connection, Result, Error, OptionalExtension};
+use rusqlite::{Connection, Result, Error, params, OptionalExtension};
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
 use tauri::AppHandle;
@@ -9,6 +9,8 @@ use chrono::NaiveDate;
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Settings {
     pub output_path: String,
+    pub auto_save_enabled: bool,
+    pub auto_save_interval: i32,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -46,10 +48,23 @@ pub fn initialize_db(db_path: &Path) -> Result<Connection> {
     conn.execute(
         "CREATE TABLE IF NOT EXISTS settings (
             id INTEGER PRIMARY KEY,
-            output_path TEXT NOT NULL
+            output_path TEXT NOT NULL,
+            auto_save_enabled BOOLEAN NOT NULL DEFAULT 0,
+            auto_save_interval INTEGER NOT NULL DEFAULT 5
         )",
         [],
     )?;
+    
+    // Add a migration to add new columns if they don't exist
+    conn.execute(
+        "ALTER TABLE settings ADD COLUMN auto_save_enabled BOOLEAN NOT NULL DEFAULT 0",
+        [],
+    ).ok(); // Ignore error if column already exists
+    conn.execute(
+        "ALTER TABLE settings ADD COLUMN auto_save_interval INTEGER NOT NULL DEFAULT 5",
+        [],
+    ).ok(); // Ignore error if column already exists
+
     conn.execute(
         "CREATE TABLE IF NOT EXISTS saved_configs (
             id INTEGER PRIMARY KEY,
@@ -72,22 +87,33 @@ pub fn initialize_db(db_path: &Path) -> Result<Connection> {
 
 pub fn save_settings(conn: &Connection, settings: &Settings) -> Result<()> {
     conn.execute(
-        "INSERT OR REPLACE INTO settings (id, output_path) VALUES (1, ?1)",
-        [&settings.output_path],
+        "INSERT OR REPLACE INTO settings (id, output_path, auto_save_enabled, auto_save_interval) 
+         VALUES (1, ?1, ?2, ?3)",
+        params![
+            settings.output_path,
+            settings.auto_save_enabled,
+            settings.auto_save_interval
+        ],
     )?;
     Ok(())
 }
 
 pub fn load_settings(conn: &Connection) -> Result<Settings> {
     conn.query_row(
-        "SELECT output_path FROM settings WHERE id = 1",
+        "SELECT output_path, auto_save_enabled, auto_save_interval FROM settings WHERE id = 1",
         [],
         |row| Ok(Settings {
             output_path: row.get(0)?,
+            auto_save_enabled: row.get(1)?,
+            auto_save_interval: row.get(2)?,
         })
     ).or_else(|err| {
         if let Error::QueryReturnedNoRows = err {
-            Ok(Settings { output_path: String::new() })
+            Ok(Settings { 
+                output_path: String::new(), 
+                auto_save_enabled: false, 
+                auto_save_interval: 5 
+            })
         } else {
             Err(err)
         }
@@ -97,7 +123,7 @@ pub fn load_settings(conn: &Connection) -> Result<Settings> {
 pub fn save_config(conn: &Connection, config: &SavedConfig) -> Result<i64> {
     conn.execute(
         "INSERT INTO saved_configs (name, config) VALUES (?1, ?2)",
-        [&config.name, &config.config],
+        params![config.name, config.config],
     )?;
     Ok(conn.last_insert_rowid())
 }
@@ -120,14 +146,14 @@ pub fn load_configs(conn: &Connection) -> Result<Vec<SavedConfig>> {
 }
 
 pub fn delete_config(conn: &Connection, id: i64) -> Result<()> {
-    conn.execute("DELETE FROM saved_configs WHERE id = ?1", [id])?;
+    conn.execute("DELETE FROM saved_configs WHERE id = ?1", params![id])?;
     Ok(())
 }
 
 pub fn config_name_exists(conn: &Connection, name: &str) -> Result<bool> {
     let count: i64 = conn.query_row(
         "SELECT COUNT(*) FROM saved_configs WHERE name = ?1",
-        [name],
+        params![name],
         |row| row.get(0),
     )?;
     Ok(count > 0)
@@ -136,7 +162,7 @@ pub fn config_name_exists(conn: &Connection, name: &str) -> Result<bool> {
 pub fn update_config(conn: &Connection, id: i64, name: &str, config: &str) -> Result<()> {
     conn.execute(
         "UPDATE saved_configs SET name = ?1, config = ?2 WHERE id = ?3",
-        [name, config, &id.to_string()],
+        params![name, config, id],
     )?;
     Ok(())
 }
@@ -144,7 +170,7 @@ pub fn update_config(conn: &Connection, id: i64, name: &str, config: &str) -> Re
 pub fn save_license_info(conn: &Connection, info: &LicenseInfo) -> Result<()> {
     conn.execute(
         "INSERT OR REPLACE INTO license_info (id, license_key, expiration_date, hwid) VALUES (1, ?1, ?2, ?3)",
-        (&info.license_key, &info.expiration_date.to_string(), &info.hwid),
+        params![info.license_key, info.expiration_date.to_string(), info.hwid],
     )?;
     Ok(())
 }
@@ -157,6 +183,18 @@ pub fn load_license_info(conn: &Connection) -> Result<Option<LicenseInfo>> {
             license_key: row.get(0)?,
             expiration_date: NaiveDate::parse_from_str(&row.get::<_, String>(1)?, "%Y-%m-%d").unwrap(),
             hwid: row.get(2)?,
+        })
+    ).optional()
+}
+
+pub fn load_current_config(conn: &Connection) -> Result<Option<SavedConfig>> {
+    conn.query_row(
+        "SELECT id, name, config FROM saved_configs WHERE id = (SELECT MAX(id) FROM saved_configs)",
+        [],
+        |row| Ok(SavedConfig {
+            id: Some(row.get(0)?),
+            name: row.get(1)?,
+            config: row.get(2)?,
         })
     ).optional()
 }

@@ -5,7 +5,7 @@ mod ark_data;
 mod hwid;
 mod license;
 
-use db::{get_database_path, initialize_db, save_settings, load_settings, Settings, SavedConfig, save_config, load_configs, delete_config, config_name_exists, update_config, LicenseInfo, save_license_info, load_license_info};
+use db::{get_database_path, initialize_db, save_settings, load_settings, Settings, SavedConfig, save_config, load_configs, delete_config, config_name_exists, update_config, LicenseInfo, save_license_info, load_license_info, load_current_config};
 use ark_data::read_ark_data;
 use std::fs;
 use std::path::{PathBuf, Path};
@@ -19,8 +19,14 @@ use std::fs::OpenOptions;
 use std::io::Write;
 use std::env;
 use chrono::Utc;
+use rusqlite::Connection;
+use tauri::Manager;
 
 struct LicenseState(Mutex<bool>);
+struct AppState(Mutex<Connection>);
+
+unsafe impl Send for AppState {}
+unsafe impl Sync for AppState {}
 
 fn log_to_file(message: &str) {
     let log_path = env::current_exe()
@@ -38,10 +44,10 @@ fn log_to_file(message: &str) {
 }
 
 #[tauri::command]
-fn save_settings_command(app_handle: tauri::AppHandle, output_path: String) -> Result<(), String> {
+fn save_settings_command(app_handle: tauri::AppHandle, output_path: String, auto_save_enabled: bool, auto_save_interval: i32) -> Result<(), String> {
     let db_path = get_database_path(&app_handle);
     let conn = initialize_db(&db_path).map_err(|e| e.to_string())?;
-    let settings = Settings { output_path };
+    let settings = Settings { output_path, auto_save_enabled, auto_save_interval };
     save_settings(&conn, &settings).map_err(|e| e.to_string())?;
     Ok(())
 }
@@ -263,6 +269,19 @@ async fn check_license_on_startup(app_handle: tauri::AppHandle, state: tauri::St
     }
 }
 
+#[tauri::command]
+async fn auto_save_config(config: Value, state: tauri::State<'_, AppState>) -> Result<(), String> {
+    let conn = state.0.lock().map_err(|_| "Failed to acquire database lock".to_string())?;
+    let current_config = load_current_config(&conn).map_err(|e| e.to_string())?;
+    
+    if let Some(current_config) = current_config {
+        update_config(&conn, current_config.id.unwrap(), &current_config.name, &serde_json::to_string(&config).map_err(|e| e.to_string())?).map_err(|e| e.to_string())?;
+        Ok(())
+    } else {
+        Err("No configuration is currently loaded".to_string())
+    }
+}
+
 fn main() {
     std::panic::set_hook(Box::new(|panic_info| {
         if let Some(location) = panic_info.location() {
@@ -282,7 +301,8 @@ fn main() {
             .setup(|app| {
                 let app_handle = app.handle();
                 let db_path = get_database_path(&app_handle);
-                let _conn = initialize_db(&db_path).expect("Failed to initialize database");
+                let conn = initialize_db(&db_path).expect("Failed to initialize database");
+                app.manage(AppState(Mutex::new(conn)));
 
                 #[cfg(not(debug_assertions))]
                 {
@@ -290,7 +310,7 @@ fn main() {
                     let window = app.get_window("main").unwrap();
                     
                     // Check for existing license
-                    if let Ok(Some(license_info)) = load_license_info(&_conn) {
+                    if let Ok(Some(license_info)) = load_license_info(&conn) {
                         let hwid = hwid::generate_hwid();
                         log_to_file(&format!("Startup HWID: {}", hwid));
                         
@@ -335,7 +355,8 @@ fn main() {
                 validate_license,
                 get_license_state,
                 get_license_info,
-                check_license_on_startup
+                check_license_on_startup,
+                auto_save_config
             ])
             .run(tauri::generate_context!())
             .expect("error while running tauri application");
