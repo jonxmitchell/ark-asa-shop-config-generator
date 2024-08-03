@@ -7,9 +7,10 @@ const ConfigContext = createContext();
 
 export const useConfig = () => useContext(ConfigContext);
 
-export const ConfigProvider = ({ children }) => {
+export const ConfigProvider = ({ children, initialShowTooltips = true }) => {
 	const [config, setConfig] = useState(defaultConfig);
 	const [currentlyLoadedConfig, setCurrentlyLoadedConfig] = useState(null);
+	const [showTooltips, setShowTooltips] = useState(initialShowTooltips);
 
 	const updateConfig = useCallback((newConfigOrUpdater) => {
 		setConfig((prevConfig) => {
@@ -41,11 +42,13 @@ export const ConfigProvider = ({ children }) => {
 	}, []);
 
 	const importConfig = useCallback((importedConfig) => {
-		// Unload current config
 		setCurrentlyLoadedConfig(null);
-		// Set the new imported config
 		setConfig(importedConfig);
 		console.log("Imported new config, current config unloaded");
+	}, []);
+
+	const toggleTooltips = useCallback((value) => {
+		setShowTooltips((prevState) => (value !== undefined ? value : !prevState));
 	}, []);
 
 	return (
@@ -57,6 +60,8 @@ export const ConfigProvider = ({ children }) => {
 				loadConfig,
 				unloadConfig,
 				importConfig,
+				showTooltips,
+				toggleTooltips,
 			}}>
 			{children}
 		</ConfigContext.Provider>

@@ -44,9 +44,9 @@ fn log_to_file(message: &str) {
 }
 
 #[tauri::command]
-fn save_settings_command(state: tauri::State<AppState>, output_path: String, auto_save_enabled: bool, auto_save_interval: i32) -> Result<(), String> {
+fn save_settings_command(state: tauri::State<AppState>, output_path: String, auto_save_enabled: bool, auto_save_interval: i32, show_tooltips: bool) -> Result<(), String> {
     let conn = state.0.lock().unwrap();
-    let settings = Settings { output_path, auto_save_enabled, auto_save_interval };
+    let settings = Settings { output_path, auto_save_enabled, auto_save_interval, show_tooltips };
     save_settings(&conn, &settings).map_err(|e| e.to_string())?;
     Ok(())
 }

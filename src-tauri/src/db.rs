@@ -11,6 +11,7 @@ pub struct Settings {
     pub output_path: String,
     pub auto_save_enabled: bool,
     pub auto_save_interval: i32,
+    pub show_tooltips: bool,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -64,6 +65,10 @@ pub fn initialize_db(db_path: &Path) -> Result<Connection> {
         "ALTER TABLE settings ADD COLUMN auto_save_interval INTEGER NOT NULL DEFAULT 5",
         [],
     ).ok(); // Ignore error if column already exists
+    conn.execute(
+        "ALTER TABLE settings ADD COLUMN show_tooltips BOOLEAN NOT NULL DEFAULT 1",
+        [],
+    ).ok(); // Ignore error if column already exists
 
     conn.execute(
         "CREATE TABLE IF NOT EXISTS saved_configs (
@@ -87,12 +92,13 @@ pub fn initialize_db(db_path: &Path) -> Result<Connection> {
 
 pub fn save_settings(conn: &Connection, settings: &Settings) -> Result<()> {
     conn.execute(
-        "INSERT OR REPLACE INTO settings (id, output_path, auto_save_enabled, auto_save_interval) 
-         VALUES (1, ?1, ?2, ?3)",
+        "INSERT OR REPLACE INTO settings (id, output_path, auto_save_enabled, auto_save_interval, show_tooltips) 
+         VALUES (1, ?1, ?2, ?3, ?4)",
         params![
             settings.output_path,
             settings.auto_save_enabled,
-            settings.auto_save_interval
+            settings.auto_save_interval,
+            settings.show_tooltips
         ],
     )?;
     Ok(())
@@ -100,19 +106,21 @@ pub fn save_settings(conn: &Connection, settings: &Settings) -> Result<()> {
 
 pub fn load_settings(conn: &Connection) -> Result<Settings> {
     conn.query_row(
-        "SELECT output_path, auto_save_enabled, auto_save_interval FROM settings WHERE id = 1",
+        "SELECT output_path, auto_save_enabled, auto_save_interval, show_tooltips FROM settings WHERE id = 1",
         [],
         |row| Ok(Settings {
             output_path: row.get(0)?,
             auto_save_enabled: row.get(1)?,
             auto_save_interval: row.get(2)?,
+            show_tooltips: row.get(3)?,
         })
     ).or_else(|err| {
         if let Error::QueryReturnedNoRows = err {
             Ok(Settings { 
                 output_path: String::new(), 
                 auto_save_enabled: false, 
-                auto_save_interval: 5 
+                auto_save_interval: 5,
+                show_tooltips: true
             })
         } else {
             Err(err)

@@ -12,7 +12,7 @@ import "react-toastify/dist/ReactToastify.css";
 import AppControls from "./components/AppControls";
 import AutoSave from "./components/AutoSave";
 import Loader from "./components/Loader";
-import { usePreventBrowserShortcuts } from "./hooks/usePreventBrowserShortcuts"; // Add this import
+import { usePreventBrowserShortcuts } from "./hooks/usePreventBrowserShortcuts";
 
 function App() {
 	const [isLicensed, setIsLicensed] = useState(false);
@@ -20,6 +20,7 @@ function App() {
 	const [isLoading, setIsLoading] = useState(true);
 	const [activeTab, setActiveTab] = useState("generator");
 	const [activeSidebarItem, setActiveSidebarItem] = useState("MySQL");
+	const [initialShowTooltips, setInitialShowTooltips] = useState(true);
 
 	useContextMenu();
 	usePreventBrowserShortcuts();
@@ -31,6 +32,10 @@ function App() {
 				const result = await invoke("check_license_on_startup");
 				setIsLicensed(result);
 				setLicenseError("");
+
+				// Load initial settings
+				const settings = await invoke("load_settings_command");
+				setInitialShowTooltips(settings.show_tooltips);
 			} catch (error) {
 				console.error("License check failed:", error);
 				setIsLicensed(false);
@@ -62,7 +67,7 @@ function App() {
 	}
 
 	return (
-		<ConfigProvider>
+		<ConfigProvider initialShowTooltips={initialShowTooltips}>
 			<div autoComplete="off" data-form-type="other">
 				<div className="flex h-screen bg-deep-black text-white p-4 overflow-hidden">
 					<div className="flex w-full space-x-4 h-full">

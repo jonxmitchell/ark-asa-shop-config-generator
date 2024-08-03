@@ -41,6 +41,7 @@ function SettingsModal({ isOpen, onClose }) {
 			setOutputPath(settings.output_path);
 			setAutoSaveEnabled(settings.auto_save_enabled);
 			setAutoSaveInterval(settings.auto_save_interval);
+			toggleTooltips(settings.show_tooltips);
 		} catch (error) {
 			console.error("Failed to load settings:", error);
 			toast.error("Failed to load settings");
@@ -69,11 +70,13 @@ function SettingsModal({ isOpen, onClose }) {
 				outputPath,
 				autoSaveEnabled,
 				autoSaveInterval,
+				showTooltips,
 			});
 			console.log("Saved settings:", {
 				outputPath,
 				autoSaveEnabled,
 				autoSaveInterval,
+				showTooltips,
 			});
 			toast.success("Settings saved successfully", {
 				position: "bottom-right",
