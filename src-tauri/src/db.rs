@@ -198,3 +198,15 @@ pub fn load_current_config(conn: &Connection) -> Result<Option<SavedConfig>> {
         })
     ).optional()
 }
+
+pub fn load_config_by_id(conn: &Connection, id: i64) -> Result<Option<SavedConfig>> {
+    conn.query_row(
+        "SELECT id, name, config FROM saved_configs WHERE id = ?1",
+        params![id],
+        |row| Ok(SavedConfig {
+            id: Some(row.get(0)?),
+            name: row.get(1)?,
+            config: row.get(2)?,
+        })
+    ).optional()
+}

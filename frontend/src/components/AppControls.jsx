@@ -36,7 +36,7 @@ function AppControls() {
 	const [importProgress, setImportProgress] = useState(0);
 	const [isSavedConfigsModalOpen, setIsSavedConfigsModalOpen] = useState(false);
 	const [isLicenseModalOpen, setIsLicenseModalOpen] = useState(false);
-	const { config, updateConfig } = useConfig();
+	const { config, importConfig } = useConfig();
 
 	const handleLicense = useCallback(() => {
 		setIsLicenseModalOpen(true);
@@ -44,7 +44,7 @@ function AppControls() {
 
 	const handleSettings = useCallback(() => setIsSettingsModalOpen(true), []);
 
-	const importConfig = useCallback(async () => {
+	const importConfigFile = useCallback(async () => {
 		try {
 			const selected = await open({
 				multiple: false,
@@ -63,7 +63,7 @@ function AppControls() {
 
 				const contents = await readTextFile(selected);
 				const importedConfig = JSON.parse(contents);
-				updateConfig(importedConfig);
+				importConfig(importedConfig);
 
 				// Ensure the progress modal is shown for at least 2 seconds
 				await new Promise((resolve) => setTimeout(resolve, 2000 - 20 * 100));
@@ -84,7 +84,7 @@ function AppControls() {
 			setIsImportProgressOpen(false);
 			toast.error("Failed to import configuration file.");
 		}
-	}, [updateConfig]);
+	}, [importConfig]);
 
 	const handleImport = useCallback(() => {
 		setIsImportWarningOpen(true);
@@ -141,7 +141,7 @@ function AppControls() {
 				onClose={() => setIsImportWarningOpen(false)}
 				onConfirm={() => {
 					setIsImportWarningOpen(false);
-					importConfig();
+					importConfigFile();
 				}}
 			/>
 			{isImportProgressOpen && (

@@ -5,7 +5,7 @@ mod ark_data;
 mod hwid;
 mod license;
 
-use db::{get_database_path, initialize_db, save_settings, load_settings, Settings, SavedConfig, save_config, load_configs, delete_config, config_name_exists, update_config, LicenseInfo, save_license_info, load_license_info, load_current_config};
+use db::{get_database_path, initialize_db, save_settings, load_settings, Settings, SavedConfig, save_config, load_configs, delete_config, config_name_exists, update_config, LicenseInfo, save_license_info, load_license_info, load_current_config, load_config_by_id};
 use ark_data::read_ark_data;
 use std::fs;
 use std::path::{PathBuf, Path};
@@ -270,16 +270,26 @@ async fn check_license_on_startup(app_handle: tauri::AppHandle, state: tauri::St
 }
 
 #[tauri::command]
-async fn auto_save_config(config: Value, state: tauri::State<'_, AppState>) -> Result<(), String> {
+async fn auto_save_config(config: Value, config_id: i64, state: tauri::State<'_, AppState>) -> Result<(), String> {
+    println!("Auto-save triggered for config_id: {}", config_id); // Add this line for debugging
     let conn = state.0.lock().map_err(|_| "Failed to acquire database lock".to_string())?;
-    let current_config = load_current_config(&conn).map_err(|e| e.to_string())?;
+    let current_config = load_config_by_id(&conn, config_id).map_err(|e| e.to_string())?;
     
     if let Some(current_config) = current_config {
+        println!("Updating config: {}", current_config.name); // Add this line for debugging
         update_config(&conn, current_config.id.unwrap(), &current_config.name, &serde_json::to_string(&config).map_err(|e| e.to_string())?).map_err(|e| e.to_string())?;
+        println!("Config updated successfully"); // Add this line for debugging
         Ok(())
     } else {
+        println!("No configuration found for id: {}", config_id); // Add this line for debugging
         Err("No configuration is currently loaded".to_string())
     }
+}
+
+#[tauri::command]
+fn get_current_config(state: tauri::State<AppState>) -> Result<Option<SavedConfig>, String> {
+    let conn = state.0.lock().map_err(|_| "Failed to acquire database lock".to_string())?;
+    load_current_config(&conn).map_err(|e| e.to_string())
 }
 
 fn main() {
@@ -356,7 +366,8 @@ fn main() {
                 get_license_state,
                 get_license_info,
                 check_license_on_startup,
-                auto_save_config
+                auto_save_config,
+                get_current_config
             ])
             .run(tauri::generate_context!())
             .expect("error while running tauri application");

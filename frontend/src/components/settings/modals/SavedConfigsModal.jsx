@@ -1,3 +1,5 @@
+// src/components/settings/modals/SavedConfigsModal.jsx
+
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { invoke } from "@tauri-apps/api/tauri";
@@ -10,15 +12,15 @@ import {
 	ArrowDownTrayIcon,
 	BoltSlashIcon,
 } from "@heroicons/react/24/solid";
-import { defaultConfig } from "../../../config/defaultConfig";
 
 function SavedConfigsModal({ isOpen, onClose }) {
-	const { config, updateConfig } = useConfig();
 	const [savedConfigs, setSavedConfigs] = useState([]);
-	const [currentConfigName, setCurrentConfigName] = useState("");
-	const [showWarning, setShowWarning] = useState(false);
+	const [newConfigName, setNewConfigName] = useState("");
+	const [showLoadWarning, setShowLoadWarning] = useState(false);
+	const [showSaveWarning, setShowSaveWarning] = useState(false);
 	const [configToLoad, setConfigToLoad] = useState(null);
-	const [currentlyLoadedConfig, setCurrentlyLoadedConfig] = useState(null);
+	const { config, currentlyLoadedConfig, loadConfig, unloadConfig } =
+		useConfig();
 
 	useEffect(() => {
 		if (isOpen) {
@@ -26,145 +28,84 @@ function SavedConfigsModal({ isOpen, onClose }) {
 		}
 	}, [isOpen]);
 
-	useEffect(() => {
-		// Update the current loaded config when savedConfigs changes
-		if (currentlyLoadedConfig) {
-			const updatedLoadedConfig = savedConfigs.find(
-				(saved) => saved.id === currentlyLoadedConfig.id
-			);
-			setCurrentlyLoadedConfig(updatedLoadedConfig || null);
-		}
-	}, [savedConfigs, currentlyLoadedConfig]);
-
 	const loadSavedConfigs = async () => {
 		try {
 			const configs = await invoke("load_configs_command");
 			setSavedConfigs(configs);
 		} catch (error) {
 			console.error("Failed to load saved configs:", error);
-			toast.error("Failed to load saved configs", {
-				position: "bottom-right",
-				autoClose: 3000,
-				hideProgressBar: false,
-				closeOnClick: true,
-				pauseOnHover: true,
-				draggable: true,
-				theme: "dark",
-			});
+			toast.error("Failed to load saved configs");
 		}
 	};
 
 	const handleSaveCurrentConfig = async () => {
-		if (!currentConfigName.trim()) {
-			toast.error("Please enter a name for the current config", {
-				position: "bottom-right",
-				autoClose: 3000,
-				hideProgressBar: false,
-				closeOnClick: true,
-				pauseOnHover: true,
-				draggable: true,
-				theme: "dark",
-			});
+		if (!newConfigName.trim()) {
+			toast.error("Please enter a name for the current config");
 			return;
 		}
+		if (currentlyLoadedConfig) {
+			setShowSaveWarning(true);
+		} else {
+			saveConfig();
+		}
+	};
+
+	const saveConfig = async () => {
 		try {
 			const newConfigId = await invoke("save_config_command", {
 				id: null, // Null ID indicates a new save
-				name: currentConfigName,
+				name: newConfigName,
 				config: config,
 			});
-			toast.success("Config saved successfully", {
-				position: "bottom-right",
-				autoClose: 3000,
-				hideProgressBar: false,
-				closeOnClick: true,
-				pauseOnHover: true,
-				draggable: true,
-				theme: "dark",
-			});
+			toast.success("Config saved successfully");
 			await loadSavedConfigs();
-			setCurrentConfigName("");
-			// Update the currently loaded config
-			setCurrentlyLoadedConfig({
+			setNewConfigName("");
+
+			// Unload the current config
+			unloadConfig();
+
+			// Load the newly saved config
+			const newConfig = {
 				id: newConfigId,
-				name: currentConfigName,
+				name: newConfigName,
 				config: JSON.stringify(config),
-			});
+			};
+			loadConfig(newConfig);
+			setShowSaveWarning(false);
 		} catch (error) {
 			console.error("Failed to save config:", error);
 			if (error.toString().includes("already exists")) {
-				toast.error("A configuration with this name already exists", {
-					position: "bottom-right",
-					autoClose: 3000,
-					hideProgressBar: false,
-					closeOnClick: true,
-					pauseOnHover: true,
-					draggable: true,
-					theme: "dark",
-				});
+				toast.error("A configuration with this name already exists");
 			} else {
-				toast.error("Failed to save config", {
-					position: "bottom-right",
-					autoClose: 3000,
-					hideProgressBar: false,
-					closeOnClick: true,
-					pauseOnHover: true,
-					draggable: true,
-					theme: "dark",
-				});
+				toast.error("Failed to save config");
 			}
 		}
 	};
 
 	const handleLoadConfig = (configToLoad) => {
 		setConfigToLoad(configToLoad);
-		setShowWarning(true);
+		setShowLoadWarning(true);
 	};
 
 	const confirmLoadConfig = () => {
 		if (configToLoad) {
-			updateConfig(JSON.parse(configToLoad.config));
-			setCurrentlyLoadedConfig(configToLoad);
-			toast.success("Config loaded successfully", {
-				position: "bottom-right",
-				autoClose: 3000,
-				hideProgressBar: false,
-				closeOnClick: true,
-				pauseOnHover: true,
-				draggable: true,
-				theme: "dark",
-			});
-			setShowWarning(false);
+			loadConfig(configToLoad);
+			toast.success("Config loaded successfully");
+			setShowLoadWarning(false);
 		}
 	};
 
 	const handleDeleteConfig = async (id) => {
 		try {
 			await invoke("delete_config_command", { id });
-			toast.success("Config deleted successfully", {
-				position: "bottom-right",
-				autoClose: 3000,
-				hideProgressBar: false,
-				closeOnClick: true,
-				pauseOnHover: true,
-				draggable: true,
-				theme: "dark",
-			});
+			toast.success("Config deleted successfully");
 			await loadSavedConfigs();
 			if (currentlyLoadedConfig && currentlyLoadedConfig.id === id) {
-				setCurrentlyLoadedConfig(null);
+				unloadConfig();
 			}
 		} catch (error) {
 			console.error("Failed to delete config:", error);
-			toast.error("Failed to delete config", {
-				position: "bottom-right",
-				autoClose: 3000,
-				hideProgressBar: false,
-				closeOnClick: true,
-				pauseOnHover: true,
-				draggable: true,
-				theme: "dark",
-			});
+			toast.error("Failed to delete config");
 		}
 	};
 
@@ -172,48 +113,24 @@ function SavedConfigsModal({ isOpen, onClose }) {
 		if (currentlyLoadedConfig) {
 			try {
 				await invoke("save_config_command", {
-					id: currentlyLoadedConfig.id, // Pass the ID for update
+					id: currentlyLoadedConfig.id,
 					name: currentlyLoadedConfig.name,
 					config: config,
 				});
-				toast.success("Config updated successfully", {
-					position: "bottom-right",
-					autoClose: 3000,
-					hideProgressBar: false,
-					closeOnClick: true,
-					pauseOnHover: true,
-					draggable: true,
-					theme: "dark",
-				});
+				toast.success("Config updated successfully");
 				await loadSavedConfigs();
 			} catch (error) {
 				console.error("Failed to update config:", error);
-				toast.error("Failed to update config", {
-					position: "bottom-right",
-					autoClose: 3000,
-					hideProgressBar: false,
-					closeOnClick: true,
-					pauseOnHover: true,
-					draggable: true,
-					theme: "dark",
-				});
+				toast.error("Failed to update config");
 			}
 		}
 	};
 
 	const handleUnloadConfig = () => {
-		updateConfig(defaultConfig);
-		setCurrentlyLoadedConfig(null);
-		toast.success("Configuration unloaded", {
-			position: "bottom-right",
-			autoClose: 3000,
-			hideProgressBar: false,
-			closeOnClick: true,
-			pauseOnHover: true,
-			draggable: true,
-			theme: "dark",
-		});
+		unloadConfig();
+		toast.success("Configuration unloaded");
 	};
+
 	if (!isOpen) return null;
 
 	return (
@@ -277,8 +194,8 @@ function SavedConfigsModal({ isOpen, onClose }) {
 						<div className="flex space-x-2">
 							<input
 								type="text"
-								value={currentConfigName}
-								onChange={(e) => setCurrentConfigName(e.target.value)}
+								value={newConfigName}
+								onChange={(e) => setNewConfigName(e.target.value)}
 								placeholder="Enter config name"
 								className="flex-grow px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
 							/>
@@ -318,22 +235,50 @@ function SavedConfigsModal({ isOpen, onClose }) {
 					</div>
 				</div>
 
-				{showWarning && (
+				{showLoadWarning && (
 					<div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
 						<div className="bg-mid-black p-6 rounded-lg">
-							<h3 className="text-lg font-semibold mb-4 text-white">Warning</h3>
+							<h3 className="text-lg font-semibold mb-4 text-white">
+								⚠️ Warning
+							</h3>
 							<p className="mb-4 text-gray-300">
 								Loading a new config will overwrite your current unsaved
 								changes. Do you want to proceed?
 							</p>
 							<div className="flex justify-end space-x-4">
 								<button
-									onClick={() => setShowWarning(false)}
+									onClick={() => setShowLoadWarning(false)}
 									className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors">
 									Cancel
 								</button>
 								<button
 									onClick={confirmLoadConfig}
+									className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
+									Proceed
+								</button>
+							</div>
+						</div>
+					</div>
+				)}
+
+				{showSaveWarning && (
+					<div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
+						<div className="bg-mid-black p-6 rounded-lg">
+							<h3 className="text-lg font-semibold mb-4 text-white">
+								⚠️ Warning
+							</h3>
+							<p className="mb-4 text-gray-300">
+								Saving a new config will unload the currently loaded config and
+								you will lose any unsaved changes. Do you want to proceed?
+							</p>
+							<div className="flex justify-end space-x-4">
+								<button
+									onClick={() => setShowSaveWarning(false)}
+									className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors">
+									Cancel
+								</button>
+								<button
+									onClick={saveConfig}
 									className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
 									Proceed
 								</button>

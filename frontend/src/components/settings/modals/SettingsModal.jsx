@@ -7,6 +7,7 @@ import { open } from "@tauri-apps/api/dialog";
 import { invoke } from "@tauri-apps/api/tauri";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useConfig } from "../../ConfigContext";
 
 // Custom Toggle component
 const Toggle = ({ checked, onChange }) => (
@@ -26,6 +27,7 @@ function SettingsModal({ isOpen, onClose }) {
 	const [outputPath, setOutputPath] = useState("");
 	const [autoSaveEnabled, setAutoSaveEnabled] = useState(false);
 	const [autoSaveInterval, setAutoSaveInterval] = useState(5);
+	const { showTooltips, toggleTooltips } = useConfig();
 
 	useEffect(() => {
 		if (isOpen) {
@@ -167,6 +169,17 @@ function SettingsModal({ isOpen, onClose }) {
 								className="w-16 px-2 py-1 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
 							/>
 						</div>
+					</div>
+				</div>
+
+				{/* Tooltip Settings */}
+				<div className="mb-6 bg-light-black p-4 rounded-lg">
+					<h3 className="text-lg font-semibold mb-2 text-white">
+						Tooltip Settings
+					</h3>
+					<div className="flex items-center space-x-2">
+						<span className="text-sm text-gray-400">Show Tooltips</span>
+						<Toggle checked={showTooltips} onChange={toggleTooltips} />
 					</div>
 				</div>
 
