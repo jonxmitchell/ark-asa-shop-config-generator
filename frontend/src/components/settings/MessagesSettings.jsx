@@ -1,6 +1,6 @@
 // src/components/settings/MessagesSettings.jsx
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
 import { useConfig } from "../ConfigContext";
 
@@ -9,7 +9,7 @@ function MessagesSettings() {
 	const [searchTerm, setSearchTerm] = useState("");
 	const [filteredMessages, setFilteredMessages] = useState([]);
 
-	const messagesConfig = config?.Messages || {};
+	const messagesConfig = useMemo(() => config?.Messages || {}, [config]);
 
 	const filterMessages = useCallback(() => {
 		return Object.entries(messagesConfig)
@@ -36,6 +36,7 @@ function MessagesSettings() {
 
 	return (
 		<div className="bg-light-black p-6 rounded-lg">
+			<h2 className="text-xl font-bold mb-4 text-white">Messages</h2>
 			<input
 				type="text"
 				placeholder="Search messages..."
