@@ -2,9 +2,10 @@
 
 import React from "react";
 import { useConfig } from "../ConfigContext";
+import { Tooltip } from "react-tooltip";
 
 function DiscordSettings() {
-	const { config, updateConfig } = useConfig();
+	const { config, updateConfig, showTooltips } = useConfig();
 	const discordConfig = config?.General?.Discord || {};
 
 	const handleChange = (e) => {
@@ -37,6 +38,8 @@ function DiscordSettings() {
 						checked={isEnabled}
 						onChange={handleChange}
 						className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
+						data-tooltip-id="discord-enabled"
+						data-tooltip-content="Enable or disable Discord logging"
 					/>
 					<label
 						htmlFor="discordEnabled"
@@ -64,6 +67,8 @@ function DiscordSettings() {
 						className={`w-full px-3 py-2 text-sm text-white bg-mid-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
 							!isEnabled && "opacity-50 cursor-not-allowed"
 						}`}
+						data-tooltip-id="discord-sender-name"
+						data-tooltip-content="Set the name that will appear as the sender in Discord"
 					/>
 				</div>
 
@@ -86,9 +91,18 @@ function DiscordSettings() {
 						className={`w-full px-3 py-2 text-sm text-white bg-mid-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
 							!isEnabled && "opacity-50 cursor-not-allowed"
 						}`}
+						data-tooltip-id="discord-webhook-url"
+						data-tooltip-content="Enter the Discord webhook URL for logging"
 					/>
 				</div>
 			</div>
+			{showTooltips && (
+				<>
+					<Tooltip id="discord-enabled" place="top" opacity={1} />
+					<Tooltip id="discord-sender-name" place="top" opacity={1} />
+					<Tooltip id="discord-webhook-url" place="top" opacity={1} />
+				</>
+			)}
 		</div>
 	);
 }
