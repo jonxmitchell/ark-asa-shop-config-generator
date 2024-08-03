@@ -3,6 +3,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import SearchableDropdown from "../../SearchableDropdown";
+import { Tooltip } from "react-tooltip";
 
 function SellItemEntry({ itemName, itemData, handleItemChange, arkData }) {
 	return (
@@ -17,7 +18,8 @@ function SellItemEntry({ itemName, itemData, handleItemChange, arkData }) {
 				<div className="flex-grow">
 					<label
 						htmlFor={`${itemName}-description`}
-						className="block text-sm font-medium text-gray-300 mb-1">
+						className="block text-sm font-medium text-gray-300 mb-1"
+						data-tooltip-id={`tooltip-description-${itemName}`}>
 						Description
 					</label>
 					<input
@@ -29,11 +31,17 @@ function SellItemEntry({ itemName, itemData, handleItemChange, arkData }) {
 						}
 						className="w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
 					/>
+					<Tooltip
+						id={`tooltip-description-${itemName}`}
+						place="top"
+						content="Enter a description for this sell item"
+					/>
 				</div>
 				<div className="w-24">
 					<label
 						htmlFor={`${itemName}-price`}
-						className="block text-sm font-medium text-gray-300 mb-1">
+						className="block text-sm font-medium text-gray-300 mb-1"
+						data-tooltip-id={`tooltip-price-${itemName}`}>
 						Price
 					</label>
 					<input
@@ -45,11 +53,17 @@ function SellItemEntry({ itemName, itemData, handleItemChange, arkData }) {
 						}
 						className="w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
 					/>
+					<Tooltip
+						id={`tooltip-price-${itemName}`}
+						place="top"
+						content="Set the selling price for this item"
+					/>
 				</div>
 				<div className="w-24">
 					<label
 						htmlFor={`${itemName}-amount`}
-						className="block text-sm font-medium text-gray-300 mb-1">
+						className="block text-sm font-medium text-gray-300 mb-1"
+						data-tooltip-id={`tooltip-amount-${itemName}`}>
 						Amount
 					</label>
 					<input
@@ -61,12 +75,18 @@ function SellItemEntry({ itemName, itemData, handleItemChange, arkData }) {
 						}
 						className="w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
 					/>
+					<Tooltip
+						id={`tooltip-amount-${itemName}`}
+						place="top"
+						content="Specify the quantity of this item to sell"
+					/>
 				</div>
 			</div>
 			<div>
 				<label
 					htmlFor={`${itemName}-blueprint`}
-					className="block text-sm font-medium text-gray-300 mb-1">
+					className="block text-sm font-medium text-gray-300 mb-1"
+					data-tooltip-id={`tooltip-blueprint-${itemName}`}>
 					Blueprint
 				</label>
 				<SearchableDropdown
@@ -78,6 +98,11 @@ function SellItemEntry({ itemName, itemData, handleItemChange, arkData }) {
 					placeholder="Select or enter a blueprint"
 					value={itemData.Blueprint || ""}
 					className="w-full bg-dark-black"
+				/>
+				<Tooltip
+					id={`tooltip-blueprint-${itemName}`}
+					place="top"
+					content="Choose the blueprint for this sell item"
 				/>
 			</div>
 		</motion.div>

@@ -8,6 +8,7 @@ import { invoke } from "@tauri-apps/api/tauri";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useConfig } from "../../ConfigContext";
+import { Tooltip } from "react-tooltip";
 
 // Custom Toggle component
 const Toggle = ({ checked, onChange }) => (
@@ -31,22 +32,22 @@ function SettingsModal({ isOpen, onClose }) {
 
 	useEffect(() => {
 		if (isOpen) {
+			const loadSavedSettings = async () => {
+				try {
+					const settings = await invoke("load_settings_command");
+					setOutputPath(settings.output_path);
+					setAutoSaveEnabled(settings.auto_save_enabled);
+					setAutoSaveInterval(settings.auto_save_interval);
+					toggleTooltips(settings.show_tooltips);
+				} catch (error) {
+					console.error("Failed to load settings:", error);
+					toast.error("Failed to load settings");
+				}
+			};
+
 			loadSavedSettings();
 		}
-	}, [isOpen]);
-
-	const loadSavedSettings = async () => {
-		try {
-			const settings = await invoke("load_settings_command");
-			setOutputPath(settings.output_path);
-			setAutoSaveEnabled(settings.auto_save_enabled);
-			setAutoSaveInterval(settings.auto_save_interval);
-			toggleTooltips(settings.show_tooltips);
-		} catch (error) {
-			console.error("Failed to load settings:", error);
-			toast.error("Failed to load settings");
-		}
-	};
+	}, [isOpen, toggleTooltips]);
 
 	const handleSelectFolder = async () => {
 		try {
@@ -109,7 +110,9 @@ function SettingsModal({ isOpen, onClose }) {
 				onClick={(e) => e.stopPropagation()}>
 				<button
 					onClick={onClose}
-					className="absolute top-4 right-4 text-gray-400 hover:text-white">
+					className="absolute top-4 right-4 text-gray-400 hover:text-white"
+					data-tooltip-id="close-settings"
+					data-tooltip-content="Close settings">
 					<HiX className="h-6 w-6" />
 				</button>
 				<h2 className="text-2xl font-bold mb-6 text-white">Settings</h2>
@@ -126,11 +129,15 @@ function SettingsModal({ isOpen, onClose }) {
 							value={outputPath}
 							readOnly
 							className="w-full pl-10 pr-24 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+							data-tooltip-id="output-path"
+							data-tooltip-content="Current export output location"
 						/>
 						<HiOutlineFolder className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
 						<button
 							onClick={handleSelectFolder}
-							className="absolute right-2 top-1/2 transform -translate-y-1/2 px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors">
+							className="absolute right-2 top-1/2 transform -translate-y-1/2 px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+							data-tooltip-id="select-folder"
+							data-tooltip-content="Choose export output location">
 							Select
 						</button>
 					</div>
@@ -143,7 +150,12 @@ function SettingsModal({ isOpen, onClose }) {
 					</h3>
 					<div className="flex flex-col space-y-2 mb-4">
 						<span className="text-sm text-gray-400">Enable auto-save</span>
-						<Toggle checked={autoSaveEnabled} onChange={setAutoSaveEnabled} />
+						<Toggle
+							checked={autoSaveEnabled}
+							onChange={setAutoSaveEnabled}
+							data-tooltip-id="auto-save-toggle"
+							data-tooltip-content="Toggle auto-save feature"
+						/>
 					</div>
 					<div className={`space-y-2 ${!autoSaveEnabled && "opacity-50"}`}>
 						<span className="text-sm text-gray-400">
@@ -159,6 +171,8 @@ function SettingsModal({ isOpen, onClose }) {
 								onChange={(e) => setAutoSaveInterval(parseInt(e.target.value))}
 								disabled={!autoSaveEnabled}
 								className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+								data-tooltip-id="auto-save-interval"
+								data-tooltip-content="Set auto-save interval"
 							/>
 							<input
 								type="number"
@@ -170,6 +184,8 @@ function SettingsModal({ isOpen, onClose }) {
 								}
 								disabled={!autoSaveEnabled}
 								className="w-16 px-2 py-1 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+								data-tooltip-id="auto-save-interval-input"
+								data-tooltip-content="Set auto-save interval in minutes"
 							/>
 						</div>
 					</div>
@@ -182,17 +198,37 @@ function SettingsModal({ isOpen, onClose }) {
 					</h3>
 					<div className="flex items-center space-x-2">
 						<span className="text-sm text-gray-400">Show Tooltips</span>
-						<Toggle checked={showTooltips} onChange={toggleTooltips} />
+						<Toggle
+							checked={showTooltips}
+							onChange={toggleTooltips}
+							data-tooltip-id="show-tooltips-toggle"
+							data-tooltip-content="Toggle visibility of tooltips"
+						/>
 					</div>
 				</div>
 
 				<div className="flex justify-end">
 					<button
 						onClick={handleSave}
-						className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors">
+						className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+						data-tooltip-id="save-settings"
+						data-tooltip-content="Save current settings">
 						Save
 					</button>
 				</div>
+
+				{showTooltips && (
+					<>
+						<Tooltip id="close-settings" place="left" />
+						<Tooltip id="output-path" place="top" />
+						<Tooltip id="select-folder" place="left" />
+						<Tooltip id="auto-save-toggle" place="right" />
+						<Tooltip id="auto-save-interval" place="top" />
+						<Tooltip id="auto-save-interval-input" place="top" />
+						<Tooltip id="show-tooltips-toggle" place="right" />
+						<Tooltip id="save-settings" place="top" />
+					</>
+				)}
 			</motion.div>
 		</motion.div>
 	);

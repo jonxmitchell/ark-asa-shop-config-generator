@@ -12,6 +12,7 @@ import {
 	ArrowDownTrayIcon,
 	BoltSlashIcon,
 } from "@heroicons/react/24/solid";
+import { Tooltip } from "react-tooltip";
 
 function SavedConfigsModal({ isOpen, onClose }) {
 	const [savedConfigs, setSavedConfigs] = useState([]);
@@ -19,8 +20,13 @@ function SavedConfigsModal({ isOpen, onClose }) {
 	const [showLoadWarning, setShowLoadWarning] = useState(false);
 	const [showSaveWarning, setShowSaveWarning] = useState(false);
 	const [configToLoad, setConfigToLoad] = useState(null);
-	const { config, currentlyLoadedConfig, loadConfig, unloadConfig } =
-		useConfig();
+	const {
+		config,
+		currentlyLoadedConfig,
+		loadConfig,
+		unloadConfig,
+		showTooltips,
+	} = useConfig();
 
 	useEffect(() => {
 		if (isOpen) {
@@ -151,7 +157,9 @@ function SavedConfigsModal({ isOpen, onClose }) {
 						</h2>
 						<button
 							onClick={onClose}
-							className="text-gray-400 hover:text-white">
+							className="text-gray-400 hover:text-white"
+							data-tooltip-id="close-modal"
+							data-tooltip-content="Close modal">
 							<XMarkIcon className="h-6 w-6" />
 						</button>
 					</div>
@@ -173,14 +181,16 @@ function SavedConfigsModal({ isOpen, onClose }) {
 									onClick={handleUpdateConfig}
 									disabled={!currentlyLoadedConfig}
 									className="p-1 text-blue-500 hover:text-blue-400 disabled:text-gray-600 disabled:cursor-not-allowed"
-									title="Update">
+									data-tooltip-id="update-config"
+									data-tooltip-content="Update current configuration">
 									<ArrowPathIcon className="h-5 w-5" />
 								</button>
 								<button
 									onClick={handleUnloadConfig}
 									disabled={!currentlyLoadedConfig}
 									className="p-1 text-red-500 hover:text-red-400 disabled:text-gray-600 disabled:cursor-not-allowed"
-									title="Unload">
+									data-tooltip-id="unload-config"
+									data-tooltip-content="Unload current configuration">
 									<BoltSlashIcon className="h-5 w-5" />
 								</button>
 							</div>
@@ -198,10 +208,14 @@ function SavedConfigsModal({ isOpen, onClose }) {
 								onChange={(e) => setNewConfigName(e.target.value)}
 								placeholder="Enter config name"
 								className="flex-grow px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+								data-tooltip-id="new-config-name"
+								data-tooltip-content="Enter a name for the new configuration"
 							/>
 							<button
 								onClick={handleSaveCurrentConfig}
-								className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
+								className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+								data-tooltip-id="save-config"
+								data-tooltip-content="Save current configuration">
 								Save
 							</button>
 						</div>
@@ -220,13 +234,15 @@ function SavedConfigsModal({ isOpen, onClose }) {
 									<button
 										onClick={() => handleLoadConfig(savedConfig)}
 										className="p-1 text-green-500 hover:text-green-400"
-										title="Load">
+										data-tooltip-id={`load-config-${savedConfig.id}`}
+										data-tooltip-content={`Load ${savedConfig.name}`}>
 										<ArrowDownTrayIcon className="h-5 w-5" />
 									</button>
 									<button
 										onClick={() => handleDeleteConfig(savedConfig.id)}
 										className="p-1 text-red-500 hover:text-red-400"
-										title="Delete">
+										data-tooltip-id={`delete-config-${savedConfig.id}`}
+										data-tooltip-content={`Delete ${savedConfig.name}`}>
 										<TrashIcon className="h-5 w-5" />
 									</button>
 								</div>
@@ -234,6 +250,22 @@ function SavedConfigsModal({ isOpen, onClose }) {
 						))}
 					</div>
 				</div>
+
+				{showTooltips && (
+					<>
+						<Tooltip id="close-modal" place="left" />
+						<Tooltip id="update-config" place="top" />
+						<Tooltip id="unload-config" place="top" />
+						<Tooltip id="new-config-name" place="top" />
+						<Tooltip id="save-config" place="top" />
+						{savedConfigs.map((savedConfig) => (
+							<React.Fragment key={savedConfig.id}>
+								<Tooltip id={`load-config-${savedConfig.id}`} place="top" />
+								<Tooltip id={`delete-config-${savedConfig.id}`} place="top" />
+							</React.Fragment>
+						))}
+					</>
+				)}
 
 				{showLoadWarning && (
 					<div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">

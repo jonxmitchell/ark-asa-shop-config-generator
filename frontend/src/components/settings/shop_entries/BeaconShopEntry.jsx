@@ -4,6 +4,7 @@ import React, { useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import SearchableDropdown from "../../SearchableDropdown";
 import { PowerIcon } from "@heroicons/react/24/solid";
+import { Tooltip } from "react-tooltip";
 
 function BeaconShopEntry({
 	itemName,
@@ -11,6 +12,7 @@ function BeaconShopEntry({
 	expanded,
 	handleItemChange,
 	arkData,
+	showTooltips,
 }) {
 	const handleBeaconSelect = useCallback(
 		(selected) => {
@@ -72,6 +74,8 @@ function BeaconShopEntry({
 								}
 								className="w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
 								autoComplete="off"
+								data-tooltip-id="beacon-title-tooltip"
+								data-tooltip-content="Enter the title for this beacon"
 							/>
 						</div>
 						<div className="col-span-6">
@@ -89,6 +93,7 @@ function BeaconShopEntry({
 								}
 								className="w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
 								autoComplete="off"
+								data-tooltip-id="beacon-description-tooltip"
 							/>
 						</div>
 						<div className="col-span-2">
@@ -106,6 +111,7 @@ function BeaconShopEntry({
 								}
 								className="w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
 								autoComplete="off"
+								data-tooltip-id="beacon-price-tooltip"
 							/>
 						</div>
 					</div>
@@ -145,6 +151,7 @@ function BeaconShopEntry({
 												? 2
 												: undefined
 										}
+										data-tooltip-id={`beacon-${field.toLowerCase()}-tooltip`}
 									/>
 									<button
 										onClick={() => toggleField(field)}
@@ -157,7 +164,8 @@ function BeaconShopEntry({
 											itemData[field] !== undefined
 												? "Disable field"
 												: "Enable field"
-										}>
+										}
+										data-tooltip-id={`beacon-${field.toLowerCase()}-toggle-tooltip`}>
 										<PowerIcon className="h-4 w-4" />
 									</button>
 								</div>
@@ -180,8 +188,66 @@ function BeaconShopEntry({
 							className="w-full bg-dark-black"
 							displayKey="Name"
 							valueKey="ClassName"
+							data-tooltip-id="beacon-class-tooltip"
 						/>
 					</div>
+
+					{showTooltips && (
+						<>
+							<Tooltip
+								id="beacon-title-tooltip"
+								place="top"
+								content="Enter the title for this beacon"
+							/>
+							<Tooltip
+								id="beacon-description-tooltip"
+								place="top"
+								content="Enter the description for this beacon"
+							/>
+							<Tooltip
+								id="beacon-price-tooltip"
+								place="top"
+								content="Set the price for this beacon"
+							/>
+							<Tooltip
+								id="beacon-minlevel-tooltip"
+								place="top"
+								content="Set the minimum level required for this beacon"
+							/>
+							<Tooltip
+								id="beacon-maxlevel-tooltip"
+								place="top"
+								content="Set the maximum level allowed for this beacon"
+							/>
+							<Tooltip
+								id="beacon-permissions-tooltip"
+								place="top"
+								content="Set the permissions required for this beacon"
+							/>
+							<Tooltip
+								id="beacon-minlevel-toggle-tooltip"
+								place="top"
+								content="Toggle minimum level requirement"
+							/>
+							<Tooltip
+								id="beacon-maxlevel-toggle-tooltip"
+								place="top"
+								content="Toggle maximum level limit"
+							/>
+							<Tooltip
+								id="beacon-permissions-toggle-tooltip"
+								place="top"
+								content="Toggle permissions requirement"
+							/>
+							<Tooltip
+								id="beacon-class-tooltip"
+								place="top"
+								content="Select the class name for this beacon"
+								offset={5}
+								float={true}
+							/>
+						</>
+					)}
 				</motion.div>
 			)}
 		</AnimatePresence>

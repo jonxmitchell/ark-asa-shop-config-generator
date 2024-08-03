@@ -3,8 +3,12 @@
 import React from "react";
 import { motion } from "framer-motion";
 import SearchableDropdown from "../../SearchableDropdown";
+import { Tooltip } from "react-tooltip";
+import { useConfig } from "../../ConfigContext";
 
 function SellDinoEntry({ itemName, itemData, handleItemChange, arkData }) {
+	const { showTooltips } = useConfig();
+
 	return (
 		<motion.div
 			initial={{ opacity: 0 }}
@@ -28,6 +32,7 @@ function SellDinoEntry({ itemName, itemData, handleItemChange, arkData }) {
 							handleItemChange(itemName, "Description", e.target.value)
 						}
 						className="w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+						data-tooltip-id={`tooltip-description-${itemName}`}
 					/>
 				</div>
 				<div className="w-24">
@@ -44,6 +49,7 @@ function SellDinoEntry({ itemName, itemData, handleItemChange, arkData }) {
 							handleItemChange(itemName, "Price", parseInt(e.target.value))
 						}
 						className="w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+						data-tooltip-id={`tooltip-price-${itemName}`}
 					/>
 				</div>
 				<div className="w-24">
@@ -60,6 +66,7 @@ function SellDinoEntry({ itemName, itemData, handleItemChange, arkData }) {
 							handleItemChange(itemName, "Level", parseInt(e.target.value))
 						}
 						className="w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+						data-tooltip-id={`tooltip-level-${itemName}`}
 					/>
 				</div>
 			</div>
@@ -78,8 +85,33 @@ function SellDinoEntry({ itemName, itemData, handleItemChange, arkData }) {
 					placeholder="Select or enter a blueprint"
 					value={itemData.Blueprint || ""}
 					className="w-full bg-dark-black"
+					data-tooltip-id={`tooltip-blueprint-${itemName}`}
 				/>
 			</div>
+			{showTooltips && (
+				<>
+					<Tooltip
+						id={`tooltip-description-${itemName}`}
+						place="top"
+						content="Description of the dino for sale"
+					/>
+					<Tooltip
+						id={`tooltip-price-${itemName}`}
+						place="top"
+						content="Price of the dino in points"
+					/>
+					<Tooltip
+						id={`tooltip-level-${itemName}`}
+						place="top"
+						content="Level of the dino for sale"
+					/>
+					<Tooltip
+						id={`tooltip-blueprint-${itemName}`}
+						place="top"
+						content="Blueprint of the dino for sale"
+					/>
+				</>
+			)}
 		</motion.div>
 	);
 }

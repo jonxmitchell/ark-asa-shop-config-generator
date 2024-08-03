@@ -19,9 +19,10 @@ import CommandShopEntry from "./shop_entries/CommandShopEntry";
 import DinoShopEntry from "./shop_entries/DinoShopEntry";
 import ConfirmationModal from "../ConfirmationModal";
 import { useConfig } from "../ConfigContext";
+import { Tooltip } from "react-tooltip";
 
 function ShopItemsSettings() {
-	const { config, updateConfig } = useConfig();
+	const { config, updateConfig, showTooltips } = useConfig();
 	const shopItemsConfig = useMemo(() => config?.ShopItems || {}, [config]);
 
 	const [newItemName, setNewItemName] = useState("");
@@ -266,7 +267,9 @@ function ShopItemsSettings() {
 				case "dino":
 					return <DinoShopEntry {...commonProps} />;
 				case "beacon":
-					return <BeaconShopEntry {...commonProps} />;
+					return (
+						<BeaconShopEntry {...commonProps} showTooltips={showTooltips} />
+					);
 				case "experience":
 					return <ExperienceShopEntry {...commonProps} />;
 				case "unlockengram":
@@ -314,11 +317,13 @@ function ShopItemsSettings() {
 							newItemValidationMessage ? "border-red-500" : "border-gray-600"
 						} focus:ring-blue-500 focus:border-blue-500`}
 						autoComplete="off"
+						data-tooltip-id="new-item-name"
 					/>
 					<select
 						value={newItemType}
 						onChange={(e) => setNewItemType(e.target.value)}
-						className="px-3 py-2 text-sm text-white bg-mid-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500">
+						className="px-3 py-2 text-sm text-white bg-mid-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+						data-tooltip-id="new-item-type">
 						<option value="item">Item</option>
 						<option value="dino">Dino</option>
 						<option value="beacon">Beacon</option>
@@ -328,7 +333,8 @@ function ShopItemsSettings() {
 					</select>
 					<button
 						onClick={addNewItem}
-						className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
+						className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+						data-tooltip-id="add-new-item">
 						Add Item
 					</button>
 				</div>
@@ -346,6 +352,7 @@ function ShopItemsSettings() {
 						onChange={(e) => setSearchTerm(e.target.value)}
 						className="flex-grow px-3 py-2 text-sm text-white bg-mid-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
 						autoComplete="off"
+						data-tooltip-id="search-items"
 					/>
 				</div>
 
@@ -379,16 +386,19 @@ function ShopItemsSettings() {
 														: "border-gray-600"
 												} focus:ring-blue-500 focus:border-blue-500`}
 												autoFocus
+												data-tooltip-id="edit-item-name"
 											/>
 											<button
 												onClick={finishRenameItem}
 												className="text-green-500 hover:text-green-400"
-												disabled={!!editValidationMessage}>
+												disabled={!!editValidationMessage}
+												data-tooltip-id="confirm-rename">
 												<CheckIcon className="h-5 w-5" />
 											</button>
 											<button
 												onClick={cancelRenameItem}
-												className="text-red-500 hover:text-red-400">
+												className="text-red-500 hover:text-red-400"
+												data-tooltip-id="cancel-rename">
 												<XMarkIcon className="h-5 w-5" />
 											</button>
 										</div>
@@ -420,18 +430,21 @@ function ShopItemsSettings() {
 									{editingName !== itemName && (
 										<button
 											onClick={() => startRenameItem(itemName)}
-											className="text-blue-500 hover:text-blue-400">
+											className="text-blue-500 hover:text-blue-400"
+											data-tooltip-id="rename-item">
 											<PencilIcon className="h-5 w-5" />
 										</button>
 									)}
 									<button
 										onClick={() => setDeleteConfirmation(itemName)}
-										className="text-red-500 hover:text-red-400">
+										className="text-red-500 hover:text-red-400"
+										data-tooltip-id="delete-item">
 										<TrashIcon className="h-5 w-5" />
 									</button>
 									<button
 										onClick={() => toggleItemExpansion(itemName)}
-										className="text-gray-400 hover:text-gray-300">
+										className="text-gray-400 hover:text-gray-300"
+										data-tooltip-id="toggle-expansion">
 										{expandedItem === itemName ? (
 											<ChevronUpIcon className="h-5 w-5" />
 										) : (
@@ -467,6 +480,49 @@ function ShopItemsSettings() {
 					/>
 				)}
 			</AnimatePresence>
+
+			{showTooltips && (
+				<>
+					<Tooltip
+						id="new-item-name"
+						place="top"
+						content="Enter a new item name (spaces are not allowed)"
+					/>
+					<Tooltip
+						id="new-item-type"
+						place="top"
+						content="Select the type of item to add"
+					/>
+					<Tooltip
+						id="add-new-item"
+						place="top"
+						content="Add the new item to the shop"
+					/>
+					<Tooltip
+						id="search-items"
+						place="top"
+						content="Search for items in the shop"
+					/>
+					<Tooltip
+						id="edit-item-name"
+						place="top"
+						content="Edit the item name"
+					/>
+					<Tooltip
+						id="confirm-rename"
+						place="top"
+						content="Confirm the new item name"
+					/>
+					<Tooltip id="cancel-rename" place="top" content="Cancel renaming" />
+					<Tooltip id="rename-item" place="top" content="Rename this item" />
+					<Tooltip id="delete-item" place="top" content="Delete this item" />
+					<Tooltip
+						id="toggle-expansion"
+						place="top"
+						content="Expand or collapse item details"
+					/>
+				</>
+			)}
 		</div>
 	);
 }

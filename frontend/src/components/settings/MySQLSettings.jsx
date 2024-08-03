@@ -79,6 +79,7 @@ function MySQLSettings() {
 						value={mysqlConfig.MysqlPass || ""}
 						onChange={handleChange}
 						disabled={!isMySQL}
+						showTooltips={showTooltips}
 						data-tooltip-id="tooltip-MysqlPass"
 					/>
 				</div>

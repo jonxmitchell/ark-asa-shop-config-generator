@@ -1,6 +1,6 @@
 // src/components/settings/SellItemsSettings.jsx
 
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
 	TrashIcon,
@@ -15,10 +15,11 @@ import ConfirmationModal from "../ConfirmationModal";
 import SellItemEntry from "./sell_shop_entries/SellItemEntry";
 import SellDinoEntry from "./sell_shop_entries/SellDinoEntry";
 import { useConfig } from "../ConfigContext";
+import { Tooltip } from "react-tooltip";
 
 function SellItemsSettings() {
-	const { config, updateConfig } = useConfig();
-	const sellItemsConfig = config?.SellItems || {};
+	const { config, updateConfig, showTooltips } = useConfig();
+	const sellItemsConfig = useMemo(() => config?.SellItems || {}, [config]);
 
 	const [newItemName, setNewItemName] = useState("");
 	const [newItemType, setNewItemType] = useState("item");
@@ -179,17 +180,23 @@ function SellItemsSettings() {
 						onChange={(e) => setNewItemName(e.target.value.replace(/\s/g, ""))}
 						placeholder="New sell item name"
 						className="flex-grow px-3 py-2 text-sm text-white bg-mid-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+						data-tooltip-id="new-item-name"
+						data-tooltip-content="Enter a name for the new sell item (no spaces allowed)"
 					/>
 					<select
 						value={newItemType}
 						onChange={(e) => setNewItemType(e.target.value)}
-						className="px-3 py-2 text-sm text-white bg-mid-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500">
+						className="px-3 py-2 text-sm text-white bg-mid-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+						data-tooltip-id="item-type"
+						data-tooltip-content="Select the type of item to sell">
 						<option value="item">Item</option>
 						<option value="dino">Dino</option>
 					</select>
 					<button
 						onClick={addNewItem}
-						className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
+						className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+						data-tooltip-id="add-item"
+						data-tooltip-content="Add a new sell item to the configuration">
 						Add Item
 					</button>
 				</div>
@@ -203,6 +210,8 @@ function SellItemsSettings() {
 						value={searchTerm}
 						onChange={(e) => setSearchTerm(e.target.value)}
 						className="flex-grow px-3 py-2 text-sm text-white bg-mid-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+						data-tooltip-id="search-items"
+						data-tooltip-content="Search for specific sell items"
 					/>
 				</div>
 				<AnimatePresence initial={false}>
@@ -228,6 +237,10 @@ function SellItemsSettings() {
 												}
 												className="px-2 py-1 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
 												autoFocus
+												autoComplete="off"
+												onClick={(e) => e.stopPropagation()}
+												data-tooltip-id="edit-item-name"
+												data-tooltip-content="Edit the name of this sell item"
 											/>
 											<button
 												onClick={(e) => {
@@ -235,7 +248,9 @@ function SellItemsSettings() {
 													finishRenameItem();
 												}}
 												className="text-green-500 hover:text-green-400"
-												disabled={!!editValidationMessage}>
+												disabled={!!editValidationMessage}
+												data-tooltip-id="confirm-edit"
+												data-tooltip-content="Confirm the name change">
 												<CheckIcon className="h-5 w-5" />
 											</button>
 											<button
@@ -243,7 +258,9 @@ function SellItemsSettings() {
 													e.stopPropagation();
 													cancelRenameItem();
 												}}
-												className="text-red-500 hover:text-red-400">
+												className="text-red-500 hover:text-red-400"
+												data-tooltip-id="cancel-edit"
+												data-tooltip-content="Cancel the name change">
 												<XMarkIcon className="h-5 w-5" />
 											</button>
 										</div>
@@ -270,7 +287,9 @@ function SellItemsSettings() {
 												e.stopPropagation();
 												startRenameItem(itemName);
 											}}
-											className="text-blue-500 hover:text-blue-400">
+											className="text-blue-500 hover:text-blue-400"
+											data-tooltip-id="rename-item"
+											data-tooltip-content="Rename this sell item">
 											<PencilIcon className="h-5 w-5" />
 										</button>
 									)}
@@ -279,7 +298,9 @@ function SellItemsSettings() {
 											e.stopPropagation();
 											setDeleteConfirmation(itemName);
 										}}
-										className="text-red-500 hover:text-red-400">
+										className="text-red-500 hover:text-red-400"
+										data-tooltip-id="delete-item"
+										data-tooltip-content="Delete this sell item">
 										<TrashIcon className="h-5 w-5" />
 									</button>
 									<button
@@ -287,7 +308,9 @@ function SellItemsSettings() {
 											e.stopPropagation();
 											toggleItemExpansion(itemName);
 										}}
-										className="text-gray-400 hover:text-gray-300">
+										className="text-gray-400 hover:text-gray-300"
+										data-tooltip-id="toggle-expansion"
+										data-tooltip-content="Expand or collapse item details">
 										{expandedItem === itemName ? (
 											<ChevronUpIcon className="h-5 w-5" />
 										) : (
@@ -327,6 +350,21 @@ function SellItemsSettings() {
 				title="Confirm Deletion"
 				message={`Are you sure you want to delete the sell item "${deleteConfirmation}"?`}
 			/>
+
+			{showTooltips && (
+				<>
+					<Tooltip id="new-item-name" />
+					<Tooltip id="item-type" />
+					<Tooltip id="add-item" />
+					<Tooltip id="search-items" />
+					<Tooltip id="edit-item-name" />
+					<Tooltip id="confirm-edit" />
+					<Tooltip id="cancel-edit" />
+					<Tooltip id="rename-item" />
+					<Tooltip id="delete-item" />
+					<Tooltip id="toggle-expansion" />
+				</>
+			)}
 		</div>
 	);
 }
