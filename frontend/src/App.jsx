@@ -12,6 +12,7 @@ import "react-toastify/dist/ReactToastify.css";
 import AppControls from "./components/AppControls";
 import AutoSave from "./components/AutoSave";
 import Loader from "./components/Loader";
+import { usePreventBrowserShortcuts } from "./hooks/usePreventBrowserShortcuts"; // Add this import
 
 function App() {
 	const [isLicensed, setIsLicensed] = useState(false);
@@ -21,6 +22,7 @@ function App() {
 	const [activeSidebarItem, setActiveSidebarItem] = useState("MySQL");
 
 	useContextMenu();
+	usePreventBrowserShortcuts();
 
 	useEffect(() => {
 		const checkLicense = async () => {
