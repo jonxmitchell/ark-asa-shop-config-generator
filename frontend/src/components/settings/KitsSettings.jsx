@@ -19,9 +19,10 @@ import DinosModal from "./modals/DinosModal";
 import CommandsModal from "./modals/CommandsModal";
 import ConfirmationModal from "../ConfirmationModal";
 import { useConfig } from "../ConfigContext";
+import { Tooltip } from "react-tooltip";
 
 function KitsSettings() {
-	const { config, updateConfig } = useConfig();
+	const { config, updateConfig, showTooltips } = useConfig();
 	const kitsConfig = config?.Kits || {};
 
 	const [newKitName, setNewKitName] = useState("");
@@ -198,10 +199,12 @@ function KitsSettings() {
 						placeholder="New kit name"
 						className="flex-grow px-3 py-2 text-sm text-white bg-mid-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
 						autoComplete="off"
+						data-tooltip-id="tooltip-new-kit-name"
 					/>
 					<button
 						onClick={addNewKit}
-						className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
+						className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+						data-tooltip-id="tooltip-add-kit">
 						Add Kit
 					</button>
 				</div>
@@ -216,6 +219,7 @@ function KitsSettings() {
 						onChange={(e) => setSearchTerm(e.target.value)}
 						className="flex-grow px-3 py-2 text-sm text-white bg-mid-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
 						autoComplete="off"
+						data-tooltip-id="tooltip-search-kits"
 					/>
 				</div>
 				<AnimatePresence initial={false}>
@@ -249,7 +253,8 @@ function KitsSettings() {
 												finishRenameKit();
 											}}
 											className="text-green-500 hover:text-green-400"
-											disabled={!!editValidationMessage}>
+											disabled={!!editValidationMessage}
+											data-tooltip-id="tooltip-confirm-rename">
 											<CheckIcon className="h-5 w-5" />
 										</button>
 										<button
@@ -257,7 +262,8 @@ function KitsSettings() {
 												e.stopPropagation();
 												cancelRenameKit();
 											}}
-											className="text-red-500 hover:text-red-400">
+											className="text-red-500 hover:text-red-400"
+											data-tooltip-id="tooltip-cancel-rename">
 											<XMarkIcon className="h-5 w-5" />
 										</button>
 									</div>
@@ -273,7 +279,8 @@ function KitsSettings() {
 												e.stopPropagation();
 												startRenameKit(kitName);
 											}}
-											className="text-blue-500 hover:text-blue-400">
+											className="text-blue-500 hover:text-blue-400"
+											data-tooltip-id="tooltip-rename-kit">
 											<PencilIcon className="h-5 w-5" />
 										</button>
 									)}
@@ -282,7 +289,8 @@ function KitsSettings() {
 											e.stopPropagation();
 											setDeleteConfirmation(kitName);
 										}}
-										className="text-red-500 hover:text-red-400">
+										className="text-red-500 hover:text-red-400"
+										data-tooltip-id="tooltip-delete-kit">
 										<TrashIcon className="h-5 w-5" />
 									</button>
 									<button
@@ -290,7 +298,8 @@ function KitsSettings() {
 											e.stopPropagation();
 											toggleKitExpansion(kitName);
 										}}
-										className="text-gray-400 hover:text-gray-300">
+										className="text-gray-400 hover:text-gray-300"
+										data-tooltip-id="tooltip-toggle-kit">
 										{expandedKit === kitName ? (
 											<ChevronUpIcon className="h-5 w-5" />
 										) : (
@@ -334,6 +343,7 @@ function KitsSettings() {
 													}
 													className="w-full px-2 py-1 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
 													autoComplete="off"
+													data-tooltip-id="tooltip-default-amount"
 												/>
 											</div>
 											{["Price", "MinLevel", "MaxLevel"].map((field) => (
@@ -368,6 +378,7 @@ function KitsSettings() {
 															}`}
 															disabled={!(field in kitData)}
 															autoComplete="off"
+															data-tooltip-id={`tooltip-${field.toLowerCase()}`}
 														/>
 														<button
 															onClick={() => toggleField(kitName, field)}
@@ -380,7 +391,8 @@ function KitsSettings() {
 																field in kitData
 																	? "Disable field"
 																	: "Enable field"
-															}>
+															}
+															data-tooltip-id={`tooltip-toggle-${field.toLowerCase()}`}>
 															<PowerIcon className="h-4 w-4" />
 														</button>
 													</div>
@@ -407,6 +419,7 @@ function KitsSettings() {
 													}
 													className="w-full px-2 py-1 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
 													autoComplete="off"
+													data-tooltip-id="tooltip-description"
 												/>
 											</div>
 											<div>
@@ -428,6 +441,7 @@ function KitsSettings() {
 													}
 													className="w-full px-2 py-1 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
 													autoComplete="off"
+													data-tooltip-id="tooltip-permissions"
 												/>
 											</div>
 										</div>
@@ -447,26 +461,30 @@ function KitsSettings() {
 											/>
 											<label
 												htmlFor={`${kitName}-only-from-spawn`}
-												className="ml-2 text-sm font-medium text-gray-300">
+												className="ml-2 text-sm font-medium text-gray-300"
+												data-tooltip-id="tooltip-only-from-spawn">
 												Only From Spawn
 											</label>
 										</div>
 										<div className="grid grid-cols-3 gap-2 mt-2">
 											<button
 												onClick={() => openModal(kitName, "items")}
-												className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
+												className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+												data-tooltip-id="tooltip-items">
 												<CubeIcon className="h-5 w-5 mr-2" />
 												Items ({kitData.Items?.length || 0})
 											</button>
 											<button
 												onClick={() => openModal(kitName, "dinos")}
-												className="flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors">
+												className="flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+												data-tooltip-id="tooltip-dinos">
 												<SparklesIcon className="h-5 w-5 mr-2" />
 												Dinos ({kitData.Dinos?.length || 0})
 											</button>
 											<button
 												onClick={() => openModal(kitName, "commands")}
-												className="flex items-center justify-center px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors">
+												className="flex items-center justify-center px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors"
+												data-tooltip-id="tooltip-commands">
 												<CommandLineIcon className="h-5 w-5 mr-2" />
 												Commands ({kitData.Commands?.length || 0})
 											</button>
@@ -582,6 +600,158 @@ function KitsSettings() {
 				title="Confirm Deletion"
 				message={`Are you sure you want to delete the kit "${deleteConfirmation}"?`}
 			/>
+
+			{showTooltips && (
+				<>
+					<Tooltip
+						id="tooltip-new-kit-name"
+						place="top"
+						content="Enter a name for the new kit"
+						offset={5}
+						float={true}
+					/>
+					<Tooltip
+						id="tooltip-add-kit"
+						place="top"
+						content="Add a new kit with the given name"
+						offset={5}
+						float={true}
+					/>
+					<Tooltip
+						id="tooltip-search-kits"
+						place="top"
+						content="Search for kits by name"
+						offset={5}
+						float={true}
+					/>
+					<Tooltip
+						id="tooltip-rename-kit"
+						place="top"
+						content="Rename this kit"
+						offset={5}
+						float={true}
+					/>
+					<Tooltip
+						id="tooltip-delete-kit"
+						place="top"
+						content="Delete this kit"
+						offset={5}
+						float={true}
+					/>
+					<Tooltip
+						id="tooltip-toggle-kit"
+						place="top"
+						content="Expand or collapse kit details"
+						offset={5}
+						float={true}
+					/>
+					<Tooltip
+						id="tooltip-confirm-rename"
+						place="top"
+						content="Confirm kit rename"
+						offset={5}
+						float={true}
+					/>
+					<Tooltip
+						id="tooltip-cancel-rename"
+						place="top"
+						content="Cancel kit rename"
+						offset={5}
+						float={true}
+					/>
+					<Tooltip
+						id="tooltip-default-amount"
+						place="top"
+						content="Default number of this kit to give"
+						offset={5}
+						float={true}
+					/>
+					<Tooltip
+						id="tooltip-price"
+						place="top"
+						content="Price of this kit"
+						offset={5}
+						float={true}
+					/>
+					<Tooltip
+						id="tooltip-minlevel"
+						place="top"
+						content="Minimum player level required to use this kit"
+						offset={5}
+						float={true}
+					/>
+					<Tooltip
+						id="tooltip-maxlevel"
+						place="top"
+						content="Maximum player level allowed to use this kit"
+						offset={5}
+						float={true}
+					/>
+					<Tooltip
+						id="tooltip-toggle-price"
+						place="top"
+						content="Enable or disable price for this kit"
+						offset={5}
+						float={true}
+					/>
+					<Tooltip
+						id="tooltip-toggle-minlevel"
+						place="top"
+						content="Enable or disable minimum level requirement"
+						offset={5}
+						float={true}
+					/>
+					<Tooltip
+						id="tooltip-toggle-maxlevel"
+						place="top"
+						content="Enable or disable maximum level limit"
+						offset={5}
+						float={true}
+					/>
+					<Tooltip
+						id="tooltip-description"
+						place="top"
+						content="Description of this kit"
+						offset={5}
+						float={true}
+					/>
+					<Tooltip
+						id="tooltip-permissions"
+						place="top"
+						content="Permissions required to use this kit"
+						offset={5}
+						float={true}
+					/>
+					<Tooltip
+						id="tooltip-only-from-spawn"
+						place="top"
+						content="If checked, this kit can only be used when spawning"
+						offset={5}
+						float={true}
+					/>
+					<Tooltip
+						id="tooltip-items"
+						place="top"
+						content="Manage items in this kit"
+						offset={5}
+						float={true}
+					/>
+					<Tooltip
+						id="tooltip-dinos"
+						place="top"
+						content="Manage dinosaurs in this kit"
+						offset={5}
+						float={true}
+					/>
+					<Tooltip
+						id="tooltip-commands"
+						place="top"
+						content="Manage commands executed when this kit is used"
+						offset={5}
+						float={true}
+					/>
+				</>
+			)}
 		</div>
 	);
 }

@@ -3,9 +3,10 @@
 import React from "react";
 import PasswordInput from "./PasswordInput";
 import { useConfig } from "../ConfigContext";
+import { Tooltip } from "react-tooltip";
 
 function MySQLSettings() {
-	const { config, updateConfig } = useConfig();
+	const { config, updateConfig, showTooltips } = useConfig();
 
 	const handleChange = (e) => {
 		const { name, value, type, checked } = e.target;
@@ -41,7 +42,8 @@ function MySQLSettings() {
 					/>
 					<label
 						htmlFor="useMysql"
-						className="ml-2 text-sm font-medium text-gray-300">
+						className="ml-2 text-sm font-medium text-gray-300"
+						data-tooltip-id="tooltip-useMysql">
 						Use MySQL
 					</label>
 				</div>
@@ -63,6 +65,7 @@ function MySQLSettings() {
 							className={`w-full px-3 py-2 text-sm text-white bg-mid-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
 								!isMySQL && "opacity-50 cursor-not-allowed"
 							}`}
+							data-tooltip-id={`tooltip-${setting}`}
 						/>
 					</div>
 				))}
@@ -76,6 +79,7 @@ function MySQLSettings() {
 						value={mysqlConfig.MysqlPass || ""}
 						onChange={handleChange}
 						disabled={!isMySQL}
+						data-tooltip-id="tooltip-MysqlPass"
 					/>
 				</div>
 				<div className="space-y-2">
@@ -95,9 +99,56 @@ function MySQLSettings() {
 						className={`w-full px-3 py-2 text-sm text-white bg-mid-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
 							!isMySQL && "opacity-50 cursor-not-allowed"
 						}`}
+						data-tooltip-id="tooltip-MysqlPort"
 					/>
 				</div>
 			</div>
+			{showTooltips && (
+				<>
+					<Tooltip
+						id="tooltip-useMysql"
+						place="top"
+						content="Enable MySQL database integration"
+						offset={5}
+						float={true}
+					/>
+					<Tooltip
+						id="tooltip-MysqlHost"
+						place="top"
+						content="Hostname or IP address of your MySQL server"
+						offset={5}
+						float={true}
+					/>
+					<Tooltip
+						id="tooltip-MysqlUser"
+						place="top"
+						content="Username for MySQL authentication"
+						offset={5}
+						float={true}
+					/>
+					<Tooltip
+						id="tooltip-MysqlDB"
+						place="top"
+						content="Name of the MySQL database to use"
+						offset={5}
+						float={true}
+					/>
+					<Tooltip
+						id="tooltip-MysqlPass"
+						place="top"
+						content="Password for MySQL authentication"
+						offset={5}
+						float={true}
+					/>
+					<Tooltip
+						id="tooltip-MysqlPort"
+						place="top"
+						content="Port number for MySQL server (default: 3306)"
+						offset={5}
+						float={true}
+					/>
+				</>
+			)}
 		</div>
 	);
 }

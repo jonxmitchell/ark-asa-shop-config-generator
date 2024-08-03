@@ -4,9 +4,10 @@ import React, { useState } from "react";
 import { TrashIcon } from "@heroicons/react/24/solid";
 import { motion, AnimatePresence } from "framer-motion";
 import { useConfig } from "../ConfigContext";
+import { Tooltip } from "react-tooltip";
 
 function TimedPointsRewards() {
-	const { config, updateConfig } = useConfig();
+	const { config, updateConfig, showTooltips } = useConfig();
 	const [newGroupName, setNewGroupName] = useState("");
 
 	const timedPointsRewardConfig = config?.General?.TimedPointsReward || {};
@@ -108,7 +109,9 @@ function TimedPointsRewards() {
 					/>
 					<label
 						htmlFor="timedRewardsEnabled"
-						className="ml-2 text-sm font-medium text-gray-300">
+						className="ml-2 text-sm font-medium text-gray-300"
+						data-tooltip-id="timed-rewards-enabled"
+						data-tooltip-content="Enable or disable timed points rewards">
 						Enable Timed Points Reward
 					</label>
 				</div>
@@ -130,7 +133,9 @@ function TimedPointsRewards() {
 							htmlFor="stackRewards"
 							className={`ml-2 text-sm font-medium text-gray-300 ${
 								!isEnabled && "opacity-50"
-							}`}>
+							}`}
+							data-tooltip-id="stack-rewards"
+							data-tooltip-content="Allow rewards to accumulate if player is offline">
 							Stack Rewards
 						</label>
 					</div>
@@ -158,6 +163,8 @@ function TimedPointsRewards() {
 							className={`w-11/12 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer ${
 								!isEnabled && "opacity-50 cursor-not-allowed"
 							}`}
+							data-tooltip-id="reward-interval"
+							data-tooltip-content="Set the time between rewards in minutes"
 						/>
 						<input
 							type="number"
@@ -187,13 +194,17 @@ function TimedPointsRewards() {
 							className={`flex-grow px-3 py-2 text-sm text-white bg-mid-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
 								!isEnabled && "cursor-not-allowed"
 							}`}
+							data-tooltip-id="new-group-name"
+							data-tooltip-content="Enter the name for a new reward group"
 						/>
 						<button
 							onClick={addGroup}
 							disabled={!isEnabled}
 							className={`px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors ${
 								!isEnabled && "opacity-50 cursor-not-allowed"
-							}`}>
+							}`}
+							data-tooltip-id="add-group"
+							data-tooltip-content="Add a new reward group">
 							Add Group
 						</button>
 					</div>
@@ -218,6 +229,8 @@ function TimedPointsRewards() {
 									className={`w-9/12 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer ${
 										!isEnabled && "cursor-not-allowed"
 									}`}
+									data-tooltip-id={`group-amount-${groupName}`}
+									data-tooltip-content={`Set the reward amount for ${groupName}`}
 								/>
 								<input
 									type="number"
@@ -234,7 +247,9 @@ function TimedPointsRewards() {
 									disabled={!isEnabled}
 									className={`text-red-500 hover:text-red-700 ${
 										!isEnabled && "cursor-not-allowed"
-									}`}>
+									}`}
+									data-tooltip-id={`remove-group-${groupName}`}
+									data-tooltip-content={`Remove ${groupName} group`}>
 									<TrashIcon className="h-5 w-5" />
 								</button>
 							</div>
@@ -242,6 +257,36 @@ function TimedPointsRewards() {
 					))}
 				</div>
 			</div>
+			{showTooltips && (
+				<>
+					<Tooltip
+						id="timed-rewards-enabled"
+						place="top"
+						opacity={1}
+						float={true}
+					/>
+					<Tooltip id="stack-rewards" place="top" opacity={1} float={true} />
+					<Tooltip id="reward-interval" place="top" opacity={1} float={true} />
+					<Tooltip id="new-group-name" place="top" opacity={1} float={true} />
+					<Tooltip id="add-group" place="top" opacity={1} float={true} />
+					{sortedGroups.map(([groupName]) => (
+						<React.Fragment key={groupName}>
+							<Tooltip
+								id={`group-amount-${groupName}`}
+								place="top"
+								opacity={1}
+								float={true}
+							/>
+							<Tooltip
+								id={`remove-group-${groupName}`}
+								place="top"
+								opacity={1}
+								float={true}
+							/>
+						</React.Fragment>
+					))}
+				</>
+			)}
 		</div>
 	);
 }

@@ -38,12 +38,12 @@ function DiscordSettings() {
 						checked={isEnabled}
 						onChange={handleChange}
 						className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
-						data-tooltip-id="discord-enabled"
-						data-tooltip-content="Enable or disable Discord logging"
 					/>
 					<label
 						htmlFor="discordEnabled"
-						className="ml-2 text-sm font-medium text-gray-300">
+						className="ml-2 text-sm font-medium text-gray-300"
+						data-tooltip-id="discord-enabled"
+						data-tooltip-content="Enable or disable Discord logging">
 						Enable Discord Logging
 					</label>
 				</div>
@@ -98,9 +98,19 @@ function DiscordSettings() {
 			</div>
 			{showTooltips && (
 				<>
-					<Tooltip id="discord-enabled" place="top" opacity={1} />
-					<Tooltip id="discord-sender-name" place="top" opacity={1} />
-					<Tooltip id="discord-webhook-url" place="top" opacity={1} />
+					<Tooltip id="discord-enabled" place="top" opacity={1} float={true} />
+					<Tooltip
+						id="discord-sender-name"
+						place="top"
+						opacity={1}
+						float={true}
+					/>
+					<Tooltip
+						id="discord-webhook-url"
+						place="top"
+						opacity={1}
+						float={true}
+					/>
 				</>
 			)}
 		</div>

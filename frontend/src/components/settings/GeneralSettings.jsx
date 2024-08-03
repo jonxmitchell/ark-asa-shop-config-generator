@@ -4,9 +4,10 @@ import React from "react";
 import DiscordSettings from "./DiscordSettings";
 import TimedPointsRewards from "./TimedPointsRewards";
 import { useConfig } from "../ConfigContext";
+import { Tooltip } from "react-tooltip";
 
 function GeneralSettings() {
-	const { config, updateConfig } = useConfig();
+	const { config, updateConfig, showTooltips } = useConfig();
 	const generalConfig = config?.General || {};
 
 	const handleChange = (e) => {
@@ -59,6 +60,7 @@ function GeneralSettings() {
 											handleSliderChange(setting, e.target.value)
 										}
 										className="w-11/12 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+										data-tooltip-id={`tooltip-${setting}`}
 									/>
 									<input
 										type="number"
@@ -91,6 +93,7 @@ function GeneralSettings() {
 								onChange={handleChange}
 								autoComplete="off"
 								className="w-full px-3 py-2 text-sm text-white bg-mid-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+								data-tooltip-id={`tooltip-${setting}`}
 							/>
 						</div>
 					))}
@@ -118,7 +121,8 @@ function GeneralSettings() {
 								/>
 								<label
 									htmlFor={setting}
-									className="ml-2 text-sm font-medium text-gray-300">
+									className="ml-2 text-sm font-medium text-gray-300"
+									data-tooltip-id={`tooltip-${setting}`}>
 									{setting}
 								</label>
 							</div>
@@ -129,8 +133,59 @@ function GeneralSettings() {
 
 			<DiscordSettings />
 			<TimedPointsRewards />
+
+			{showTooltips && (
+				<>
+					{[
+						"ItemsPerPage",
+						"ShopDisplayTime",
+						"ShopTextSize",
+						"DbPathOverride",
+						"DefaultKit",
+						"CryoItemPath",
+						"GiveDinosInCryopods",
+						"UseSoulTraps",
+						"CryoLimitedTime",
+						"UseOriginalTradeCommandWithUI",
+						"PreventUseNoglin",
+						"PreventUseUnconscious",
+						"PreventUseHandcuffed",
+						"PreventUseCarried",
+					].map((setting) => (
+						<Tooltip
+							key={setting}
+							id={`tooltip-${setting}`}
+							place="top"
+							content={getTooltipContent(setting)}
+							offset={40}
+							float={true}
+						/>
+					))}
+				</>
+			)}
 		</div>
 	);
+}
+
+function getTooltipContent(setting) {
+	const tooltipContent = {
+		ItemsPerPage: "Number of items to display per page in the shop",
+		ShopDisplayTime: "Time in seconds to display the shop",
+		ShopTextSize: "Size of the text in the shop UI",
+		DbPathOverride: "Custom path for the database file",
+		DefaultKit: "Name of the default kit to give new players",
+		CryoItemPath: "Path to the cryopod item blueprint",
+		GiveDinosInCryopods: "Give purchased dinos in cryopods",
+		UseSoulTraps: "Use soul traps instead of cryopods",
+		CryoLimitedTime: "Limit the time dinos can stay in cryopods",
+		UseOriginalTradeCommandWithUI: "Use the original trade command with a UI",
+		PreventUseNoglin: "Prevent using the shop while controlling a Noglin",
+		PreventUseUnconscious: "Prevent using the shop while unconscious",
+		PreventUseHandcuffed: "Prevent using the shop while handcuffed",
+		PreventUseCarried: "Prevent using the shop while being carried",
+	};
+
+	return tooltipContent[setting] || "No description available";
 }
 
 export default GeneralSettings;

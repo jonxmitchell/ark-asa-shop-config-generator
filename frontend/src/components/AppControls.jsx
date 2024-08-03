@@ -18,12 +18,14 @@ import SavedConfigsModal from "./settings/modals/SavedConfigsModal";
 import LicenseInfoModal from "../components/settings/modals/LicenseInfoModal";
 import { useConfig } from "./ConfigContext";
 import { toast } from "react-toastify";
+import { Tooltip } from "react-tooltip";
 
-const IconButton = ({ Icon, onClick, title }) => (
+const IconButton = ({ Icon, onClick, title, tooltipId }) => (
 	<button
 		onClick={onClick}
 		className="text-gray-400 hover:text-accent-blue transition-colors"
-		title={title}>
+		title={title}
+		data-tooltip-id={tooltipId}>
 		<Icon className="h-6 w-6" />
 	</button>
 );
@@ -36,7 +38,7 @@ function AppControls() {
 	const [importProgress, setImportProgress] = useState(0);
 	const [isSavedConfigsModalOpen, setIsSavedConfigsModalOpen] = useState(false);
 	const [isLicenseModalOpen, setIsLicenseModalOpen] = useState(false);
-	const { config, importConfig } = useConfig();
+	const { config, importConfig, showTooltips } = useConfig();
 
 	const handleLicense = useCallback(() => {
 		setIsLicenseModalOpen(true);
@@ -106,26 +108,31 @@ function AppControls() {
 					Icon={HiOutlineDocumentText}
 					onClick={handleLicense}
 					title="License"
+					tooltipId="tooltip-license"
 				/>
 				<IconButton
 					Icon={HiOutlineCog}
 					onClick={handleSettings}
 					title="Settings"
+					tooltipId="tooltip-settings"
 				/>
 				<IconButton
 					Icon={HiOutlineDownload}
 					onClick={handleImport}
 					title="Import"
+					tooltipId="tooltip-import"
 				/>
 				<IconButton
 					Icon={HiOutlineUpload}
 					onClick={handleExport}
 					title="Export"
+					tooltipId="tooltip-export"
 				/>
 				<IconButton
 					Icon={HiOutlineCollection}
 					onClick={handleSavedConfigs}
 					title="Saved Configs"
+					tooltipId="tooltip-saved-configs"
 				/>
 			</div>
 			<SettingsModal
@@ -155,6 +162,45 @@ function AppControls() {
 				isOpen={isLicenseModalOpen}
 				onClose={() => setIsLicenseModalOpen(false)}
 			/>
+			{showTooltips && (
+				<>
+					<Tooltip
+						id="tooltip-license"
+						place="top"
+						content="View license information"
+						offset={5}
+						float={true}
+					/>
+					<Tooltip
+						id="tooltip-settings"
+						place="top"
+						content="Open settings"
+						offset={5}
+						float={true}
+					/>
+					<Tooltip
+						id="tooltip-import"
+						place="top"
+						content="Import configuration"
+						offset={5}
+						float={true}
+					/>
+					<Tooltip
+						id="tooltip-export"
+						place="top"
+						content="Export configuration"
+						offset={5}
+						float={true}
+					/>
+					<Tooltip
+						id="tooltip-saved-configs"
+						place="top"
+						content="Manage saved configurations"
+						offset={5}
+						float={true}
+					/>
+				</>
+			)}
 		</>
 	);
 }

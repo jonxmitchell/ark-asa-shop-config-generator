@@ -10,6 +10,7 @@ const Tooltip = ({ id, content }) => {
 				place="top"
 				content={content}
 				className="custom-tooltip"
+				float={true}
 			/>
 		</>
 	);
