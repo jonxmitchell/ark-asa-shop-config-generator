@@ -114,7 +114,15 @@ function ItemShopEntry({
 			handleItemChange(
 				itemName,
 				field,
-				itemData[field] === undefined ? 0 : undefined
+				itemData[field] === undefined
+					? field === "MinLevel"
+						? 1
+						: field === "MaxLevel"
+						? 2
+						: field === "Permissions"
+						? "default"
+						: 0
+					: undefined
 			);
 		},
 		[itemName, itemData, handleItemChange]
@@ -196,21 +204,28 @@ function ItemShopEntry({
 										id={`${field}-${itemName}`}
 										type={field === "Permissions" ? "text" : "number"}
 										value={itemData[field] !== undefined ? itemData[field] : ""}
-										onChange={(e) =>
-											handleItemChange(
-												itemName,
-												field,
-												field === "Permissions"
-													? e.target.value
-													: parseInt(e.target.value)
-											)
-										}
-										className={`w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
+										onChange={(e) => {
+											let value = e.target.value;
+											if (field === "MinLevel") {
+												value = Math.max(1, parseInt(value) || 1);
+											} else if (field === "MaxLevel") {
+												value = Math.max(2, parseInt(value) || 2);
+											}
+											handleItemChange(itemName, field, value);
+										}}
+										className={`w-full px-3 py-2 pr-8 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
 											itemData[field] === undefined &&
 											"opacity-50 cursor-not-allowed"
 										}`}
 										disabled={itemData[field] === undefined}
 										autoComplete="off"
+										min={
+											field === "MinLevel"
+												? 1
+												: field === "MaxLevel"
+												? 2
+												: undefined
+										}
 									/>
 									<button
 										onClick={() => toggleField(field)}
@@ -230,22 +245,21 @@ function ItemShopEntry({
 							</div>
 						))}
 					</div>
-					<div className="flex justify-between items-center">
-						<h5 className="text-sm font-medium text-gray-300">Items</h5>
-						<button
-							onClick={() => addItemEntry(itemName)}
-							className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center text-sm">
-							<PlusIcon className="h-4 w-4 mr-1" />
-							Add Entry
-						</button>
-					</div>
-
-					<AnimatePresence>
+					<div className="space-y-2 mt-4">
+						<div className="flex justify-between items-center">
+							<h5 className="text-sm font-medium text-gray-300">Items</h5>
+							<button
+								onClick={() => addItemEntry(itemName)}
+								className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center text-sm">
+								<PlusIcon className="h-4 w-4 mr-1" />
+								Add Item
+							</button>
+						</div>
 						{itemData.Items &&
-							itemData.Items.map((entry, index) => (
+							itemData.Items.map((item, index) => (
 								<ItemEntry
 									key={index}
-									entry={entry}
+									entry={item}
 									index={index}
 									handleItemEntryChange={(index, field, value) =>
 										handleItemEntryChange(itemName, index, field, value)
@@ -254,7 +268,7 @@ function ItemShopEntry({
 									arkData={arkData}
 								/>
 							))}
-					</AnimatePresence>
+					</div>
 				</motion.div>
 			)}
 		</AnimatePresence>

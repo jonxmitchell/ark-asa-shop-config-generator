@@ -20,7 +20,15 @@ function UnlockEngramShopEntry({
 			handleItemChange(
 				itemName,
 				field,
-				itemData[field] === undefined ? 0 : undefined
+				itemData[field] === undefined
+					? field === "MinLevel"
+						? 1
+						: field === "MaxLevel"
+						? 2
+						: field === "Permissions"
+						? "default"
+						: 0
+					: undefined
 			);
 		},
 		[itemName, itemData, handleItemChange]
@@ -127,20 +135,28 @@ function UnlockEngramShopEntry({
 										id={`${field}-${itemName}`}
 										type={field === "Permissions" ? "text" : "number"}
 										value={itemData[field] !== undefined ? itemData[field] : ""}
-										onChange={(e) =>
-											handleInputChange(
-												field,
-												field === "Permissions"
-													? e.target.value
-													: parseInt(e.target.value)
-											)
-										}
-										className={`w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
+										onChange={(e) => {
+											let value = e.target.value;
+											if (field === "MinLevel") {
+												value = Math.max(1, parseInt(value) || 1);
+											} else if (field === "MaxLevel") {
+												value = Math.max(2, parseInt(value) || 2);
+											}
+											handleInputChange(field, value);
+										}}
+										className={`w-full px-3 py-2 pr-8 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
 											itemData[field] === undefined &&
 											"opacity-50 cursor-not-allowed"
 										}`}
 										disabled={itemData[field] === undefined}
 										autoComplete="off"
+										min={
+											field === "MinLevel"
+												? 1
+												: field === "MaxLevel"
+												? 2
+												: undefined
+										}
 									/>
 									<button
 										onClick={() => toggleField(field)}
