@@ -16,7 +16,7 @@ function Sidebar({ activeItem, setActiveItem }) {
 		<aside
 			className="w-full h-full bg-mid-black py-6 px-4 flex flex-col"
 			aria-label="Sidebar">
-			<h2 className="text-xl font-bold mb-6 text-white px-2">Settings</h2>
+			<h2 className="text-xl font-bold mb-6 text-white px-2">Configurations</h2>
 			<div className="overflow-y-auto flex-grow scrollbar-thin scrollbar-thumb-blue scrollbar-track-gray">
 				<ul className="space-y-2">
 					{menuItems.map((item) => (
