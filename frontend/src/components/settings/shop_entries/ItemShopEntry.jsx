@@ -4,9 +4,13 @@ import React, { useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { TrashIcon, PlusIcon, PowerIcon } from "@heroicons/react/24/solid";
 import SearchableDropdown from "../../SearchableDropdown";
+import { useConfig } from "../../ConfigContext";
+import { Tooltip } from "react-tooltip";
 
 const ItemEntry = React.memo(
 	({ entry, index, handleItemEntryChange, removeItemEntry, arkData }) => {
+		const { showTooltips } = useConfig();
+
 		return (
 			<motion.div
 				initial={{ opacity: 0, y: -10 }}
@@ -34,6 +38,7 @@ const ItemEntry = React.memo(
 							}
 							className="w-full px-3 py-2 text-sm text-white bg-mid-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
 							autoComplete="off"
+							data-tooltip-id={`tooltip-quality-${index}`}
 						/>
 					</div>
 					<div className="col-span-2">
@@ -51,6 +56,7 @@ const ItemEntry = React.memo(
 							}
 							className="w-full px-3 py-2 text-sm text-white bg-mid-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
 							autoComplete="off"
+							data-tooltip-id={`tooltip-amount-${index}`}
 						/>
 					</div>
 					<div className="col-span-8">
@@ -68,6 +74,7 @@ const ItemEntry = React.memo(
 							placeholder="Select or enter a blueprint"
 							value={entry.Blueprint}
 							className={"w-full bg-mid-black"}
+							data-tooltip-id={`tooltip-blueprint-${index}`}
 						/>
 					</div>
 				</div>
@@ -81,6 +88,7 @@ const ItemEntry = React.memo(
 								handleItemEntryChange(index, "ForceBlueprint", e.target.checked)
 							}
 							className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
+							data-tooltip-id={`tooltip-force-blueprint-${index}`}
 						/>
 						<label
 							htmlFor={`forceBlueprint-${index}`}
@@ -90,10 +98,40 @@ const ItemEntry = React.memo(
 					</div>
 					<button
 						onClick={() => removeItemEntry(index)}
-						className="text-red-500 hover:text-red-700">
+						className="text-red-500 hover:text-red-700"
+						data-tooltip-id={`tooltip-remove-item-${index}`}>
 						<TrashIcon className="h-5 w-5" />
 					</button>
 				</div>
+				{showTooltips && (
+					<>
+						<Tooltip
+							id={`tooltip-quality-${index}`}
+							place="top"
+							content="Set the quality of the item"
+						/>
+						<Tooltip
+							id={`tooltip-amount-${index}`}
+							place="top"
+							content="Set the quantity of the item"
+						/>
+						<Tooltip
+							id={`tooltip-blueprint-${index}`}
+							place="top"
+							content="Select the blueprint for the item"
+						/>
+						<Tooltip
+							id={`tooltip-force-blueprint-${index}`}
+							place="top"
+							content="Force the use of blueprint for this item"
+						/>
+						<Tooltip
+							id={`tooltip-remove-item-${index}`}
+							place="top"
+							content="Remove this item from the shop"
+						/>
+					</>
+				)}
 			</motion.div>
 		);
 	}
@@ -109,6 +147,8 @@ function ItemShopEntry({
 	removeItemEntry,
 	arkData,
 }) {
+	const { showTooltips } = useConfig();
+
 	const toggleField = useCallback(
 		(field) => {
 			handleItemChange(
@@ -153,6 +193,7 @@ function ItemShopEntry({
 								}
 								className="w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
 								autoComplete="off"
+								data-tooltip-id={`tooltip-title-${itemName}`}
 							/>
 						</div>
 						<div className="col-span-6">
@@ -170,6 +211,7 @@ function ItemShopEntry({
 								}
 								className="w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
 								autoComplete="off"
+								data-tooltip-id={`tooltip-description-${itemName}`}
 							/>
 						</div>
 						<div className="col-span-2">
@@ -187,6 +229,7 @@ function ItemShopEntry({
 								}
 								className="w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
 								autoComplete="off"
+								data-tooltip-id={`tooltip-price-${itemName}`}
 							/>
 						</div>
 					</div>
@@ -226,6 +269,7 @@ function ItemShopEntry({
 												? 2
 												: undefined
 										}
+										data-tooltip-id={`tooltip-${field}-${itemName}`}
 									/>
 									<button
 										onClick={() => toggleField(field)}
@@ -238,7 +282,8 @@ function ItemShopEntry({
 											itemData[field] !== undefined
 												? "Disable field"
 												: "Enable field"
-										}>
+										}
+										data-tooltip-id={`tooltip-toggle-${field}-${itemName}`}>
 										<PowerIcon className="h-4 w-4" />
 									</button>
 								</div>
@@ -250,7 +295,8 @@ function ItemShopEntry({
 							<h5 className="text-sm font-medium text-gray-300">Items</h5>
 							<button
 								onClick={() => addItemEntry(itemName)}
-								className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center text-sm">
+								className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center text-sm"
+								data-tooltip-id={`tooltip-add-item-${itemName}`}>
 								<PlusIcon className="h-4 w-4 mr-1" />
 								Add Item
 							</button>
@@ -270,6 +316,60 @@ function ItemShopEntry({
 							))}
 					</div>
 				</motion.div>
+			)}
+			{showTooltips && (
+				<>
+					<Tooltip
+						id={`tooltip-title-${itemName}`}
+						place="top"
+						content="Enter the title for this shop item"
+					/>
+					<Tooltip
+						id={`tooltip-description-${itemName}`}
+						place="top"
+						content="Enter the description for this shop item"
+					/>
+					<Tooltip
+						id={`tooltip-price-${itemName}`}
+						place="top"
+						content="Set the price for this shop item"
+					/>
+					<Tooltip
+						id={`tooltip-MinLevel-${itemName}`}
+						place="top"
+						content="Set the minimum level required to purchase this item"
+					/>
+					<Tooltip
+						id={`tooltip-MaxLevel-${itemName}`}
+						place="top"
+						content="Set the maximum level allowed to purchase this item"
+					/>
+					<Tooltip
+						id={`tooltip-Permissions-${itemName}`}
+						place="top"
+						content="Set the permissions required to purchase this item"
+					/>
+					<Tooltip
+						id={`tooltip-toggle-MinLevel-${itemName}`}
+						place="top"
+						content="Toggle minimum level requirement"
+					/>
+					<Tooltip
+						id={`tooltip-toggle-MaxLevel-${itemName}`}
+						place="top"
+						content="Toggle maximum level limit"
+					/>
+					<Tooltip
+						id={`tooltip-toggle-Permissions-${itemName}`}
+						place="top"
+						content="Toggle permissions requirement"
+					/>
+					<Tooltip
+						id={`tooltip-add-item-${itemName}`}
+						place="top"
+						content="Add a new item to this shop entry"
+					/>
+				</>
 			)}
 		</AnimatePresence>
 	);
