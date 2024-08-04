@@ -92,7 +92,7 @@ function KitsSettings() {
 						Permissions: "",
 						Price: 0,
 						MinLevel: 1,
-						MaxLevel: 20,
+						MaxLevel: 2,
 						OnlyFromSpawn: false,
 					},
 				},
@@ -177,7 +177,7 @@ function KitsSettings() {
 			delete updatedKits[kitName][field];
 		} else {
 			updatedKits[kitName][field] =
-				field === "Price" ? 0 : field === "MinLevel" ? 1 : 20;
+				field === "Price" ? 0 : field === "MinLevel" ? 1 : 2;
 		}
 		updateConfig({ Kits: updatedKits });
 	};
@@ -363,7 +363,7 @@ function KitsSettings() {
 																	? 0
 																	: field === "MinLevel"
 																	? 1
-																	: 20)
+																	: 2)
 															}
 															onChange={(e) =>
 																handleKitChange(
