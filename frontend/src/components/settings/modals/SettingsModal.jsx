@@ -26,9 +26,19 @@ const Toggle = ({ checked, onChange }) => (
 
 function SettingsModal({ isOpen, onClose }) {
 	const [outputPath, setOutputPath] = useState("");
-	const [autoSaveEnabled, setAutoSaveEnabled] = useState(false);
-	const [autoSaveInterval, setAutoSaveInterval] = useState(5);
-	const { showTooltips, toggleTooltips } = useConfig();
+	const {
+		showTooltips,
+		toggleTooltips,
+		autoSaveSettings,
+		setAutoSaveSettings,
+		loadAutoSaveSettings,
+	} = useConfig();
+	const [localAutoSaveEnabled, setLocalAutoSaveEnabled] = useState(
+		autoSaveSettings.enabled
+	);
+	const [localAutoSaveInterval, setLocalAutoSaveInterval] = useState(
+		autoSaveSettings.interval
+	);
 
 	useEffect(() => {
 		if (isOpen) {
@@ -36,8 +46,8 @@ function SettingsModal({ isOpen, onClose }) {
 				try {
 					const settings = await invoke("load_settings_command");
 					setOutputPath(settings.output_path);
-					setAutoSaveEnabled(settings.auto_save_enabled);
-					setAutoSaveInterval(settings.auto_save_interval);
+					setLocalAutoSaveEnabled(settings.auto_save_enabled);
+					setLocalAutoSaveInterval(settings.auto_save_interval);
 					toggleTooltips(settings.show_tooltips);
 				} catch (error) {
 					console.error("Failed to load settings:", error);
@@ -69,14 +79,19 @@ function SettingsModal({ isOpen, onClose }) {
 		try {
 			await invoke("save_settings_command", {
 				outputPath,
-				autoSaveEnabled,
-				autoSaveInterval,
+				autoSaveEnabled: localAutoSaveEnabled,
+				autoSaveInterval: localAutoSaveInterval,
 				showTooltips,
 			});
+			setAutoSaveSettings({
+				enabled: localAutoSaveEnabled,
+				interval: localAutoSaveInterval,
+			});
+			await loadAutoSaveSettings();
 			console.log("Saved settings:", {
 				outputPath,
-				autoSaveEnabled,
-				autoSaveInterval,
+				autoSaveEnabled: localAutoSaveEnabled,
+				autoSaveInterval: localAutoSaveInterval,
 				showTooltips,
 			});
 			toast.success("Settings saved successfully", {
@@ -151,13 +166,13 @@ function SettingsModal({ isOpen, onClose }) {
 					<div className="flex flex-col space-y-2 mb-4">
 						<span className="text-sm text-gray-400">Enable auto-save</span>
 						<Toggle
-							checked={autoSaveEnabled}
-							onChange={setAutoSaveEnabled}
+							checked={localAutoSaveEnabled}
+							onChange={setLocalAutoSaveEnabled}
 							data-tooltip-id="auto-save-toggle"
 							data-tooltip-content="Toggle auto-save feature"
 						/>
 					</div>
-					<div className={`space-y-2 ${!autoSaveEnabled && "opacity-50"}`}>
+					<div className={`space-y-2 ${!localAutoSaveEnabled && "opacity-50"}`}>
 						<span className="text-sm text-gray-400">
 							Auto-Save Duration (in minutes)
 						</span>
@@ -167,22 +182,24 @@ function SettingsModal({ isOpen, onClose }) {
 								id="autoSaveInterval"
 								min="1"
 								max="60"
-								value={autoSaveInterval}
-								onChange={(e) => setAutoSaveInterval(parseInt(e.target.value))}
-								disabled={!autoSaveEnabled}
+								value={localAutoSaveInterval}
+								onChange={(e) =>
+									setLocalAutoSaveInterval(parseInt(e.target.value))
+								}
+								disabled={!localAutoSaveEnabled}
 								className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
 								data-tooltip-id="auto-save-interval"
 								data-tooltip-content="Set auto-save interval"
 							/>
 							<input
 								type="number"
-								value={autoSaveInterval}
+								value={localAutoSaveInterval}
 								onChange={(e) =>
-									setAutoSaveInterval(
+									setLocalAutoSaveInterval(
 										Math.max(1, Math.min(60, parseInt(e.target.value) || 1))
 									)
 								}
-								disabled={!autoSaveEnabled}
+								disabled={!localAutoSaveEnabled}
 								className="w-16 px-2 py-1 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
 								data-tooltip-id="auto-save-interval-input"
 								data-tooltip-content="Set auto-save interval in minutes"

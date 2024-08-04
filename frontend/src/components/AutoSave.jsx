@@ -1,28 +1,36 @@
-// eslint-disable-next-line no-unused-vars
+// src/components/AutoSave.jsx
+
 import React, { useEffect, useRef, useCallback } from "react";
 import { invoke } from "@tauri-apps/api/tauri";
 import { toast } from "react-toastify";
 import { useConfig } from "./ConfigContext";
 
 function AutoSave() {
-	const { config, currentlyLoadedConfig } = useConfig();
-	const timeoutRef = useRef(null);
-	const currentConfigRef = useRef(null);
+	const { config, currentlyLoadedConfig, autoSaveSettings } = useConfig();
+	const intervalRef = useRef(null);
+	const latestConfigRef = useRef(config);
+	const latestLoadedConfigRef = useRef(currentlyLoadedConfig);
 
+	// Update refs when config or currentlyLoadedConfig changes
 	useEffect(() => {
-		currentConfigRef.current = currentlyLoadedConfig;
-	}, [currentlyLoadedConfig]);
+		latestConfigRef.current = config;
+	}, [config]);
 
 	const autoSave = useCallback(async () => {
-		try {
-			const currentConfig = currentConfigRef.current;
-			if (!currentConfig) {
-				console.log("No configuration loaded, skipping auto-save");
-				return;
-			}
+		const currentConfig = latestConfigRef.current;
+		const currentLoadedConfig = latestLoadedConfigRef.current;
 
-			console.log("Attempting to auto-save...", currentConfig);
-			await invoke("auto_save_config", { config, configId: currentConfig.id });
+		if (!currentLoadedConfig) {
+			console.log("Auto-save skipped: no configuration loaded");
+			return;
+		}
+
+		try {
+			console.log("Attempting to auto-save...", currentLoadedConfig);
+			await invoke("auto_save_config", {
+				config: currentConfig,
+				configId: currentLoadedConfig.id,
+			});
 			console.log("Auto-save successful");
 			toast.success("Configuration auto-saved successfully", {
 				position: "bottom-right",
@@ -36,56 +44,47 @@ function AutoSave() {
 		} catch (error) {
 			console.error("Auto-save failed:", error);
 			toast.error("Failed to auto-save configuration");
-		} finally {
-			const settings = await invoke("load_settings_command");
-			if (settings.auto_save_enabled) {
-				timeoutRef.current = setTimeout(
-					autoSave,
-					settings.auto_save_interval * 60 * 1000
-				);
-				console.log(
-					"Next auto-save scheduled for",
-					settings.auto_save_interval,
-					"minutes"
-				);
-			}
 		}
-	}, [config]);
+	}, []);
+
+	const setupAutoSave = useCallback(() => {
+		if (intervalRef.current) {
+			clearInterval(intervalRef.current);
+			intervalRef.current = null;
+		}
+
+		if (autoSaveSettings.enabled && latestLoadedConfigRef.current) {
+			console.log("Setting up auto-save...");
+			intervalRef.current = setInterval(
+				autoSave,
+				autoSaveSettings.interval * 60 * 1000
+			);
+			console.log(
+				"Auto-save scheduled for every",
+				autoSaveSettings.interval,
+				"minutes"
+			);
+		} else {
+			console.log("Auto-save is disabled or no configuration is loaded");
+		}
+	}, [autoSaveSettings, autoSave]);
 
 	useEffect(() => {
-		const setupAutoSave = async () => {
-			try {
-				const settings = await invoke("load_settings_command");
-				console.log("Auto-save settings:", settings);
-				if (settings.auto_save_enabled) {
-					if (timeoutRef.current) {
-						clearTimeout(timeoutRef.current);
-					}
-					timeoutRef.current = setTimeout(
-						autoSave,
-						settings.auto_save_interval * 60 * 1000
-					);
-					console.log(
-						"Auto-save scheduled for",
-						settings.auto_save_interval,
-						"minutes"
-					);
-				}
-			} catch (error) {
-				console.error("Failed to setup auto-save:", error);
-			}
-		};
+		latestLoadedConfigRef.current = currentlyLoadedConfig;
+		setupAutoSave();
+	}, [currentlyLoadedConfig, setupAutoSave]);
 
+	useEffect(() => {
 		setupAutoSave();
 
 		return () => {
-			if (timeoutRef.current) {
-				clearTimeout(timeoutRef.current);
+			if (intervalRef.current) {
+				clearInterval(intervalRef.current);
 			}
 		};
-	}, [config, currentlyLoadedConfig, autoSave]);
+	}, [setupAutoSave]);
 
 	return null;
 }
 
-export default AutoSave;
+export default React.memo(AutoSave);
