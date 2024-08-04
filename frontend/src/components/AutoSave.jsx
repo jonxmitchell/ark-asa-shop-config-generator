@@ -43,7 +43,15 @@ function AutoSave() {
 			});
 		} catch (error) {
 			console.error("Auto-save failed:", error);
-			toast.error("Failed to auto-save configuration");
+			toast.error("Failed to auto-save configuration", {
+				position: "bottom-right",
+				autoClose: 3000,
+				hideProgressBar: false,
+				closeOnClick: true,
+				pauseOnHover: true,
+				draggable: true,
+				theme: "dark",
+			});
 		}
 	}, []);
 

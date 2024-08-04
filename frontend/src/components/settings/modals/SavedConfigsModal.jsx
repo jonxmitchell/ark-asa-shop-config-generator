@@ -44,13 +44,29 @@ function SavedConfigsModal({ isOpen, onClose }) {
 			setSavedConfigs(configs);
 		} catch (error) {
 			console.error("Failed to load saved configs:", error);
-			toast.error("Failed to load saved configs");
+			toast.error("Failed to load saved configs", {
+				position: "bottom-right",
+				autoClose: 3000,
+				hideProgressBar: false,
+				closeOnClick: true,
+				pauseOnHover: true,
+				draggable: true,
+				theme: "dark",
+			});
 		}
 	};
 
 	const handleSaveCurrentConfig = async () => {
 		if (!newConfigName.trim()) {
-			toast.error("Please enter a name for the current config");
+			toast.error("Please enter a name for the current config", {
+				position: "bottom-right",
+				autoClose: 3000,
+				hideProgressBar: false,
+				closeOnClick: true,
+				pauseOnHover: true,
+				draggable: true,
+				theme: "dark",
+			});
 			return;
 		}
 		if (currentlyLoadedConfig) {
@@ -67,7 +83,15 @@ function SavedConfigsModal({ isOpen, onClose }) {
 				name: newConfigName,
 				config: config,
 			});
-			toast.success("Config saved successfully");
+			toast.success("Config saved successfully", {
+				position: "bottom-right",
+				autoClose: 3000,
+				hideProgressBar: false,
+				closeOnClick: true,
+				pauseOnHover: true,
+				draggable: true,
+				theme: "dark",
+			});
 			await loadSavedConfigs();
 			setNewConfigName("");
 
@@ -83,9 +107,25 @@ function SavedConfigsModal({ isOpen, onClose }) {
 		} catch (error) {
 			console.error("Failed to save config:", error);
 			if (error.toString().includes("already exists")) {
-				toast.error("A configuration with this name already exists");
+				toast.error("A configuration with this name already exists", {
+					position: "bottom-right",
+					autoClose: 3000,
+					hideProgressBar: false,
+					closeOnClick: true,
+					pauseOnHover: true,
+					draggable: true,
+					theme: "dark",
+				});
 			} else {
-				toast.error("Failed to save config");
+				toast.error("Failed to save config", {
+					position: "bottom-right",
+					autoClose: 3000,
+					hideProgressBar: false,
+					closeOnClick: true,
+					pauseOnHover: true,
+					draggable: true,
+					theme: "dark",
+				});
 			}
 		}
 	};
@@ -98,7 +138,15 @@ function SavedConfigsModal({ isOpen, onClose }) {
 	const confirmLoadConfig = () => {
 		if (configToLoad) {
 			loadConfig(configToLoad);
-			toast.success("Config loaded successfully");
+			toast.success("Config loaded successfully", {
+				position: "bottom-right",
+				autoClose: 3000,
+				hideProgressBar: false,
+				closeOnClick: true,
+				pauseOnHover: true,
+				draggable: true,
+				theme: "dark",
+			});
 			setShowLoadWarning(false);
 		}
 	};
@@ -106,14 +154,30 @@ function SavedConfigsModal({ isOpen, onClose }) {
 	const handleDeleteConfig = async (id) => {
 		try {
 			await invoke("delete_config_command", { id });
-			toast.success("Config deleted successfully");
+			toast.success("Config deleted successfully", {
+				position: "bottom-right",
+				autoClose: 3000,
+				hideProgressBar: false,
+				closeOnClick: true,
+				pauseOnHover: true,
+				draggable: true,
+				theme: "dark",
+			});
 			await loadSavedConfigs();
 			if (currentlyLoadedConfig && currentlyLoadedConfig.id === id) {
 				unloadConfig();
 			}
 		} catch (error) {
 			console.error("Failed to delete config:", error);
-			toast.error("Failed to delete config");
+			toast.error("Failed to delete config", {
+				position: "bottom-right",
+				autoClose: 3000,
+				hideProgressBar: false,
+				closeOnClick: true,
+				pauseOnHover: true,
+				draggable: true,
+				theme: "dark",
+			});
 		}
 	};
 
@@ -125,18 +189,42 @@ function SavedConfigsModal({ isOpen, onClose }) {
 					name: currentlyLoadedConfig.name,
 					config: config,
 				});
-				toast.success("Config updated successfully");
+				toast.success("Config updated successfully", {
+					position: "bottom-right",
+					autoClose: 3000,
+					hideProgressBar: false,
+					closeOnClick: true,
+					pauseOnHover: true,
+					draggable: true,
+					theme: "dark",
+				});
 				await loadSavedConfigs();
 			} catch (error) {
 				console.error("Failed to update config:", error);
-				toast.error("Failed to update config");
+				toast.error("Failed to update config", {
+					position: "bottom-right",
+					autoClose: 3000,
+					hideProgressBar: false,
+					closeOnClick: true,
+					pauseOnHover: true,
+					draggable: true,
+					theme: "dark",
+				});
 			}
 		}
 	};
 
 	const handleUnloadConfig = () => {
 		unloadConfig();
-		toast.success("Configuration unloaded");
+		toast.success("Configuration unloaded", {
+			position: "bottom-right",
+			autoClose: 3000,
+			hideProgressBar: false,
+			closeOnClick: true,
+			pauseOnHover: true,
+			draggable: true,
+			theme: "dark",
+		});
 	};
 
 	const handleStartRename = (config) => {
@@ -151,7 +239,15 @@ function SavedConfigsModal({ isOpen, onClose }) {
 
 	const handleConfirmRename = async () => {
 		if (newName.trim() === "") {
-			toast.error("Config name cannot be empty");
+			toast.error("Config name cannot be empty", {
+				position: "bottom-right",
+				autoClose: 3000,
+				hideProgressBar: false,
+				closeOnClick: true,
+				pauseOnHover: true,
+				draggable: true,
+				theme: "dark",
+			});
 			return;
 		}
 
@@ -161,13 +257,29 @@ function SavedConfigsModal({ isOpen, onClose }) {
 				name: newName,
 				config: JSON.parse(renamingConfig.config),
 			});
-			toast.success("Config renamed successfully");
+			toast.success("Config renamed successfully", {
+				position: "bottom-right",
+				autoClose: 3000,
+				hideProgressBar: false,
+				closeOnClick: true,
+				pauseOnHover: true,
+				draggable: true,
+				theme: "dark",
+			});
 			await loadSavedConfigs();
 			setRenamingConfig(null);
 			setNewName("");
 		} catch (error) {
 			console.error("Failed to rename config:", error);
-			toast.error("Failed to rename config");
+			toast.error("Failed to rename config", {
+				position: "bottom-right",
+				autoClose: 3000,
+				hideProgressBar: false,
+				closeOnClick: true,
+				pauseOnHover: true,
+				draggable: true,
+				theme: "dark",
+			});
 		}
 	};
 

@@ -51,7 +51,15 @@ function SettingsModal({ isOpen, onClose }) {
 					toggleTooltips(settings.show_tooltips);
 				} catch (error) {
 					console.error("Failed to load settings:", error);
-					toast.error("Failed to load settings");
+					toast.error("Failed to load settings", {
+						position: "bottom-right",
+						autoClose: 3000,
+						hideProgressBar: false,
+						closeOnClick: true,
+						pauseOnHover: true,
+						draggable: true,
+						theme: "dark",
+					});
 				}
 			};
 
@@ -71,7 +79,15 @@ function SettingsModal({ isOpen, onClose }) {
 			}
 		} catch (error) {
 			console.error("Failed to open folder dialog:", error);
-			toast.error("Failed to open folder dialog");
+			toast.error("Failed to open folder dialog", {
+				position: "bottom-right",
+				autoClose: 3000,
+				hideProgressBar: false,
+				closeOnClick: true,
+				pauseOnHover: true,
+				draggable: true,
+				theme: "dark",
+			});
 		}
 	};
 
@@ -105,7 +121,15 @@ function SettingsModal({ isOpen, onClose }) {
 			});
 		} catch (error) {
 			console.error("Failed to save settings:", error);
-			toast.error("Failed to save settings");
+			toast.error("Failed to save settings", {
+				position: "bottom-right",
+				autoClose: 3000,
+				hideProgressBar: false,
+				closeOnClick: true,
+				pauseOnHover: true,
+				draggable: true,
+				theme: "dark",
+			});
 		}
 	};
 

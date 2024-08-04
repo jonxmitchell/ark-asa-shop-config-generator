@@ -84,7 +84,15 @@ function AppControls() {
 		} catch (error) {
 			console.error("Error importing file:", error);
 			setIsImportProgressOpen(false);
-			toast.error("Failed to import configuration file.");
+			toast.error("Failed to import configuration file.", {
+				position: "bottom-right",
+				autoClose: 3000,
+				hideProgressBar: false,
+				closeOnClick: true,
+				pauseOnHover: true,
+				draggable: true,
+				theme: "dark",
+			});
 		}
 	}, [importConfig]);
 

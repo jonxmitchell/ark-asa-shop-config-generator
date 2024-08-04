@@ -40,7 +40,15 @@ function App() {
 				console.error("License check failed:", error);
 				setIsLicensed(false);
 				setLicenseError(error);
-				toast.error(`License error: ${error}`);
+				toast.error(`License error: ${error}`, {
+					position: "bottom-right",
+					autoClose: 3000,
+					hideProgressBar: false,
+					closeOnClick: true,
+					pauseOnHover: true,
+					draggable: true,
+					theme: "dark",
+				});
 			} finally {
 				setIsLoading(false);
 			}
