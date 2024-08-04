@@ -7314,7 +7314,7 @@
 			"ID": 654,
 			"Type": "Consumables",
 			"Name": "Beer Jar (alt)",
-			"ClassName": "Unknown",
+			"ClassName": "PrimalItemConsumable_BeerJarAlt_C",
 			"Blueprint": "Blueprint'/Game/PrimalEarth/CoreBlueprints/Items/Consumables/PrimalItemConsumable_BeerJarAlt.PrimalItemConsumable_BeerJarAlt'"
 		},
 		"Beer_Jar": {
@@ -13516,7 +13516,7 @@
 			"ID": 1546,
 			"Type": "Artifacts",
 			"Name": "Generate Center Portal",
-			"ClassName": "Unknown",
+			"ClassName": "PrimalItem_BossTribute_TheCenter_C",
 			"Blueprint": "Blueprint'/Game/PrimalEarth/CoreBlueprints/Items/Armor/Cloth/PrimalItem_BossTribute_TheCenter.PrimalItem_BossTribute_TheCenter'"
 		},
 		"Generate_Dragon_Portal": {
@@ -13537,7 +13537,7 @@
 			"ID": 1549,
 			"Type": "Artifacts",
 			"Name": "Generate Scorched Earth Portal",
-			"ClassName": "Unknown",
+			"ClassName": "PrimalItem_BossTribute_ScorchedEarth_C",
 			"Blueprint": "Blueprint'/Game/PrimalEarth/CoreBlueprints/Items/Armor/Cloth/PrimalItem_BossTribute_ScorchedEarth.PrimalItem_BossTribute_ScorchedEarth'"
 		},
 		"Summon_Broodmother": {
@@ -13565,14 +13565,14 @@
 			"ID": 1554,
 			"Type": "Structures",
 			"Name": "Birthday Cake",
-			"ClassName": "Unknown",
+			"ClassName": "PrimalItemStructure_BirthdayCake_C",
 			"Blueprint": "Blueprint'/Game/PrimalEarth/CoreBlueprints/Items/Structures/Halloween/PrimalItemStructure_BirthdayCake.PrimalItemStructure_BirthdayCake'"
 		},
 		"Birthday_Candle": {
 			"ID": 1555,
 			"Type": "Resources",
 			"Name": "Birthday Candle",
-			"ClassName": "Unknown",
+			"ClassName": "PrimalItemResource_BirthdayCandle_C",
 			"Blueprint": "Blueprint'/Game/PrimalEarth/CoreBlueprints/Resources/PrimalItemResource_BirthdayCandle.PrimalItemResource_BirthdayCandle'"
 		},
 		"Box_o'_Chocolates": {
@@ -13663,14 +13663,14 @@
 			"ID": 1568,
 			"Type": "Structures",
 			"Name": "Pumpkin",
-			"ClassName": "Unknown",
+			"ClassName": "PrimalItemStructure_Pumpkin_C",
 			"Blueprint": "Blueprint'/Game/PrimalEarth/CoreBlueprints/Items/Structures/Halloween/PrimalItemStructure_Pumpkin.PrimalItemStructure_Pumpkin'"
 		},
 		"Scarecrow": {
 			"ID": 1569,
 			"Type": "Structures",
 			"Name": "Scarecrow",
-			"ClassName": "Unknown",
+			"ClassName": "PrimalItemStructure_Scarecrow_C",
 			"Blueprint": "Blueprint'/Game/PrimalEarth/CoreBlueprints/Items/Structures/Halloween/PrimalItemStructure_Scarecrow.PrimalItemStructure_Scarecrow'"
 		},
 		"Snowman": {
@@ -13684,7 +13684,7 @@
 			"ID": 1571,
 			"Type": "Structures",
 			"Name": "Stolen Headstone",
-			"ClassName": "Unknown",
+			"ClassName": "PrimalItemStructure_HW_Grave_C",
 			"Blueprint": "Blueprint'/Game/PrimalEarth/CoreBlueprints/Items/Structures/Halloween/PrimalItemStructure_HW_Grave.PrimalItemStructure_HW_Grave'"
 		},
 		"Summer_Swirl_Taffy": {
@@ -13735,7 +13735,7 @@
 			"ID": 20,
 			"Type": "engram",
 			"Name": "Sloped Thatch Wall Left",
-			"Blueprint": "Unknown"
+			"Blueprint": "Blueprint'/Game/PrimalEarth/CoreBlueprints/Items/Structures/Roofs/Thatch/PrimalItemStructure_ThatchWall_Sloped_Left.PrimalItemStructure_ThatchWall_Sloped_Left'"
 		},
 		"Training_Dummy": {
 			"ID": 39,
