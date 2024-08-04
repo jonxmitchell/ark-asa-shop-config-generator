@@ -11,6 +11,8 @@ import {
 	TrashIcon,
 	ArrowDownTrayIcon,
 	BoltSlashIcon,
+	PencilSquareIcon,
+	CheckIcon,
 } from "@heroicons/react/24/solid";
 import { Tooltip } from "react-tooltip";
 
@@ -20,6 +22,8 @@ function SavedConfigsModal({ isOpen, onClose }) {
 	const [showLoadWarning, setShowLoadWarning] = useState(false);
 	const [showSaveWarning, setShowSaveWarning] = useState(false);
 	const [configToLoad, setConfigToLoad] = useState(null);
+	const [renamingConfig, setRenamingConfig] = useState(null);
+	const [newName, setNewName] = useState("");
 	const {
 		config,
 		currentlyLoadedConfig,
@@ -59,7 +63,7 @@ function SavedConfigsModal({ isOpen, onClose }) {
 	const saveConfig = async () => {
 		try {
 			const newConfigId = await invoke("save_config_command", {
-				id: null, // Null ID indicates a new save
+				id: null,
 				name: newConfigName,
 				config: config,
 			});
@@ -67,10 +71,8 @@ function SavedConfigsModal({ isOpen, onClose }) {
 			await loadSavedConfigs();
 			setNewConfigName("");
 
-			// Unload the current config
 			unloadConfig();
 
-			// Load the newly saved config
 			const newConfig = {
 				id: newConfigId,
 				name: newConfigName,
@@ -135,6 +137,38 @@ function SavedConfigsModal({ isOpen, onClose }) {
 	const handleUnloadConfig = () => {
 		unloadConfig();
 		toast.success("Configuration unloaded");
+	};
+
+	const handleStartRename = (config) => {
+		setRenamingConfig(config);
+		setNewName(config.name);
+	};
+
+	const handleCancelRename = () => {
+		setRenamingConfig(null);
+		setNewName("");
+	};
+
+	const handleConfirmRename = async () => {
+		if (newName.trim() === "") {
+			toast.error("Config name cannot be empty");
+			return;
+		}
+
+		try {
+			await invoke("save_config_command", {
+				id: renamingConfig.id,
+				name: newName,
+				config: JSON.parse(renamingConfig.config),
+			});
+			toast.success("Config renamed successfully");
+			await loadSavedConfigs();
+			setRenamingConfig(null);
+			setNewName("");
+		} catch (error) {
+			console.error("Failed to rename config:", error);
+			toast.error("Failed to rename config");
+		}
 	};
 
 	if (!isOpen) return null;
@@ -229,22 +263,60 @@ function SavedConfigsModal({ isOpen, onClose }) {
 							<div
 								key={savedConfig.id}
 								className="flex items-center justify-between bg-light-black p-4 rounded-lg">
-								<span className="text-white">{savedConfig.name}</span>
+								{renamingConfig && renamingConfig.id === savedConfig.id ? (
+									<input
+										type="text"
+										value={newName}
+										onChange={(e) => setNewName(e.target.value)}
+										className="flex-grow px-2 py-1 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500 mr-2"
+										autoFocus
+									/>
+								) : (
+									<span className="text-white">{savedConfig.name}</span>
+								)}
 								<div className="space-x-2">
-									<button
-										onClick={() => handleLoadConfig(savedConfig)}
-										className="p-1 text-green-500 hover:text-green-400"
-										data-tooltip-id={`load-config-${savedConfig.id}`}
-										data-tooltip-content={`Load ${savedConfig.name}`}>
-										<ArrowDownTrayIcon className="h-5 w-5" />
-									</button>
-									<button
-										onClick={() => handleDeleteConfig(savedConfig.id)}
-										className="p-1 text-red-500 hover:text-red-400"
-										data-tooltip-id={`delete-config-${savedConfig.id}`}
-										data-tooltip-content={`Delete ${savedConfig.name}`}>
-										<TrashIcon className="h-5 w-5" />
-									</button>
+									{renamingConfig && renamingConfig.id === savedConfig.id ? (
+										<>
+											<button
+												onClick={handleConfirmRename}
+												className="p-1 text-green-500 hover:text-green-400"
+												data-tooltip-id={`confirm-rename-${savedConfig.id}`}
+												data-tooltip-content="Confirm rename">
+												<CheckIcon className="h-5 w-5" />
+											</button>
+											<button
+												onClick={handleCancelRename}
+												className="p-1 text-red-500 hover:text-red-400"
+												data-tooltip-id={`cancel-rename-${savedConfig.id}`}
+												data-tooltip-content="Cancel rename">
+												<XMarkIcon className="h-5 w-5" />
+											</button>
+										</>
+									) : (
+										<>
+											<button
+												onClick={() => handleStartRename(savedConfig)}
+												className="p-1 text-blue-500 hover:text-blue-400"
+												data-tooltip-id={`rename-config-${savedConfig.id}`}
+												data-tooltip-content={`Rename ${savedConfig.name}`}>
+												<PencilSquareIcon className="h-5 w-5" />
+											</button>
+											<button
+												onClick={() => handleLoadConfig(savedConfig)}
+												className="p-1 text-green-500 hover:text-green-400"
+												data-tooltip-id={`load-config-${savedConfig.id}`}
+												data-tooltip-content={`Load ${savedConfig.name}`}>
+												<ArrowDownTrayIcon className="h-5 w-5" />
+											</button>
+											<button
+												onClick={() => handleDeleteConfig(savedConfig.id)}
+												className="p-1 text-red-500 hover:text-red-400"
+												data-tooltip-id={`delete-config-${savedConfig.id}`}
+												data-tooltip-content={`Delete ${savedConfig.name}`}>
+												<TrashIcon className="h-5 w-5" />
+											</button>
+										</>
+									)}
 								</div>
 							</div>
 						))}
@@ -262,6 +334,9 @@ function SavedConfigsModal({ isOpen, onClose }) {
 							<React.Fragment key={savedConfig.id}>
 								<Tooltip id={`load-config-${savedConfig.id}`} place="top" />
 								<Tooltip id={`delete-config-${savedConfig.id}`} place="top" />
+								<Tooltip id={`rename-config-${savedConfig.id}`} place="top" />
+								<Tooltip id={`confirm-rename-${savedConfig.id}`} place="top" />
+								<Tooltip id={`cancel-rename-${savedConfig.id}`} place="top" />
 							</React.Fragment>
 						))}
 					</>
