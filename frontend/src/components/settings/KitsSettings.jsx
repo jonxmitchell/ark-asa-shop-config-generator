@@ -1,6 +1,6 @@
 // src/components/settings/KitsSettings.jsx
 
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useMemo } from "react";
 import {
 	TrashIcon,
 	PencilSquareIcon,
@@ -23,7 +23,7 @@ import { Tooltip } from "react-tooltip";
 
 function KitsSettings() {
 	const { config, updateConfig, showTooltips } = useConfig();
-	const kitsConfig = config?.Kits || {};
+	const kitsConfig = useMemo(() => config?.Kits || {}, [config]);
 
 	const [newKitName, setNewKitName] = useState("");
 	const [editingKitName, setEditingKitName] = useState("");
