@@ -26,7 +26,7 @@ function LicenseManager({ setIsLicensed, initialError }) {
 			}
 		} catch (error) {
 			console.error("License validation error:", error);
-			setError(`An error occurred while validating the license: ${error}`);
+			setError(`An error occurred while validating the license`);
 		} finally {
 			setIsLoading(false);
 		}

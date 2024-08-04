@@ -38,9 +38,9 @@
 			"active": false
 		},
 		"allowlist": {
-			"all": true,
+			"all": false,
 			"shell": {
-				"all": true,
+				"all": false,
 				"execute": true,
 				"sidecar": true,
 				"open": true
@@ -72,11 +72,12 @@
 		},
 		"windows": [
 			{
-				"title": "Ark ASA Shop Config Generator",
-				"width": 1200,
+				"title": "ASA Ark Shop Config Generator",
+				"width": 1400,
 				"height": 800,
 				"resizable": true,
-				"fullscreen": false
+				"fullscreen": false,
+				"visible": true
 			}
 		],
 		"security": {
