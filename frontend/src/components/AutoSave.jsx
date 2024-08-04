@@ -1,6 +1,5 @@
-// src/components/AutoSave.jsx
-
-import React, { useEffect, useRef } from "react";
+// eslint-disable-next-line no-unused-vars
+import React, { useEffect, useRef, useCallback } from "react";
 import { invoke } from "@tauri-apps/api/tauri";
 import { toast } from "react-toastify";
 import { useConfig } from "./ConfigContext";
@@ -14,40 +13,7 @@ function AutoSave() {
 		currentConfigRef.current = currentlyLoadedConfig;
 	}, [currentlyLoadedConfig]);
 
-	useEffect(() => {
-		const setupAutoSave = async () => {
-			try {
-				const settings = await invoke("load_settings_command");
-				console.log("Auto-save settings:", settings);
-				if (settings.auto_save_enabled) {
-					if (timeoutRef.current) {
-						clearTimeout(timeoutRef.current);
-					}
-					timeoutRef.current = setTimeout(
-						autoSave,
-						settings.auto_save_interval * 60 * 1000
-					);
-					console.log(
-						"Auto-save scheduled for",
-						settings.auto_save_interval,
-						"minutes"
-					);
-				}
-			} catch (error) {
-				console.error("Failed to setup auto-save:", error);
-			}
-		};
-
-		setupAutoSave();
-
-		return () => {
-			if (timeoutRef.current) {
-				clearTimeout(timeoutRef.current);
-			}
-		};
-	}, [config, currentlyLoadedConfig]);
-
-	const autoSave = async () => {
+	const autoSave = useCallback(async () => {
 		try {
 			const currentConfig = currentConfigRef.current;
 			if (!currentConfig) {
@@ -84,7 +50,40 @@ function AutoSave() {
 				);
 			}
 		}
-	};
+	}, [config]);
+
+	useEffect(() => {
+		const setupAutoSave = async () => {
+			try {
+				const settings = await invoke("load_settings_command");
+				console.log("Auto-save settings:", settings);
+				if (settings.auto_save_enabled) {
+					if (timeoutRef.current) {
+						clearTimeout(timeoutRef.current);
+					}
+					timeoutRef.current = setTimeout(
+						autoSave,
+						settings.auto_save_interval * 60 * 1000
+					);
+					console.log(
+						"Auto-save scheduled for",
+						settings.auto_save_interval,
+						"minutes"
+					);
+				}
+			} catch (error) {
+				console.error("Failed to setup auto-save:", error);
+			}
+		};
+
+		setupAutoSave();
+
+		return () => {
+			if (timeoutRef.current) {
+				clearTimeout(timeoutRef.current);
+			}
+		};
+	}, [config, currentlyLoadedConfig, autoSave]);
 
 	return null;
 }
