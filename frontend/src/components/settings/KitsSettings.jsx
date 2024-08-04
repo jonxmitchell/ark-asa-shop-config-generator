@@ -3,7 +3,7 @@
 import React, { useState, useCallback, useEffect } from "react";
 import {
 	TrashIcon,
-	PencilIcon,
+	PencilSquareIcon,
 	CubeIcon,
 	SparklesIcon,
 	CommandLineIcon,
@@ -281,7 +281,7 @@ function KitsSettings() {
 											}}
 											className="text-blue-500 hover:text-blue-400"
 											data-tooltip-id="tooltip-rename-kit">
-											<PencilIcon className="h-5 w-5" />
+											<PencilSquareIcon className="h-5 w-5" />
 										</button>
 									)}
 									<button

@@ -7,7 +7,7 @@ import { useConfig } from "../../ConfigContext";
 import { toast } from "react-toastify";
 import {
 	XMarkIcon,
-	ArrowPathIcon,
+	FolderIcon,
 	TrashIcon,
 	ArrowDownTrayIcon,
 	BoltSlashIcon,
@@ -183,7 +183,7 @@ function SavedConfigsModal({ isOpen, onClose }) {
 									className="p-1 text-blue-500 hover:text-blue-400 disabled:text-gray-600 disabled:cursor-not-allowed"
 									data-tooltip-id="update-config"
 									data-tooltip-content="Update current configuration">
-									<ArrowPathIcon className="h-5 w-5" />
+									<FolderIcon className="h-5 w-5" />
 								</button>
 								<button
 									onClick={handleUnloadConfig}

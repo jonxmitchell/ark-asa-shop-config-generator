@@ -4,7 +4,7 @@ import React, { useState, useCallback, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
 	TrashIcon,
-	PencilIcon,
+	PencilSquareIcon,
 	ChevronDownIcon,
 	ChevronUpIcon,
 	CheckIcon,
@@ -290,7 +290,7 @@ function SellItemsSettings() {
 											className="text-blue-500 hover:text-blue-400"
 											data-tooltip-id="rename-item"
 											data-tooltip-content="Rename this sell item">
-											<PencilIcon className="h-5 w-5" />
+											<PencilSquareIcon className="h-5 w-5" />
 										</button>
 									)}
 									<button
