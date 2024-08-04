@@ -3,6 +3,7 @@
 import React, { useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PowerIcon } from "@heroicons/react/24/solid";
+import { Tooltip } from "react-tooltip";
 
 function ExperienceShopEntry({
 	itemName,
@@ -54,6 +55,7 @@ function ExperienceShopEntry({
 								}
 								className="w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
 								autoComplete="off"
+								data-tooltip-id={`tooltip-title-${itemName}`}
 							/>
 						</div>
 						<div className="col-span-5">
@@ -71,6 +73,7 @@ function ExperienceShopEntry({
 								}
 								className="w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
 								autoComplete="off"
+								data-tooltip-id={`tooltip-description-${itemName}`}
 							/>
 						</div>
 						<div className="col-span-2">
@@ -86,8 +89,9 @@ function ExperienceShopEntry({
 								onChange={(e) =>
 									handleItemChange(itemName, "Price", parseInt(e.target.value))
 								}
-								className="w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+								className="w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-500 focus:border-blue-500"
 								autoComplete="off"
+								data-tooltip-id={`tooltip-price-${itemName}`}
 							/>
 						</div>
 						<div className="col-span-2">
@@ -109,6 +113,7 @@ function ExperienceShopEntry({
 								}
 								className="w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
 								autoComplete="off"
+								data-tooltip-id={`tooltip-amount-${itemName}`}
 							/>
 						</div>
 					</div>
@@ -148,6 +153,7 @@ function ExperienceShopEntry({
 												? 2
 												: undefined
 										}
+										data-tooltip-id={`tooltip-${field.toLowerCase()}-${itemName}`}
 									/>
 									<button
 										onClick={() => toggleField(field)}
@@ -160,7 +166,8 @@ function ExperienceShopEntry({
 											itemData[field] !== undefined
 												? "Disable field"
 												: "Enable field"
-										}>
+										}
+										data-tooltip-id={`tooltip-toggle-${field.toLowerCase()}-${itemName}`}>
 										<PowerIcon className="h-4 w-4" />
 									</button>
 								</div>
@@ -180,12 +187,69 @@ function ExperienceShopEntry({
 						/>
 						<label
 							htmlFor={`giveToDino-${itemName}`}
-							className="ml-2 text-sm font-medium text-gray-300">
+							className="ml-2 text-sm font-medium text-gray-300"
+							data-tooltip-id={`tooltip-give-to-dino-${itemName}`}>
 							Give To Dino
 						</label>
 					</div>
 				</motion.div>
 			)}
+			{/* Tooltips */}
+			<Tooltip
+				id={`tooltip-title-${itemName}`}
+				place="top"
+				content="Enter the title for this experience item"
+			/>
+			<Tooltip
+				id={`tooltip-description-${itemName}`}
+				place="top"
+				content="Enter a description for this experience item"
+			/>
+			<Tooltip
+				id={`tooltip-price-${itemName}`}
+				place="top"
+				content="Set the price for this experience item"
+			/>
+			<Tooltip
+				id={`tooltip-amount-${itemName}`}
+				place="top"
+				content="Set the amount of experience to give"
+			/>
+			<Tooltip
+				id={`tooltip-minlevel-${itemName}`}
+				place="top"
+				content="Set the minimum level required for this experience item"
+			/>
+			<Tooltip
+				id={`tooltip-maxlevel-${itemName}`}
+				place="top"
+				content="Set the maximum level allowed for this experience item"
+			/>
+			<Tooltip
+				id={`tooltip-permissions-${itemName}`}
+				place="top"
+				content="Set the permissions required for this experience item"
+			/>
+			<Tooltip
+				id={`tooltip-toggle-minlevel-${itemName}`}
+				place="top"
+				content="Toggle minimum level requirement"
+			/>
+			<Tooltip
+				id={`tooltip-toggle-maxlevel-${itemName}`}
+				place="top"
+				content="Toggle maximum level limit"
+			/>
+			<Tooltip
+				id={`tooltip-toggle-permissions-${itemName}`}
+				place="top"
+				content="Toggle permissions requirement"
+			/>
+			<Tooltip
+				id={`tooltip-give-to-dino-${itemName}`}
+				place="top"
+				content="Check to give experience to the player's dinosaur instead of the player"
+			/>
 		</AnimatePresence>
 	);
 }

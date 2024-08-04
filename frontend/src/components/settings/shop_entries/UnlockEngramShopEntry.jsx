@@ -4,6 +4,7 @@ import React, { useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import SearchableDropdown from "../../SearchableDropdown";
 import { TrashIcon, PlusIcon, PowerIcon } from "@heroicons/react/24/solid";
+import { Tooltip } from "react-tooltip";
 
 function UnlockEngramShopEntry({
 	itemName,
@@ -84,6 +85,7 @@ function UnlockEngramShopEntry({
 								onChange={(e) => handleInputChange("Title", e.target.value)}
 								className="w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
 								autoComplete="off"
+								data-tooltip-id={`tooltip-title-${itemName}`}
 							/>
 						</div>
 						<div className="col-span-6">
@@ -101,6 +103,7 @@ function UnlockEngramShopEntry({
 								}
 								className="w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
 								autoComplete="off"
+								data-tooltip-id={`tooltip-description-${itemName}`}
 							/>
 						</div>
 						<div className="col-span-2">
@@ -118,6 +121,7 @@ function UnlockEngramShopEntry({
 								}
 								className="w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
 								autoComplete="off"
+								data-tooltip-id={`tooltip-price-${itemName}`}
 							/>
 						</div>
 					</div>
@@ -157,6 +161,7 @@ function UnlockEngramShopEntry({
 												? 2
 												: undefined
 										}
+										data-tooltip-id={`tooltip-${field.toLowerCase()}-${itemName}`}
 									/>
 									<button
 										onClick={() => toggleField(field)}
@@ -169,7 +174,8 @@ function UnlockEngramShopEntry({
 											itemData[field] !== undefined
 												? "Disable field"
 												: "Enable field"
-										}>
+										}
+										data-tooltip-id={`tooltip-toggle-${field.toLowerCase()}-${itemName}`}>
 										<PowerIcon className="h-4 w-4" />
 									</button>
 								</div>
@@ -181,7 +187,8 @@ function UnlockEngramShopEntry({
 						<h5 className="text-sm font-medium text-gray-300">Engrams</h5>
 						<button
 							onClick={handleAddItemEntry}
-							className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center text-sm">
+							className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center text-sm"
+							data-tooltip-id={`tooltip-add-engram-${itemName}`}>
 							<PlusIcon className="h-4 w-4 mr-1" />
 							Add Engram
 						</button>
@@ -206,11 +213,13 @@ function UnlockEngramShopEntry({
 												placeholder="Select or enter an engram"
 												value={engram.Blueprint || ""}
 												className="w-full bg-mid-black"
+												data-tooltip-id={`tooltip-engram-select-${itemName}-${index}`}
 											/>
 										</div>
 										<button
 											onClick={() => handleRemoveItemEntry(index)}
-											className="text-red-500 hover:text-red-700 flex-shrink-0">
+											className="text-red-500 hover:text-red-700 flex-shrink-0"
+											data-tooltip-id={`tooltip-remove-engram-${itemName}-${index}`}>
 											<TrashIcon className="h-5 w-5" />
 										</button>
 									</div>
@@ -219,6 +228,72 @@ function UnlockEngramShopEntry({
 					</AnimatePresence>
 				</motion.div>
 			)}
+			{/* Tooltips */}
+			<Tooltip
+				id={`tooltip-title-${itemName}`}
+				place="top"
+				content="Enter the title for this engram unlock item"
+			/>
+			<Tooltip
+				id={`tooltip-description-${itemName}`}
+				place="top"
+				content="Enter a description for this engram unlock item"
+			/>
+			<Tooltip
+				id={`tooltip-price-${itemName}`}
+				place="top"
+				content="Set the price for this engram unlock item"
+			/>
+			<Tooltip
+				id={`tooltip-minlevel-${itemName}`}
+				place="top"
+				content="Set the minimum level required for this engram unlock item"
+			/>
+			<Tooltip
+				id={`tooltip-maxlevel-${itemName}`}
+				place="top"
+				content="Set the maximum level allowed for this engram unlock item"
+			/>
+			<Tooltip
+				id={`tooltip-permissions-${itemName}`}
+				place="top"
+				content="Set the permissions required for this engram unlock item"
+			/>
+			<Tooltip
+				id={`tooltip-toggle-minlevel-${itemName}`}
+				place="top"
+				content="Toggle minimum level requirement"
+			/>
+			<Tooltip
+				id={`tooltip-toggle-maxlevel-${itemName}`}
+				place="top"
+				content="Toggle maximum level limit"
+			/>
+			<Tooltip
+				id={`tooltip-toggle-permissions-${itemName}`}
+				place="top"
+				content="Toggle permissions requirement"
+			/>
+			<Tooltip
+				id={`tooltip-add-engram-${itemName}`}
+				place="top"
+				content="Add a new engram to unlock"
+			/>
+			{itemData.Items &&
+				itemData.Items.map((_, index) => (
+					<React.Fragment key={index}>
+						<Tooltip
+							id={`tooltip-engram-select-${itemName}-${index}`}
+							place="top"
+							content="Select an engram to unlock"
+						/>
+						<Tooltip
+							id={`tooltip-remove-engram-${itemName}-${index}`}
+							place="top"
+							content="Remove this engram"
+						/>
+					</React.Fragment>
+				))}
 		</AnimatePresence>
 	);
 }
