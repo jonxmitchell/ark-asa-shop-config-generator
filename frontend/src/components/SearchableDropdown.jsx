@@ -11,7 +11,7 @@ function SearchableDropdown({
 	className,
 	onDropdownToggle,
 	displayKey = "Name",
-	valueKey = "ClassName",
+	valueKey = "Blueprint",
 }) {
 	const [isOpen, setIsOpen] = useState(false);
 	const [inputValue, setInputValue] = useState(value || "");
@@ -29,9 +29,10 @@ function SearchableDropdown({
 				options.filter((option) => {
 					const optionDisplay = option[displayKey] || "";
 					const optionValue = option[valueKey] || "";
+					const searchTerm = inputValue.toLowerCase();
 					return (
-						optionDisplay.toLowerCase().includes(inputValue.toLowerCase()) ||
-						optionValue.toLowerCase().includes(inputValue.toLowerCase())
+						optionDisplay.toLowerCase().includes(searchTerm) ||
+						optionValue.toLowerCase().includes(searchTerm)
 					);
 				})
 			);
@@ -104,17 +105,21 @@ function SearchableDropdown({
 					style={{
 						maxHeight: "200px",
 						overflowY: "auto",
+						overflowX: "hidden",
 						position: "absolute",
 						top: "100%",
 						left: 0,
 					}}>
-					<ul className="py-1 text-sm text-gray-200">
+					<ul className="py-1 text-sm text-gray-200 custom-scrollbar">
 						{filteredOptions.map((option) => (
 							<li
 								key={option[valueKey] || option[displayKey]}
 								onClick={() => handleOptionSelect(option)}
 								className="px-4 py-2 hover:bg-gray-700 cursor-pointer">
-								{option[displayKey]}
+								<div>{option[displayKey]}</div>
+								<div className="text-xs text-gray-400 truncate">
+									{option[valueKey]}
+								</div>
 							</li>
 						))}
 					</ul>
