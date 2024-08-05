@@ -1,6 +1,12 @@
 // src/components/settings/SellItemsSettings.jsx
 
-import React, { useState, useCallback, useEffect, useMemo } from "react";
+import React, {
+	useState,
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+} from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
 	TrashIcon,
@@ -9,6 +15,7 @@ import {
 	ChevronUpIcon,
 	CheckIcon,
 	XMarkIcon,
+	XCircleIcon,
 } from "@heroicons/react/24/solid";
 import { useArkData } from "../../hooks/useArkData";
 import ConfirmationModal from "../ConfirmationModal";
@@ -31,16 +38,107 @@ function SellItemsSettings() {
 	const [editValidationMessage, setEditValidationMessage] = useState("");
 	const [searchTerm, setSearchTerm] = useState("");
 	const [filteredItems, setFilteredItems] = useState([]);
+	const [selectedTypes, setSelectedTypes] = useState([]);
+	const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
+	const filterDropdownRef = useRef(null);
 	const { arkData } = useArkData();
+
+	const FilterDropdown = () => {
+		const filterCount = selectedTypes.length;
+
+		const clearFilters = (e) => {
+			e.stopPropagation(); // Prevent the dropdown from toggling
+			setSelectedTypes([]);
+		};
+
+		return (
+			<div className="relative" ref={filterDropdownRef}>
+				<button
+					onClick={() => setIsFilterDropdownOpen(!isFilterDropdownOpen)}
+					className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-2 focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center"
+					data-tooltip-id="filter-types">
+					{filterCount > 0 ? (
+						<>
+							<span>{`${filterCount} Filter${
+								filterCount > 1 ? "s" : ""
+							} Applied`}</span>
+							<XCircleIcon
+								className="w-5 h-5 ml-2 text-gray-400 hover:text-white transition-colors"
+								onClick={clearFilters}
+								data-tooltip-id="clear-filters"
+							/>
+						</>
+					) : (
+						"Filter Types"
+					)}
+					{isFilterDropdownOpen ? (
+						<ChevronUpIcon className="w-2.5 h-2.5 ms-3" />
+					) : (
+						<ChevronDownIcon className="w-2.5 h-2.5 ms-3" />
+					)}
+				</button>
+				{isFilterDropdownOpen && (
+					<div className="absolute z-10 mt-2 w-48 bg-mid-black border-blue-600 rounded-lg border-2 shadow-md right-0">
+						<ul className="p-3 space-y-1 text-sm text-gray-200">
+							{["item", "dino"].map((type) => (
+								<li key={type}>
+									<div className="flex items-center p-2 rounded hover:bg-light-black">
+										<input
+											id={`checkbox-${type}`}
+											type="checkbox"
+											value={type}
+											checked={selectedTypes.includes(type)}
+											onChange={() => handleTypeCheckboxChange(type)}
+											className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 cursor-pointer"
+										/>
+										<label
+											htmlFor={`checkbox-${type}`}
+											className="w-full ms-2 text-sm font-medium text-gray-300 select-none cursor-pointer">
+											{type.charAt(0).toUpperCase() + type.slice(1)}
+										</label>
+									</div>
+								</li>
+							))}
+						</ul>
+					</div>
+				)}
+			</div>
+		);
+	};
 
 	useEffect(() => {
 		const filtered = Object.entries(sellItemsConfig)
-			.filter(([itemName]) =>
-				itemName.toLowerCase().includes(searchTerm.toLowerCase())
+			.filter(
+				([itemName, itemData]) =>
+					itemName.toLowerCase().includes(searchTerm.toLowerCase()) &&
+					(selectedTypes.length === 0 || selectedTypes.includes(itemData.Type))
 			)
 			.sort((a, b) => a[0].localeCompare(b[0]));
 		setFilteredItems(filtered);
-	}, [searchTerm, sellItemsConfig]);
+	}, [searchTerm, sellItemsConfig, selectedTypes]);
+
+	useEffect(() => {
+		const handleClickOutside = (event) => {
+			if (
+				filterDropdownRef.current &&
+				!filterDropdownRef.current.contains(event.target)
+			) {
+				setIsFilterDropdownOpen(false);
+			}
+		};
+
+		const handleScroll = () => {
+			setIsFilterDropdownOpen(false);
+		};
+
+		document.addEventListener("mousedown", handleClickOutside);
+		document.addEventListener("scroll", handleScroll, true);
+
+		return () => {
+			document.removeEventListener("mousedown", handleClickOutside);
+			document.removeEventListener("scroll", handleScroll, true);
+		};
+	}, []);
 
 	const validateItemName = useCallback(
 		(name, isEditing = false) => {
@@ -131,7 +229,7 @@ function SellItemsSettings() {
 				setExpandedItem(editedName);
 			}
 		}
-		setEditingName("");
+		setEditingName(null);
 		setEditedName("");
 		setEditValidationMessage("");
 	};
@@ -145,6 +243,12 @@ function SellItemsSettings() {
 	const toggleItemExpansion = (itemName) => {
 		setExpandedItem((prevExpanded) =>
 			prevExpanded === itemName ? null : itemName
+		);
+	};
+
+	const handleTypeCheckboxChange = (type) => {
+		setSelectedTypes((prev) =>
+			prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
 		);
 	};
 
@@ -179,7 +283,10 @@ function SellItemsSettings() {
 						value={newItemName}
 						onChange={(e) => setNewItemName(e.target.value.replace(/\s/g, ""))}
 						placeholder="New sell item name"
-						className="flex-grow px-3 py-2 text-sm text-white bg-mid-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+						className={`flex-grow px-3 py-2 text-sm text-white bg-mid-black rounded border ${
+							nameValidationMessage ? "border-red-500" : "border-gray-600"
+						} focus:ring-blue-500 focus:border-blue-500`}
+						autoComplete="off"
 						data-tooltip-id="new-item-name"
 						data-tooltip-content="Enter a name for the new sell item (no spaces allowed)"
 					/>
@@ -201,7 +308,9 @@ function SellItemsSettings() {
 					</button>
 				</div>
 				{nameValidationMessage && (
-					<p className="text-red-500 text-xs mt-1">{nameValidationMessage}</p>
+					<p className="text-red-500 text-xs mt-1 mb-2">
+						{nameValidationMessage}
+					</p>
 				)}
 				<div className="flex space-x-2 mb-4">
 					<input
@@ -210,9 +319,11 @@ function SellItemsSettings() {
 						value={searchTerm}
 						onChange={(e) => setSearchTerm(e.target.value)}
 						className="flex-grow px-3 py-2 text-sm text-white bg-mid-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+						autoComplete="off"
 						data-tooltip-id="search-items"
 						data-tooltip-content="Search for specific sell items"
 					/>
+					<FilterDropdown />
 				</div>
 				<AnimatePresence initial={false}>
 					{filteredItems.map(([itemName, itemData]) => (
@@ -228,38 +339,36 @@ function SellItemsSettings() {
 							<div className="flex justify-between items-center">
 								<div className="flex items-center space-x-2">
 									{editingName === itemName ? (
-										<div className="flex items-center space-x-2">
+										<div
+											className="flex items-center space-x-2"
+											onClick={(e) => e.stopPropagation()}>
 											<input
 												type="text"
 												value={editedName}
 												onChange={(e) =>
 													setEditedName(e.target.value.replace(/\s/g, ""))
 												}
-												className="px-2 py-1 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+												className={`px-2 py-1 text-sm text-white bg-dark-black rounded border ${
+													editValidationMessage
+														? "border-red-500"
+														: "border-gray-600"
+												} focus:ring-blue-500 focus:border-blue-500`}
 												autoFocus
-												autoComplete="off"
-												onClick={(e) => e.stopPropagation()}
 												data-tooltip-id="edit-item-name"
 												data-tooltip-content="Edit the name of this sell item"
 											/>
 											<button
-												onClick={(e) => {
-													e.stopPropagation();
-													finishRenameItem();
-												}}
+												onClick={finishRenameItem}
 												className="text-green-500 hover:text-green-400"
 												disabled={!!editValidationMessage}
-												data-tooltip-id="confirm-edit"
+												data-tooltip-id="confirm-rename"
 												data-tooltip-content="Confirm the name change">
 												<CheckIcon className="h-5 w-5" />
 											</button>
 											<button
-												onClick={(e) => {
-													e.stopPropagation();
-													cancelRenameItem();
-												}}
+												onClick={cancelRenameItem}
 												className="text-red-500 hover:text-red-400"
-												data-tooltip-id="cancel-edit"
+												data-tooltip-id="cancel-rename"
 												data-tooltip-content="Cancel the name change">
 												<XMarkIcon className="h-5 w-5" />
 											</button>
@@ -270,7 +379,7 @@ function SellItemsSettings() {
 												{itemName}
 											</h5>
 											<span
-												className={`text-xs px-2 py-1 rounded ${
+												className={`text-xs px-2 py-1 text-white rounded ${
 													itemData.Type === "dino"
 														? "bg-green-600 text-white"
 														: "bg-blue-600 text-white"
@@ -280,13 +389,12 @@ function SellItemsSettings() {
 										</>
 									)}
 								</div>
-								<div className="flex space-x-2">
+								<div
+									className="flex items-center space-x-2"
+									onClick={(e) => e.stopPropagation()}>
 									{editingName !== itemName && (
 										<button
-											onClick={(e) => {
-												e.stopPropagation();
-												startRenameItem(itemName);
-											}}
+											onClick={() => startRenameItem(itemName)}
 											className="text-blue-500 hover:text-blue-400"
 											data-tooltip-id="rename-item"
 											data-tooltip-content="Rename this sell item">
@@ -294,20 +402,14 @@ function SellItemsSettings() {
 										</button>
 									)}
 									<button
-										onClick={(e) => {
-											e.stopPropagation();
-											setDeleteConfirmation(itemName);
-										}}
+										onClick={() => setDeleteConfirmation(itemName)}
 										className="text-red-500 hover:text-red-400"
 										data-tooltip-id="delete-item"
 										data-tooltip-content="Delete this sell item">
 										<TrashIcon className="h-5 w-5" />
 									</button>
 									<button
-										onClick={(e) => {
-											e.stopPropagation();
-											toggleItemExpansion(itemName);
-										}}
+										onClick={() => toggleItemExpansion(itemName)}
 										className="text-gray-400 hover:text-gray-300"
 										data-tooltip-id="toggle-expansion"
 										data-tooltip-content="Expand or collapse item details">
@@ -358,15 +460,29 @@ function SellItemsSettings() {
 					<Tooltip id="add-item" />
 					<Tooltip id="search-items" />
 					<Tooltip id="edit-item-name" />
-					<Tooltip id="confirm-edit" />
-					<Tooltip id="cancel-edit" />
+					<Tooltip id="confirm-rename" />
+					<Tooltip id="cancel-rename" />
 					<Tooltip id="rename-item" />
 					<Tooltip id="delete-item" />
 					<Tooltip id="toggle-expansion" />
+					<Tooltip
+						id="filter-types"
+						place="top"
+						content="Filter items by type"
+						offset={5}
+						float={true}
+					/>
+					<Tooltip
+						id="clear-filters"
+						place="top"
+						content="Clear all filters"
+						offset={5}
+						float={true}
+					/>
 				</>
 			)}
 		</div>
 	);
 }
 
-export default SellItemsSettings;
+export default React.memo(SellItemsSettings);
