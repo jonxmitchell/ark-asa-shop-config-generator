@@ -63,7 +63,7 @@ function SellItemsSettings() {
 								filterCount > 1 ? "s" : ""
 							} Applied`}</span>
 							<XCircleIcon
-								className="w-5 h-5 ml-2 text-gray-400 hover:text-white transition-colors"
+								className="w-4 h-4 ml-2 text-gray-400 hover:text-white transition-colors"
 								onClick={clearFilters}
 								data-tooltip-id="clear-filters"
 							/>
