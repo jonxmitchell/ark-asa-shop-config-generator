@@ -15,6 +15,7 @@ import {
 	ChevronUpIcon,
 	CheckIcon,
 	XMarkIcon,
+	XCircleIcon,
 } from "@heroicons/react/24/solid";
 import { useArkData } from "../../hooks/useArkData";
 import ItemShopEntry from "./shop_entries/ItemShopEntry";
@@ -46,8 +47,75 @@ function ShopItemsSettings() {
 	const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
 	const filterDropdownRef = useRef(null);
 
-	// Memoize the ark data
-	const memoizedArkData = useMemo(() => arkData, [arkData]);
+	const FilterDropdown = () => {
+		const filterCount = selectedTypes.length;
+
+		const clearFilters = (e) => {
+			e.stopPropagation(); // Prevent the dropdown from toggling
+			setSelectedTypes([]);
+		};
+
+		return (
+			<div className="relative" ref={filterDropdownRef}>
+				<button
+					onClick={() => setIsFilterDropdownOpen(!isFilterDropdownOpen)}
+					className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-2 focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center"
+					data-tooltip-id="filter-types">
+					{filterCount > 0 ? (
+						<>
+							<span>{`${filterCount} Filter${
+								filterCount > 1 ? "s" : ""
+							} Applied`}</span>
+							<XCircleIcon
+								className="w-5 h-5 ml-2 text-gray-400 hover:text-white transition-colors"
+								onClick={clearFilters}
+								data-tooltip-id="clear-filters"
+							/>
+						</>
+					) : (
+						"Filter Types"
+					)}
+					{isFilterDropdownOpen ? (
+						<ChevronUpIcon className="w-2.5 h-2.5 ms-3" />
+					) : (
+						<ChevronDownIcon className="w-2.5 h-2.5 ms-3" />
+					)}
+				</button>
+				{isFilterDropdownOpen && (
+					<div className="absolute z-10 mt-2 w-48 bg-mid-black border-blue-600 rounded-lg border-2 shadow-md right-0">
+						<ul className="p-3 space-y-1 text-sm text-gray-200">
+							{[
+								"item",
+								"dino",
+								"beacon",
+								"experience",
+								"unlockengram",
+								"command",
+							].map((type) => (
+								<li key={type}>
+									<div className="flex items-center p-2 rounded hover:bg-light-black">
+										<input
+											id={`checkbox-${type}`}
+											type="checkbox"
+											value={type}
+											checked={selectedTypes.includes(type)}
+											onChange={() => handleTypeCheckboxChange(type)}
+											className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 cursor-pointer"
+										/>
+										<label
+											htmlFor={`checkbox-${type}`}
+											className="w-full ms-2 text-sm font-medium text-gray-300 select-none cursor-pointer">
+											{type.charAt(0).toUpperCase() + type.slice(1)}
+										</label>
+									</div>
+								</li>
+							))}
+						</ul>
+					</div>
+				)}
+			</div>
+		);
+	};
 
 	useEffect(() => {
 		const filtered = Object.entries(shopItemsConfig)
@@ -278,6 +346,12 @@ function ShopItemsSettings() {
 		);
 	}, []);
 
+	const handleTypeCheckboxChange = (type) => {
+		setSelectedTypes((prev) =>
+			prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
+		);
+	};
+
 	const renderShopEntry = useCallback(
 		(itemName, itemData) => {
 			const commonProps = {
@@ -285,7 +359,7 @@ function ShopItemsSettings() {
 				itemData,
 				expanded: expandedItem === itemName,
 				handleItemChange,
-				arkData: memoizedArkData,
+				arkData,
 			};
 
 			switch (itemData.Type) {
@@ -334,59 +408,9 @@ function ShopItemsSettings() {
 			handleItemEntryChange,
 			addItemEntry,
 			removeItemEntry,
-			memoizedArkData,
+			arkData,
 			showTooltips,
 		]
-	);
-
-	const handleTypeCheckboxChange = (type) => {
-		setSelectedTypes((prev) =>
-			prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
-		);
-	};
-
-	const FilterDropdown = () => (
-		<div className="relative" ref={filterDropdownRef}>
-			<button
-				onClick={() => setIsFilterDropdownOpen(!isFilterDropdownOpen)}
-				className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-2 focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center"
-				data-tooltip-id="filter-types">
-				Filter Types
-				<ChevronDownIcon className="w-2.5 h-2.5 ms-3" />
-			</button>
-			{isFilterDropdownOpen && (
-				<div className="absolute z-10 mt-2 w-48 bg-mid-black border-blue-600 rounded-lg border-2 shadow-md right-0">
-					<ul className="p-3 space-y-1 text-sm text-gray-200">
-						{[
-							"item",
-							"dino",
-							"beacon",
-							"experience",
-							"unlockengram",
-							"command",
-						].map((type) => (
-							<li key={type}>
-								<div className="flex items-center p-2 rounded hover:bg-light-black ">
-									<input
-										id={`checkbox-${type}`}
-										type="checkbox"
-										value={type}
-										checked={selectedTypes.includes(type)}
-										onChange={() => handleTypeCheckboxChange(type)}
-										className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 cursor-pointer"
-									/>
-									<label
-										htmlFor={`checkbox-${type}`}
-										className="w-full ms-2 text-sm font-medium text-gray-300 select-none cursor-pointer">
-										{type.charAt(0).toUpperCase() + type.slice(1)}
-									</label>
-								</div>
-							</li>
-						))}
-					</ul>
-				</div>
-			)}
-		</div>
 	);
 
 	return (
@@ -489,26 +513,28 @@ function ShopItemsSettings() {
 											</button>
 										</div>
 									) : (
-										<h5 className="text-md font-semibold text-white">
-											{itemName}
-										</h5>
+										<>
+											<h5 className="text-md font-semibold text-white">
+												{itemName}
+											</h5>
+											<span
+												className={`text-xs px-2 py-1 text-white rounded ${
+													itemData.Type === "beacon"
+														? "bg-purple-600"
+														: itemData.Type === "experience"
+														? "bg-orange-700"
+														: itemData.Type === "unlockengram"
+														? "bg-green-600"
+														: itemData.Type === "command"
+														? "bg-yellow-600"
+														: itemData.Type === "dino"
+														? "bg-pink-600"
+														: "bg-blue-600"
+												}`}>
+												{itemData.Type}
+											</span>
+										</>
 									)}
-									<span
-										className={`text-xs px-2 py-1 text-white rounded ${
-											itemData.Type === "beacon"
-												? "bg-purple-600"
-												: itemData.Type === "experience"
-												? "bg-orange-700"
-												: itemData.Type === "unlockengram"
-												? "bg-green-600"
-												: itemData.Type === "command"
-												? "bg-yellow-600"
-												: itemData.Type === "dino"
-												? "bg-pink-600"
-												: "bg-blue-600"
-										}`}>
-										{itemData.Type}
-									</span>
 								</div>
 								<div
 									className="flex items-center space-x-2"
@@ -552,20 +578,16 @@ function ShopItemsSettings() {
 				</AnimatePresence>
 			</div>
 
-			<AnimatePresence>
-				{deleteConfirmation && (
-					<ConfirmationModal
-						isOpen={true}
-						onClose={() => setDeleteConfirmation(null)}
-						onConfirm={() => {
-							deleteItem(deleteConfirmation);
-							setDeleteConfirmation(null);
-						}}
-						title="Confirm Deletion"
-						message={`Are you sure you want to delete the item "${deleteConfirmation}"?`}
-					/>
-				)}
-			</AnimatePresence>
+			<ConfirmationModal
+				isOpen={!!deleteConfirmation}
+				onClose={() => setDeleteConfirmation(null)}
+				onConfirm={() => {
+					deleteItem(deleteConfirmation);
+					setDeleteConfirmation(null);
+				}}
+				title="Confirm Deletion"
+				message={`Are you sure you want to delete the item "${deleteConfirmation}"?`}
+			/>
 
 			{showTooltips && (
 				<>
@@ -594,6 +616,7 @@ function ShopItemsSettings() {
 						place="top"
 						content="Filter items by type"
 					/>
+					<Tooltip id="clear-filters" place="top" content="Clear all filters" />
 					<Tooltip
 						id="edit-item-name"
 						place="top"
