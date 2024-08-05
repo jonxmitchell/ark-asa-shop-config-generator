@@ -38,7 +38,7 @@
 			"active": false
 		},
 		"allowlist": {
-			"all": false,
+			"all": true,
 			"shell": {
 				"all": false,
 				"execute": true,
