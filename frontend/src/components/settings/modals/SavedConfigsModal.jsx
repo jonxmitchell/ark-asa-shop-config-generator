@@ -8,13 +8,16 @@ import { useConfig } from "../../ConfigContext";
 import { toast } from "react-toastify";
 import {
 	XMarkIcon,
-	FolderIcon,
 	TrashIcon,
 	ArrowDownTrayIcon,
 	BoltSlashIcon,
 	PencilSquareIcon,
 	CheckIcon,
+	ChevronDownIcon,
+	ChevronUpIcon,
 } from "@heroicons/react/24/solid";
+import { HiOutlineFolder, HiX } from "react-icons/hi";
+import { CiFloppyDisk } from "react-icons/ci";
 import { Tooltip } from "react-tooltip";
 
 function SavedConfigsModal({ isOpen, onClose }) {
@@ -25,6 +28,7 @@ function SavedConfigsModal({ isOpen, onClose }) {
 	const [configToLoad, setConfigToLoad] = useState(null);
 	const [renamingConfig, setRenamingConfig] = useState(null);
 	const [newName, setNewName] = useState("");
+	const [showExportPath, setShowExportPath] = useState({});
 	const {
 		config,
 		currentlyLoadedConfig,
@@ -293,7 +297,6 @@ function SavedConfigsModal({ isOpen, onClose }) {
 			setRenamingConfig(null);
 			setNewName("");
 
-			// Update the currently loaded config if it was the renamed one
 			if (
 				currentlyLoadedConfig &&
 				currentlyLoadedConfig.id === renamingConfig.id
@@ -331,7 +334,6 @@ function SavedConfigsModal({ isOpen, onClose }) {
 			});
 			await loadSavedConfigs();
 
-			// Update the currently loaded config if it was the one that was changed
 			if (currentlyLoadedConfig && currentlyLoadedConfig.id === configId) {
 				loadConfig({
 					...currentlyLoadedConfig,
@@ -373,6 +375,13 @@ function SavedConfigsModal({ isOpen, onClose }) {
 				theme: "dark",
 			});
 		}
+	};
+
+	const toggleShowExportPath = (configId) => {
+		setShowExportPath((prev) => ({
+			...prev,
+			[configId]: !prev[configId],
+		}));
 	};
 
 	if (!isOpen) return null;
@@ -418,10 +427,10 @@ function SavedConfigsModal({ isOpen, onClose }) {
 								<button
 									onClick={handleUpdateConfig}
 									disabled={!currentlyLoadedConfig}
-									className="p-1 text-blue-500 hover:text-blue-400 disabled:text-gray-600 disabled:cursor-not-allowed"
+									className="p-1 text-green-500 hover:text-green-400 disabled:text-gray-600 disabled:cursor-not-allowed"
 									data-tooltip-id="update-config"
 									data-tooltip-content="Update current configuration">
-									<FolderIcon className="h-5 w-5" />
+									<CiFloppyDisk className="h-5 w-5" />
 								</button>
 								<button
 									onClick={handleUnloadConfig}
@@ -463,101 +472,115 @@ function SavedConfigsModal({ isOpen, onClose }) {
 						<h3 className="text-lg font-semibold mb-2 text-white sticky top-0 bg-mid-black py-2">
 							Saved Configurations
 						</h3>
-						{savedConfigs.map((savedConfig) => (
-							<div
-								key={savedConfig.id}
-								className="flex items-center bg-light-black p-4 rounded-lg space-x-4">
-								{renamingConfig && renamingConfig.id === savedConfig.id ? (
-									<input
-										type="text"
-										value={newName}
-										onChange={(e) => setNewName(e.target.value)}
-										className="flex-grow px-2 py-1 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
-										autoFocus
-									/>
-								) : (
-									<span className="text-white flex-grow">
-										{savedConfig.name}
-									</span>
-								)}
-								<div className="flex-grow relative">
-									<input
-										type="text"
-										value={savedConfig.custom_export_path || ""}
-										onChange={(e) =>
-											handleCustomExportPathChange(
-												savedConfig.id,
-												e.target.value
-											)
-										}
-										className="w-full pl-3 pr-16 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
-										placeholder="Custom export path"
-									/>
-									<button
-										onClick={() => handleSelectFolder(savedConfig.id)}
-										className="absolute right-1 top-1/2 transform -translate-y-1/2 px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
-										data-tooltip-id={`select-folder-${savedConfig.id}`}
-										data-tooltip-content="Select custom export folder">
-										Select
-									</button>
-									{savedConfig.custom_export_path && (
-										<button
-											onClick={() =>
-												handleCustomExportPathChange(savedConfig.id, "")
-											}
-											className="absolute right-16 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
-											data-tooltip-id={`clear-export-path-${savedConfig.id}`}
-											data-tooltip-content="Clear custom export path">
-											<XMarkIcon className="h-4 w-4" />
-										</button>
+						<AnimatePresence>
+							{savedConfigs.map((savedConfig) => (
+								<motion.div
+									key={savedConfig.id}
+									initial={{ opacity: 0 }}
+									animate={{ opacity: 1 }}
+									exit={{ opacity: 0 }}
+									className="bg-light-black p-4 rounded-lg space-y-4">
+									<div className="flex items-center justify-between">
+										{renamingConfig && renamingConfig.id === savedConfig.id ? (
+											<div className="flex items-center space-x-2">
+												<input
+													type="text"
+													value={newName}
+													onChange={(e) => setNewName(e.target.value)}
+													className="w-48 px-2 py-1 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+													autoFocus
+												/>
+												<button
+													onClick={handleConfirmRename}
+													className="p-1 text-green-500 hover:text-green-400"
+													data-tooltip-id={`confirm-rename-${savedConfig.id}`}
+													data-tooltip-content="Confirm rename">
+													<CheckIcon className="h-5 w-5" />
+												</button>
+												<button
+													onClick={handleCancelRename}
+													className="p-1 text-red-500 hover:text-red-400"
+													data-tooltip-id={`cancel-rename-${savedConfig.id}`}
+													data-tooltip-content="Cancel rename">
+													<XMarkIcon className="h-5 w-5" />
+												</button>
+											</div>
+										) : (
+											<>
+												<span className="text-white flex-grow">
+													{savedConfig.name}
+												</span>
+												<div
+													className="text-gray-400 hover:text-gray-300 cursor-pointer flex items-center mx-4"
+													onClick={() => toggleShowExportPath(savedConfig.id)}>
+													<span className="mr-2 text-sm">
+														Custom Export Path
+													</span>
+													{showExportPath[savedConfig.id] ? (
+														<ChevronUpIcon className="h-4 w-4" />
+													) : (
+														<ChevronDownIcon className="h-4 w-4" />
+													)}
+												</div>
+												<div className="flex items-center space-x-2">
+													<button
+														onClick={() => handleStartRename(savedConfig)}
+														className="p-1 text-blue-500 hover:text-blue-400"
+														data-tooltip-id={`rename-config-${savedConfig.id}`}
+														data-tooltip-content={`Rename ${savedConfig.name}`}>
+														<PencilSquareIcon className="h-5 w-5" />
+													</button>
+													<button
+														onClick={() => handleLoadConfig(savedConfig)}
+														className="p-1 text-green-500 hover:text-green-400"
+														data-tooltip-id={`load-config-${savedConfig.id}`}
+														data-tooltip-content={`Load ${savedConfig.name}`}>
+														<ArrowDownTrayIcon className="h-5 w-5" />
+													</button>
+													<button
+														onClick={() => handleDeleteConfig(savedConfig.id)}
+														className="p-1 text-red-500 hover:text-red-400"
+														data-tooltip-id={`delete-config-${savedConfig.id}`}
+														data-tooltip-content={`Delete ${savedConfig.name}`}>
+														<TrashIcon className="h-5 w-5" />
+													</button>
+												</div>
+											</>
+										)}
+									</div>
+									{showExportPath[savedConfig.id] && (
+										<div className="relative mt-2">
+											<HiOutlineFolder className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+											<input
+												type="text"
+												value={savedConfig.custom_export_path || ""}
+												readOnly
+												className="w-full pl-10 pr-24 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+												placeholder="Custom export path"
+											/>
+											{savedConfig.custom_export_path && (
+												<button
+													onClick={() =>
+														handleCustomExportPathChange(savedConfig.id, "")
+													}
+													className="absolute right-20 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
+													data-tooltip-id={`clear-export-path-${savedConfig.id}`}
+													data-tooltip-content="Clear custom export path">
+													<HiX className="h-4 w-4" />
+												</button>
+											)}
+											<button
+												onClick={() => handleSelectFolder(savedConfig.id)}
+												className="absolute right-2 top-1/2 transform -translate-y-1/2 px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+												data-tooltip-id={`select-folder-${savedConfig.id}`}
+												data-tooltip-content="Choose custom export folder">
+												Select
+											</button>
+										</div>
 									)}
-								</div>
-								<div className="flex items-center space-x-2">
-									{renamingConfig && renamingConfig.id === savedConfig.id ? (
-										<>
-											<button
-												onClick={handleConfirmRename}
-												className="p-1 text-green-500 hover:text-green-400"
-												data-tooltip-id={`confirm-rename-${savedConfig.id}`}
-												data-tooltip-content="Confirm rename">
-												<CheckIcon className="h-5 w-5" />
-											</button>
-											<button
-												onClick={handleCancelRename}
-												className="p-1 text-red-500 hover:text-red-400"
-												data-tooltip-id={`cancel-rename-${savedConfig.id}`}
-												data-tooltip-content="Cancel rename">
-												<XMarkIcon className="h-5 w-5" />
-											</button>
-										</>
-									) : (
-										<>
-											<button
-												onClick={() => handleStartRename(savedConfig)}
-												className="p-1 text-blue-500 hover:text-blue-400"
-												data-tooltip-id={`rename-config-${savedConfig.id}`}
-												data-tooltip-content={`Rename ${savedConfig.name}`}>
-												<PencilSquareIcon className="h-5 w-5" />
-											</button>
-											<button
-												onClick={() => handleLoadConfig(savedConfig)}
-												className="p-1 text-green-500 hover:text-green-400"
-												data-tooltip-id={`load-config-${savedConfig.id}`}
-												data-tooltip-content={`Load ${savedConfig.name}`}>
-												<ArrowDownTrayIcon className="h-5 w-5" />
-											</button>
-											<button
-												onClick={() => handleDeleteConfig(savedConfig.id)}
-												className="p-1 text-red-500 hover:text-red-400"
-												data-tooltip-id={`delete-config-${savedConfig.id}`}
-												data-tooltip-content={`Delete ${savedConfig.name}`}>
-												<TrashIcon className="h-5 w-5" />
-											</button>
-										</>
-									)}
-								</div>
-							</div>
-						))}
+								</motion.div>
+							))}
+						</AnimatePresence>
 					</div>
 				</div>
 
