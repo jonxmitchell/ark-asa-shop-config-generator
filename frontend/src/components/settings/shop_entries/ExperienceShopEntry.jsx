@@ -199,56 +199,67 @@ function ExperienceShopEntry({
 				id={`tooltip-title-${itemName}`}
 				place="top"
 				content="Enter the title for this experience item"
+				opacity={1}
 			/>
 			<Tooltip
 				id={`tooltip-description-${itemName}`}
 				place="top"
 				content="Enter a description for this experience item"
+				opacity={1}
 			/>
 			<Tooltip
 				id={`tooltip-price-${itemName}`}
 				place="top"
 				content="Set the price for this experience item"
+				opacity={1}
 			/>
 			<Tooltip
 				id={`tooltip-amount-${itemName}`}
 				place="top"
 				content="Set the amount of experience to give"
+				opacity={1}
 			/>
 			<Tooltip
 				id={`tooltip-minlevel-${itemName}`}
 				place="top"
 				content="Set the minimum level required for this experience item"
+				opacity={1}
 			/>
 			<Tooltip
 				id={`tooltip-maxlevel-${itemName}`}
 				place="top"
 				content="Set the maximum level allowed for this experience item"
+				opacity={1}
 			/>
 			<Tooltip
 				id={`tooltip-permissions-${itemName}`}
 				place="top"
 				content="Set the permissions required for this experience item"
+				opacity={1}
 			/>
 			<Tooltip
 				id={`tooltip-toggle-minlevel-${itemName}`}
 				place="top"
 				content="Toggle minimum level requirement"
+				opacity={1}
 			/>
 			<Tooltip
 				id={`tooltip-toggle-maxlevel-${itemName}`}
 				place="top"
 				content="Toggle maximum level limit"
+				opacity={1}
 			/>
 			<Tooltip
 				id={`tooltip-toggle-permissions-${itemName}`}
 				place="top"
 				content="Toggle permissions requirement"
+				opacity={1}
 			/>
 			<Tooltip
 				id={`tooltip-give-to-dino-${itemName}`}
 				place="top"
 				content="Check to give experience to the player's dinosaur instead of the player"
+				opacity={1}
 			/>
 		</AnimatePresence>
 	);

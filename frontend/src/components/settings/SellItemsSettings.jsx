@@ -470,14 +470,14 @@ function SellItemsSettings() {
 						place="top"
 						content="Filter items by type"
 						offset={5}
-						float={true}
+						opacity={1}
 					/>
 					<Tooltip
 						id="clear-filters"
 						place="top"
 						content="Clear all filters"
 						offset={5}
-						float={true}
+						opacity={1}
 					/>
 				</>
 			)}

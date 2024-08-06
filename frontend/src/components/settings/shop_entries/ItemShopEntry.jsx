@@ -323,51 +323,61 @@ function ItemShopEntry({
 						id={`tooltip-title-${itemName}`}
 						place="top"
 						content="Enter the title for this shop item"
+						opacity={1}
 					/>
 					<Tooltip
 						id={`tooltip-description-${itemName}`}
 						place="top"
 						content="Enter the description for this shop item"
+						opacity={1}
 					/>
 					<Tooltip
 						id={`tooltip-price-${itemName}`}
 						place="top"
 						content="Set the price for this shop item"
+						opacity={1}
 					/>
 					<Tooltip
 						id={`tooltip-MinLevel-${itemName}`}
 						place="top"
 						content="Set the minimum level required to purchase this item"
+						opacity={1}
 					/>
 					<Tooltip
 						id={`tooltip-MaxLevel-${itemName}`}
 						place="top"
 						content="Set the maximum level allowed to purchase this item"
+						opacity={1}
 					/>
 					<Tooltip
 						id={`tooltip-Permissions-${itemName}`}
 						place="top"
 						content="Set the permissions required to purchase this item"
+						opacity={1}
 					/>
 					<Tooltip
 						id={`tooltip-toggle-MinLevel-${itemName}`}
 						place="top"
 						content="Toggle minimum level requirement"
+						opacity={1}
 					/>
 					<Tooltip
 						id={`tooltip-toggle-MaxLevel-${itemName}`}
 						place="top"
 						content="Toggle maximum level limit"
+						opacity={1}
 					/>
 					<Tooltip
 						id={`tooltip-toggle-Permissions-${itemName}`}
 						place="top"
 						content="Toggle permissions requirement"
+						opacity={1}
 					/>
 					<Tooltip
 						id={`tooltip-add-item-${itemName}`}
 						place="top"
 						content="Add a new item to this shop entry"
+						opacity={1}
 					/>
 				</>
 			)}

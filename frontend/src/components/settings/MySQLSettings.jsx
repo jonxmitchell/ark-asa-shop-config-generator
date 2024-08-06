@@ -111,42 +111,42 @@ function MySQLSettings() {
 						place="top"
 						content="Enable MySQL database integration"
 						offset={5}
-						float={true}
+						opacity={1}
 					/>
 					<Tooltip
 						id="tooltip-MysqlHost"
 						place="top"
 						content="Hostname or IP address of your MySQL server"
 						offset={5}
-						float={true}
+						opacity={1}
 					/>
 					<Tooltip
 						id="tooltip-MysqlUser"
 						place="top"
 						content="Username for MySQL authentication"
 						offset={5}
-						float={true}
+						opacity={1}
 					/>
 					<Tooltip
 						id="tooltip-MysqlDB"
 						place="top"
 						content="Name of the MySQL database to use"
 						offset={5}
-						float={true}
+						opacity={1}
 					/>
 					<Tooltip
 						id="tooltip-MysqlPass"
 						place="top"
 						content="Password for MySQL authentication"
 						offset={5}
-						float={true}
+						opacity={1}
 					/>
 					<Tooltip
 						id="tooltip-MysqlPort"
 						place="top"
 						content="Port number for MySQL server (default: 3306)"
 						offset={5}
-						float={true}
+						opacity={1}
 					/>
 				</>
 			)}

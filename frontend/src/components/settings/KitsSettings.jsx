@@ -608,147 +608,147 @@ function KitsSettings() {
 						place="top"
 						content="Enter a name for the new kit"
 						offset={5}
-						float={true}
+						opacity={1}
 					/>
 					<Tooltip
 						id="tooltip-add-kit"
 						place="top"
 						content="Add a new kit with the given name"
 						offset={5}
-						float={true}
+						opacity={1}
 					/>
 					<Tooltip
 						id="tooltip-search-kits"
 						place="top"
 						content="Search for kits by name"
 						offset={5}
-						float={true}
+						opacity={1}
 					/>
 					<Tooltip
 						id="tooltip-rename-kit"
 						place="top"
 						content="Rename this kit"
 						offset={5}
-						float={true}
+						opacity={1}
 					/>
 					<Tooltip
 						id="tooltip-delete-kit"
 						place="top"
 						content="Delete this kit"
 						offset={5}
-						float={true}
+						opacity={1}
 					/>
 					<Tooltip
 						id="tooltip-toggle-kit"
 						place="top"
 						content="Expand or collapse kit details"
 						offset={5}
-						float={true}
+						opacity={1}
 					/>
 					<Tooltip
 						id="tooltip-confirm-rename"
 						place="top"
 						content="Confirm kit rename"
 						offset={5}
-						float={true}
+						opacity={1}
 					/>
 					<Tooltip
 						id="tooltip-cancel-rename"
 						place="top"
 						content="Cancel kit rename"
 						offset={5}
-						float={true}
+						opacity={1}
 					/>
 					<Tooltip
 						id="tooltip-default-amount"
 						place="top"
 						content="Default number of this kit to give"
 						offset={5}
-						float={true}
+						opacity={1}
 					/>
 					<Tooltip
 						id="tooltip-price"
 						place="top"
 						content="Price of this kit"
 						offset={5}
-						float={true}
+						opacity={1}
 					/>
 					<Tooltip
 						id="tooltip-minlevel"
 						place="top"
 						content="Minimum player level required to use this kit"
 						offset={5}
-						float={true}
+						opacity={1}
 					/>
 					<Tooltip
 						id="tooltip-maxlevel"
 						place="top"
 						content="Maximum player level allowed to use this kit"
 						offset={5}
-						float={true}
+						opacity={1}
 					/>
 					<Tooltip
 						id="tooltip-toggle-price"
 						place="top"
 						content="Enable or disable price for this kit"
 						offset={5}
-						float={true}
+						opacity={1}
 					/>
 					<Tooltip
 						id="tooltip-toggle-minlevel"
 						place="top"
 						content="Enable or disable minimum level requirement"
 						offset={5}
-						float={true}
+						opacity={1}
 					/>
 					<Tooltip
 						id="tooltip-toggle-maxlevel"
 						place="top"
 						content="Enable or disable maximum level limit"
 						offset={5}
-						float={true}
+						opacity={1}
 					/>
 					<Tooltip
 						id="tooltip-description"
 						place="top"
 						content="Description of this kit"
 						offset={5}
-						float={true}
+						opacity={1}
 					/>
 					<Tooltip
 						id="tooltip-permissions"
 						place="top"
 						content="Permissions required to use this kit"
 						offset={5}
-						float={true}
+						opacity={1}
 					/>
 					<Tooltip
 						id="tooltip-only-from-spawn"
 						place="top"
 						content="If checked, this kit can only be used when spawning"
 						offset={5}
-						float={true}
+						opacity={1}
 					/>
 					<Tooltip
 						id="tooltip-items"
 						place="top"
 						content="Manage items in this kit"
 						offset={5}
-						float={true}
+						opacity={1}
 					/>
 					<Tooltip
 						id="tooltip-dinos"
 						place="top"
 						content="Manage dinosaurs in this kit"
 						offset={5}
-						float={true}
+						opacity={1}
 					/>
 					<Tooltip
 						id="tooltip-commands"
 						place="top"
 						content="Manage commands executed when this kit is used"
 						offset={5}
-						float={true}
+						opacity={1}
 					/>
 				</>
 			)}

@@ -259,29 +259,22 @@ function TimedPointsRewards() {
 			</div>
 			{showTooltips && (
 				<>
-					<Tooltip
-						id="timed-rewards-enabled"
-						place="top"
-						opacity={1}
-						float={true}
-					/>
-					<Tooltip id="stack-rewards" place="top" opacity={1} float={true} />
-					<Tooltip id="reward-interval" place="top" opacity={1} float={true} />
-					<Tooltip id="new-group-name" place="top" opacity={1} float={true} />
-					<Tooltip id="add-group" place="top" opacity={1} float={true} />
+					<Tooltip id="timed-rewards-enabled" place="top" opacity={1} />
+					<Tooltip id="stack-rewards" place="top" opacity={1} />
+					<Tooltip id="reward-interval" place="top" opacity={1} />
+					<Tooltip id="new-group-name" place="top" opacity={1} />
+					<Tooltip id="add-group" place="top" opacity={1} />
 					{sortedGroups.map(([groupName]) => (
 						<React.Fragment key={groupName}>
 							<Tooltip
 								id={`group-amount-${groupName}`}
 								place="top"
 								opacity={1}
-								float={true}
 							/>
 							<Tooltip
 								id={`remove-group-${groupName}`}
 								place="top"
 								opacity={1}
-								float={true}
 							/>
 						</React.Fragment>
 					))}

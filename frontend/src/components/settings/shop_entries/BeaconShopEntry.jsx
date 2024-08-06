@@ -198,53 +198,71 @@ function BeaconShopEntry({
 								id="beacon-title-tooltip"
 								place="top"
 								content="Enter the title for this beacon"
+								offset={20}
+								opacity={1}
 							/>
 							<Tooltip
 								id="beacon-description-tooltip"
 								place="top"
 								content="Enter the description for this beacon"
+								offset={20}
+								opacity={1}
 							/>
 							<Tooltip
 								id="beacon-price-tooltip"
 								place="top"
 								content="Set the price for this beacon"
+								offset={20}
+								opacity={1}
 							/>
 							<Tooltip
 								id="beacon-minlevel-tooltip"
 								place="top"
 								content="Set the minimum level required for this beacon"
+								offset={20}
+								opacity={1}
 							/>
 							<Tooltip
 								id="beacon-maxlevel-tooltip"
 								place="top"
 								content="Set the maximum level allowed for this beacon"
+								offset={20}
+								opacity={1}
 							/>
 							<Tooltip
 								id="beacon-permissions-tooltip"
 								place="top"
 								content="Set the permissions required for this beacon"
+								offset={20}
+								opacity={1}
 							/>
 							<Tooltip
 								id="beacon-minlevel-toggle-tooltip"
 								place="top"
 								content="Toggle minimum level requirement"
+								offset={20}
+								opacity={1}
 							/>
 							<Tooltip
 								id="beacon-maxlevel-toggle-tooltip"
 								place="top"
 								content="Toggle maximum level limit"
+								offset={20}
+								opacity={1}
 							/>
 							<Tooltip
 								id="beacon-permissions-toggle-tooltip"
 								place="top"
 								content="Toggle permissions requirement"
+								offset={20}
+								opacity={1}
 							/>
 							<Tooltip
 								id="beacon-class-tooltip"
 								place="top"
 								content="Select the class name for this beacon"
-								offset={5}
-								float={true}
+								offset={20}
+								opacity={1}
 							/>
 						</>
 					)}

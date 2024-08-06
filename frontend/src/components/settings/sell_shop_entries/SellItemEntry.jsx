@@ -18,8 +18,7 @@ function SellItemEntry({ itemName, itemData, handleItemChange, arkData }) {
 				<div className="flex-grow">
 					<label
 						htmlFor={`${itemName}-description`}
-						className="block text-sm font-medium text-gray-300 mb-1"
-						data-tooltip-id={`tooltip-description-${itemName}`}>
+						className="block text-sm font-medium text-gray-300 mb-1">
 						Description
 					</label>
 					<input
@@ -30,18 +29,19 @@ function SellItemEntry({ itemName, itemData, handleItemChange, arkData }) {
 							handleItemChange(itemName, "Description", e.target.value)
 						}
 						className="w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+						data-tooltip-id={`tooltip-description-${itemName}`}
 					/>
 					<Tooltip
 						id={`tooltip-description-${itemName}`}
 						place="top"
 						content="Enter a description for this sell item"
+						opacity={1}
 					/>
 				</div>
 				<div className="w-24">
 					<label
 						htmlFor={`${itemName}-price`}
-						className="block text-sm font-medium text-gray-300 mb-1"
-						data-tooltip-id={`tooltip-price-${itemName}`}>
+						className="block text-sm font-medium text-gray-300 mb-1">
 						Price
 					</label>
 					<input
@@ -52,18 +52,19 @@ function SellItemEntry({ itemName, itemData, handleItemChange, arkData }) {
 							handleItemChange(itemName, "Price", parseInt(e.target.value))
 						}
 						className="w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+						data-tooltip-id={`tooltip-price-${itemName}`}
 					/>
 					<Tooltip
 						id={`tooltip-price-${itemName}`}
 						place="top"
 						content="Set the selling price for this item"
+						opacity={1}
 					/>
 				</div>
 				<div className="w-24">
 					<label
 						htmlFor={`${itemName}-amount`}
-						className="block text-sm font-medium text-gray-300 mb-1"
-						data-tooltip-id={`tooltip-amount-${itemName}`}>
+						className="block text-sm font-medium text-gray-300 mb-1">
 						Amount
 					</label>
 					<input
@@ -74,19 +75,20 @@ function SellItemEntry({ itemName, itemData, handleItemChange, arkData }) {
 							handleItemChange(itemName, "Amount", parseInt(e.target.value))
 						}
 						className="w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+						data-tooltip-id={`tooltip-amount-${itemName}`}
 					/>
 					<Tooltip
 						id={`tooltip-amount-${itemName}`}
 						place="top"
 						content="Specify the quantity of this item to sell"
+						opacity={1}
 					/>
 				</div>
 			</div>
 			<div>
 				<label
 					htmlFor={`${itemName}-blueprint`}
-					className="block text-sm font-medium text-gray-300 mb-1"
-					data-tooltip-id={`tooltip-blueprint-${itemName}`}>
+					className="block text-sm font-medium text-gray-300 mb-1">
 					Blueprint
 				</label>
 				<SearchableDropdown
@@ -98,11 +100,13 @@ function SellItemEntry({ itemName, itemData, handleItemChange, arkData }) {
 					placeholder="Select or enter a blueprint"
 					value={itemData.Blueprint || ""}
 					className="w-full bg-dark-black"
+					data-tooltip-id={`tooltip-blueprint-${itemName}`}
 				/>
 				<Tooltip
 					id={`tooltip-blueprint-${itemName}`}
 					place="top"
 					content="Choose the blueprint for this sell item"
+					opacity={1}
 				/>
 			</div>
 		</motion.div>

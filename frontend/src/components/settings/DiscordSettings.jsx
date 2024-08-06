@@ -98,19 +98,9 @@ function DiscordSettings() {
 			</div>
 			{showTooltips && (
 				<>
-					<Tooltip id="discord-enabled" place="top" opacity={1} float={true} />
-					<Tooltip
-						id="discord-sender-name"
-						place="top"
-						opacity={1}
-						float={true}
-					/>
-					<Tooltip
-						id="discord-webhook-url"
-						place="top"
-						opacity={1}
-						float={true}
-					/>
+					<Tooltip id="discord-enabled" place="top" opacity={1} />
+					<Tooltip id="discord-sender-name" place="top" opacity={1} />
+					<Tooltip id="discord-webhook-url" place="top" opacity={1} />
 				</>
 			)}
 		</div>

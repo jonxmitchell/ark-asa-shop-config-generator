@@ -586,23 +586,48 @@ function SavedConfigsModal({ isOpen, onClose }) {
 
 				{showTooltips && (
 					<>
-						<Tooltip id="close-modal" place="left" />
-						<Tooltip id="update-config" place="top" />
-						<Tooltip id="unload-config" place="top" />
-						<Tooltip id="new-config-name" place="top" />
-						<Tooltip id="save-config" place="top" />
+						<Tooltip id="close-modal" place="left" opacity={1} />
+						<Tooltip id="update-config" place="top" opacity={1} />
+						<Tooltip id="unload-config" place="top" opacity={1} />
+						<Tooltip id="new-config-name" place="top" opacity={1} />
+						<Tooltip id="save-config" place="top" opacity={1} />
 						{savedConfigs.map((savedConfig) => (
 							<React.Fragment key={savedConfig.id}>
-								<Tooltip id={`load-config-${savedConfig.id}`} place="top" />
-								<Tooltip id={`delete-config-${savedConfig.id}`} place="top" />
-								<Tooltip id={`rename-config-${savedConfig.id}`} place="top" />
-								<Tooltip id={`confirm-rename-${savedConfig.id}`} place="top" />
-								<Tooltip id={`cancel-rename-${savedConfig.id}`} place="top" />
+								<Tooltip
+									id={`load-config-${savedConfig.id}`}
+									place="top"
+									opacity={1}
+								/>
+								<Tooltip
+									id={`delete-config-${savedConfig.id}`}
+									place="top"
+									opacity={1}
+								/>
+								<Tooltip
+									id={`rename-config-${savedConfig.id}`}
+									place="top"
+									opacity={1}
+								/>
+								<Tooltip
+									id={`confirm-rename-${savedConfig.id}`}
+									place="top"
+									opacity={1}
+								/>
+								<Tooltip
+									id={`cancel-rename-${savedConfig.id}`}
+									place="top"
+									opacity={1}
+								/>
 								<Tooltip
 									id={`clear-export-path-${savedConfig.id}`}
 									place="top"
+									opacity={1}
 								/>
-								<Tooltip id={`select-folder-${savedConfig.id}`} place="top" />
+								<Tooltip
+									id={`select-folder-${savedConfig.id}`}
+									place="top"
+									opacity={1}
+								/>
 							</React.Fragment>
 						))}
 					</>

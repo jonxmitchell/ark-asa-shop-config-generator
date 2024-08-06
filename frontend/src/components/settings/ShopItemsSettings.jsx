@@ -595,45 +595,73 @@ function ShopItemsSettings() {
 						id="new-item-name"
 						place="top"
 						content="Enter a new item name (spaces are not allowed)"
+						opacity={1}
 					/>
 					<Tooltip
 						id="new-item-type"
 						place="top"
 						content="Select the type of item to add"
+						opacity={1}
 					/>
 					<Tooltip
 						id="add-new-item"
 						place="top"
 						content="Add the new item to the shop"
+						opacity={1}
 					/>
 					<Tooltip
 						id="search-items"
 						place="top"
 						content="Search for items in the shop"
+						opacity={1}
 					/>
 					<Tooltip
 						id="filter-types"
 						place="top"
 						content="Filter items by type"
+						opacity={1}
 					/>
-					<Tooltip id="clear-filters" place="top" content="Clear all filters" />
+					<Tooltip
+						id="clear-filters"
+						place="top"
+						content="Clear all filters"
+						opacity={1}
+					/>
 					<Tooltip
 						id="edit-item-name"
 						place="top"
 						content="Edit the item name"
+						opacity={1}
 					/>
 					<Tooltip
 						id="confirm-rename"
 						place="top"
 						content="Confirm the new item name"
+						opacity={1}
 					/>
-					<Tooltip id="cancel-rename" place="top" content="Cancel renaming" />
-					<Tooltip id="rename-item" place="top" content="Rename this item" />
-					<Tooltip id="delete-item" place="top" content="Delete this item" />
+					<Tooltip
+						id="cancel-rename"
+						place="top"
+						content="Cancel renaming"
+						opacity={1}
+					/>
+					<Tooltip
+						id="rename-item"
+						place="top"
+						content="Rename this item"
+						opacity={1}
+					/>
+					<Tooltip
+						id="delete-item"
+						place="top"
+						content="Delete this item"
+						opacity={1}
+					/>
 					<Tooltip
 						id="toggle-expansion"
 						place="top"
 						content="Expand or collapse item details"
+						opacity={1}
 					/>
 				</>
 			)}

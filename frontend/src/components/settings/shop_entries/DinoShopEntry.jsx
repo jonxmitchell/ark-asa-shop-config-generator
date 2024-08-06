@@ -4,6 +4,8 @@ import React, { useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import SearchableDropdown from "../../SearchableDropdown";
 import { PowerIcon } from "@heroicons/react/24/solid";
+import { Tooltip } from "react-tooltip";
+import { useConfig } from "../../ConfigContext";
 
 const STRYDER_BLUEPRINT =
 	"Blueprint'/Game/Genesis2/Dinos/TekStrider/TekStrider_Character_BP.TekStrider_Character_BP'";
@@ -17,6 +19,7 @@ function DinoShopEntry({
 	handleItemChange,
 	arkData,
 }) {
+	const { showTooltips } = useConfig();
 	const isStryder = useMemo(
 		() => itemData.Blueprint === STRYDER_BLUEPRINT,
 		[itemData.Blueprint]
@@ -118,6 +121,8 @@ function DinoShopEntry({
 									placeholder={`Select ${resourceType.label.toLowerCase()}`}
 									value={Object.keys(currentResources)[index] || ""}
 									className="w-full bg-dark-black"
+									data-tooltip-id={`tooltip-gacha-resource-${index}`}
+									data-tooltip-content={`Select ${resourceType.label}`}
 								/>
 							</div>
 							<input
@@ -133,6 +138,8 @@ function DinoShopEntry({
 								}}
 								className="w-20 px-2 py-1 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
 								max={resourceType.maxQty}
+								data-tooltip-id={`tooltip-gacha-resource-amount-${index}`}
+								data-tooltip-content={`Set amount for ${resourceType.label}`}
 							/>
 						</div>
 					</div>
@@ -169,6 +176,8 @@ function DinoShopEntry({
 								onChange={(e) => handleInputChange("Title", e.target.value)}
 								className="w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
 								autoComplete="off"
+								data-tooltip-id={`tooltip-title-${itemName}`}
+								data-tooltip-content="Enter the title for this dino"
 							/>
 						</div>
 						<div className="col-span-6">
@@ -186,6 +195,8 @@ function DinoShopEntry({
 								}
 								className="w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
 								autoComplete="off"
+								data-tooltip-id={`tooltip-description-${itemName}`}
+								data-tooltip-content="Enter a description for this dino"
 							/>
 						</div>
 						<div className="col-span-2">
@@ -203,6 +214,8 @@ function DinoShopEntry({
 								}
 								className="w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
 								autoComplete="off"
+								data-tooltip-id={`tooltip-price-${itemName}`}
+								data-tooltip-content="Set the price for this dino"
 							/>
 						</div>
 					</div>
@@ -242,6 +255,8 @@ function DinoShopEntry({
 												? 2
 												: undefined
 										}
+										data-tooltip-id={`tooltip-${field.toLowerCase()}-${itemName}`}
+										data-tooltip-content={`Set the ${field} for this dino`}
 									/>
 									<button
 										onClick={() => toggleField(field)}
@@ -254,7 +269,9 @@ function DinoShopEntry({
 											itemData[field] !== undefined
 												? "Disable field"
 												: "Enable field"
-										}>
+										}
+										data-tooltip-id={`tooltip-toggle-${field.toLowerCase()}-${itemName}`}
+										data-tooltip-content={`Toggle ${field} field`}>
 										<PowerIcon className="h-4 w-4" />
 									</button>
 								</div>
@@ -276,6 +293,8 @@ function DinoShopEntry({
 								placeholder="Select or enter a dino blueprint"
 								value={itemData.Blueprint || ""}
 								className="w-full bg-dark-black"
+								data-tooltip-id={`tooltip-blueprint-${itemName}`}
+								data-tooltip-content="Select the blueprint for this dino"
 							/>
 						</div>
 						<div className="col-span-2">
@@ -293,6 +312,8 @@ function DinoShopEntry({
 								}
 								className="w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
 								autoComplete="off"
+								data-tooltip-id={`tooltip-level-${itemName}`}
+								data-tooltip-content="Set the level for this dino"
 							/>
 						</div>
 					</div>
@@ -307,6 +328,8 @@ function DinoShopEntry({
 									handleCheckboxChange("Neutered", e.target.checked)
 								}
 								className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
+								data-tooltip-id={`tooltip-neutered-${itemName}`}
+								data-tooltip-content="Check if the dino should be neutered"
 							/>
 							<label
 								htmlFor={`neutered-${itemName}`}
@@ -323,6 +346,8 @@ function DinoShopEntry({
 									handleCheckboxChange("PreventCryo", e.target.checked)
 								}
 								className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
+								data-tooltip-id={`tooltip-preventcryo-${itemName}`}
+								data-tooltip-content="Check to prevent cryopodding this dino"
 							/>
 							<label
 								htmlFor={`preventCryo-${itemName}`}
@@ -343,7 +368,9 @@ function DinoShopEntry({
 								id={`gender-${itemName}`}
 								value={itemData.Gender || "random"}
 								onChange={(e) => handleInputChange("Gender", e.target.value)}
-								className="w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500">
+								className="w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+								data-tooltip-id={`tooltip-gender-${itemName}`}
+								data-tooltip-content="Select the gender of the dino">
 								<option value="random">Random</option>
 								<option value="male">Male</option>
 								<option value="female">Female</option>
@@ -366,6 +393,8 @@ function DinoShopEntry({
 								placeholder="Select a saddle"
 								value={itemData.SaddleBlueprint || ""}
 								className="w-full bg-dark-black"
+								data-tooltip-id={`tooltip-saddle-${itemName}`}
+								data-tooltip-content="Select a saddle blueprint for this dino"
 							/>
 						</div>
 					)}
@@ -383,7 +412,9 @@ function DinoShopEntry({
 									onChange={(e) =>
 										handleSelectChange("StryderHead", e.target.value)
 									}
-									className="w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500">
+									className="w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+									data-tooltip-id={`tooltip-stryderhead-${itemName}`}
+									data-tooltip-content="Select the head type for the Stryder">
 									<option value={-1}>Random</option>
 									<option value={0}>Harvester</option>
 									<option value={1}>Silence Cannon</option>
@@ -403,7 +434,9 @@ function DinoShopEntry({
 									onChange={(e) =>
 										handleSelectChange("StryderChest", e.target.value)
 									}
-									className="w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500">
+									className="w-full px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+									data-tooltip-id={`tooltip-stryderchest-${itemName}`}
+									data-tooltip-content="Select the chest type for the Stryder">
 									<option value={-1}>Random</option>
 									<option value={0}>Shield</option>
 									<option value={1}>One-sided Shield</option>
@@ -417,6 +450,45 @@ function DinoShopEntry({
 						<div className="relative z-10">{renderGachaResources()}</div>
 					)}
 				</motion.div>
+			)}
+			{showTooltips && (
+				<>
+					<Tooltip id={`tooltip-title-${itemName}`} opacity={1} />
+					<Tooltip id={`tooltip-description-${itemName}`} opacity={1} />
+					<Tooltip id={`tooltip-price-${itemName}`} opacity={1} />
+					<Tooltip id={`tooltip-minlevel-${itemName}`} opacity={1} />
+					<Tooltip id={`tooltip-maxlevel-${itemName}`} opacity={1} />
+					<Tooltip id={`tooltip-permissions-${itemName}`} opacity={1} />
+					<Tooltip id={`tooltip-toggle-minlevel-${itemName}`} opacity={1} />
+					<Tooltip id={`tooltip-toggle-maxlevel-${itemName}`} opacity={1} />
+					<Tooltip id={`tooltip-toggle-permissions-${itemName}`} opacity={1} />
+					<Tooltip id={`tooltip-blueprint-${itemName}`} opacity={1} />
+					<Tooltip id={`tooltip-level-${itemName}`} opacity={1} />
+					<Tooltip
+						id={`tooltip-neutered-${itemName}`}
+						opacity={1}
+						place="right"
+					/>
+					<Tooltip
+						id={`tooltip-preventcryo-${itemName}`}
+						opacity={1}
+						place="right"
+					/>
+					<Tooltip id={`tooltip-gender-${itemName}`} opacity={1} />
+					<Tooltip id={`tooltip-saddle-${itemName}`} opacity={1} />
+					<Tooltip id={`tooltip-stryderhead-${itemName}`} opacity={1} />
+					<Tooltip id={`tooltip-stryderchest-${itemName}`} opacity={1} />
+					{itemData.GachaResources &&
+						Object.keys(itemData.GachaResources).map((_, index) => (
+							<React.Fragment key={index}>
+								<Tooltip id={`tooltip-gacha-resource-${index}`} opacity={1} />
+								<Tooltip
+									id={`tooltip-gacha-resource-amount-${index}`}
+									opacity={1}
+								/>
+							</React.Fragment>
+						))}
+				</>
 			)}
 		</AnimatePresence>
 	);

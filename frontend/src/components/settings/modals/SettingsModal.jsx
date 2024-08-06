@@ -159,7 +159,7 @@ function SettingsModal({ isOpen, onClose }) {
 				{/* Export Output Location */}
 				<div className="mb-6 bg-light-black p-4 rounded-lg">
 					<h3 className="text-lg font-semibold mb-2 text-white">
-						Export Output Location
+						Default Export Output Location
 					</h3>
 					<div className="relative">
 						<input
@@ -260,14 +260,14 @@ function SettingsModal({ isOpen, onClose }) {
 
 				{showTooltips && (
 					<>
-						<Tooltip id="close-settings" place="left" />
-						<Tooltip id="output-path" place="top" />
-						<Tooltip id="select-folder" place="left" />
-						<Tooltip id="auto-save-toggle" place="right" />
-						<Tooltip id="auto-save-interval" place="top" />
-						<Tooltip id="auto-save-interval-input" place="top" />
-						<Tooltip id="show-tooltips-toggle" place="right" />
-						<Tooltip id="save-settings" place="top" />
+						<Tooltip id="close-settings" place="left" opacity={1} />
+						<Tooltip id="output-path" place="top" opacity={1} />
+						<Tooltip id="select-folder" place="left" opacity={1} />
+						<Tooltip id="auto-save-toggle" place="right" opacity={1} />
+						<Tooltip id="auto-save-interval" place="top" opacity={1} />
+						<Tooltip id="auto-save-interval-input" place="top" opacity={1} />
+						<Tooltip id="show-tooltips-toggle" place="right" opacity={1} />
+						<Tooltip id="save-settings" place="top" opacity={1} />
 					</>
 				)}
 			</motion.div>

@@ -245,51 +245,61 @@ function CommandShopEntry({
 				id={`tooltip-title-${itemName}`}
 				place="top"
 				content="Enter the title for this command"
+				opacity={1}
 			/>
 			<Tooltip
 				id={`tooltip-description-${itemName}`}
 				place="top"
 				content="Enter a description for this command"
+				opacity={1}
 			/>
 			<Tooltip
 				id={`tooltip-price-${itemName}`}
 				place="top"
 				content="Set the price for this command"
+				opacity={1}
 			/>
 			<Tooltip
 				id={`tooltip-minlevel-${itemName}`}
 				place="top"
 				content="Set the minimum level required for this command"
+				opacity={1}
 			/>
 			<Tooltip
 				id={`tooltip-maxlevel-${itemName}`}
 				place="top"
 				content="Set the maximum level allowed for this command"
+				opacity={1}
 			/>
 			<Tooltip
 				id={`tooltip-permissions-${itemName}`}
 				place="top"
 				content="Set the permissions required for this command"
+				opacity={1}
 			/>
 			<Tooltip
 				id={`tooltip-toggle-minlevel-${itemName}`}
 				place="top"
 				content="Toggle minimum level requirement"
+				opacity={1}
 			/>
 			<Tooltip
 				id={`tooltip-toggle-maxlevel-${itemName}`}
 				place="top"
 				content="Toggle maximum level limit"
+				opacity={1}
 			/>
 			<Tooltip
 				id={`tooltip-toggle-permissions-${itemName}`}
 				place="top"
 				content="Toggle permissions requirement"
+				opacity={1}
 			/>
 			<Tooltip
 				id={`tooltip-add-command-${itemName}`}
 				place="top"
 				content="Add a new command to this item"
+				opacity={1}
 			/>
 			{itemData.Items &&
 				itemData.Items.map((_, index) => (
@@ -298,21 +308,25 @@ function CommandShopEntry({
 							id={`tooltip-command-${itemName}-${index}`}
 							place="top"
 							content="Enter the command to be executed"
+							opacity={1}
 						/>
 						<Tooltip
 							id={`tooltip-display-as-${itemName}-${index}`}
 							place="top"
 							content="Enter how the command should be displayed"
+							opacity={1}
 						/>
 						<Tooltip
 							id={`tooltip-execute-as-admin-${itemName}-${index}`}
 							place="top"
 							content="Check to execute the command with admin privileges"
+							opacity={1}
 						/>
 						<Tooltip
 							id={`tooltip-remove-command-${itemName}-${index}`}
 							place="top"
 							content="Remove this command"
+							opacity={1}
 						/>
 					</React.Fragment>
 				))}

@@ -71,7 +71,7 @@ function MessagesSettings() {
 						place="top"
 						content="Search for specific messages"
 						offset={5}
-						float={true}
+						opacity={1}
 					/>
 					{Object.keys(messagesConfig).map((key) => (
 						<Tooltip
@@ -80,7 +80,7 @@ function MessagesSettings() {
 							place="top"
 							content={getTooltipContent(key)}
 							offset={5}
-							float={true}
+							opacity={1}
 						/>
 					))}
 				</>

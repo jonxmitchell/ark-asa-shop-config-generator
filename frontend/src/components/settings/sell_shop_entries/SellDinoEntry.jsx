@@ -94,21 +94,29 @@ function SellDinoEntry({ itemName, itemData, handleItemChange, arkData }) {
 						id={`tooltip-description-${itemName}`}
 						place="top"
 						content="Description of the dino for sale"
+						opacity={1}
+						offset={20}
 					/>
 					<Tooltip
 						id={`tooltip-price-${itemName}`}
 						place="top"
 						content="Price of the dino in points"
+						opacity={1}
+						offset={20}
 					/>
 					<Tooltip
 						id={`tooltip-level-${itemName}`}
 						place="top"
 						content="Level of the dino for sale"
+						opacity={1}
+						offset={20}
 					/>
 					<Tooltip
 						id={`tooltip-blueprint-${itemName}`}
 						place="top"
 						content="Blueprint of the dino for sale"
+						opacity={1}
+						offset={20}
 					/>
 				</>
 			)}

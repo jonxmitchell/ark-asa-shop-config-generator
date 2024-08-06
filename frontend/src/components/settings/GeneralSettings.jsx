@@ -157,8 +157,8 @@ function GeneralSettings() {
 							id={`tooltip-${setting}`}
 							place="top"
 							content={getTooltipContent(setting)}
-							offset={40}
-							float={true}
+							offset={35}
+							opacity={1}
 						/>
 					))}
 				</>
