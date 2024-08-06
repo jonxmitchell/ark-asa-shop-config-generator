@@ -1,5 +1,5 @@
 {
-	"name": "ark-asa-shop-config-generator",
+	"name": "asa-arkshop-config-editor",
 	"version": "1.0.0",
 	"main": "index.jsx",
 	"scripts": {
