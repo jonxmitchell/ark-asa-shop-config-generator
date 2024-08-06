@@ -16,7 +16,7 @@ function TitleBar() {
 			className="h-10 bg-mid-black flex justify-between items-center px-4">
 			<div className="bg-light-black rounded-full px-3 group">
 				<span className="text-sm text-gray-400 group-hover:text-blue-500 transition-colors select-none">
-					ASA ArkShop Config Generator
+					ASA ArkShop Config Editor
 				</span>
 			</div>
 			<div className="flex space-x-4">
