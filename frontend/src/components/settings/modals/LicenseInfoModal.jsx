@@ -145,7 +145,7 @@ function LicenseInfoModal({ isOpen, onClose }) {
 					</div>
 					<div>
 						<label className="block text-sm font-medium text-gray-400">
-							Expiration
+							Expiration Date
 						</label>
 						<p className="text-white">
 							{new Date(licenseInfo.expiration_date).toLocaleDateString()}
@@ -176,7 +176,17 @@ function LicenseInfoModal({ isOpen, onClose }) {
 								/>
 							</div>
 						) : (
-							<p className="text-white">License has expired</p>
+							<p className="text-white">
+								License has expired, contact{" "}
+								<a
+									href="https://discordapp.com/users/727813657949634570"
+									target="_blank"
+									rel="noopener noreferrer"
+									className="text-gray-400 hover:text-gray-300">
+									arti.artificial
+								</a>{" "}
+								to renew.
+							</p>
 						)}
 					</div>
 				</div>
