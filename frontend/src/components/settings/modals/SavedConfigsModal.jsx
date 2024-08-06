@@ -69,6 +69,21 @@ function SavedConfigsModal({ isOpen, onClose }) {
 			});
 			return;
 		}
+
+		// Check if the name already exists
+		if (savedConfigs.some((config) => config.name === newConfigName.trim())) {
+			toast.error("A configuration with this name already exists", {
+				position: "bottom-right",
+				autoClose: 3000,
+				hideProgressBar: false,
+				closeOnClick: true,
+				pauseOnHover: true,
+				draggable: true,
+				theme: "dark",
+			});
+			return;
+		}
+
 		if (currentlyLoadedConfig) {
 			setShowSaveWarning(true);
 		} else {
@@ -251,6 +266,25 @@ function SavedConfigsModal({ isOpen, onClose }) {
 			return;
 		}
 
+		// Check if the new name already exists
+		if (
+			savedConfigs.some(
+				(config) =>
+					config.name === newName.trim() && config.id !== renamingConfig.id
+			)
+		) {
+			toast.error("A configuration with this name already exists", {
+				position: "bottom-right",
+				autoClose: 3000,
+				hideProgressBar: false,
+				closeOnClick: true,
+				pauseOnHover: true,
+				draggable: true,
+				theme: "dark",
+			});
+			return;
+		}
+
 		try {
 			await invoke("save_config_command", {
 				id: renamingConfig.id,
@@ -376,35 +410,38 @@ function SavedConfigsModal({ isOpen, onClose }) {
 								key={savedConfig.id}
 								className="flex items-center justify-between bg-light-black p-4 rounded-lg">
 								{renamingConfig && renamingConfig.id === savedConfig.id ? (
-									<input
-										type="text"
-										value={newName}
-										onChange={(e) => setNewName(e.target.value)}
-										className="flex-grow px-2 py-1 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500 mr-2"
-										autoFocus
-									/>
+									<div className="flex items-center flex-grow">
+										<input
+											type="text"
+											value={newName}
+											onChange={(e) => setNewName(e.target.value)}
+											className="w-3/4 px-2 py-1 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500 mr-2"
+											autoFocus
+										/>
+										<button
+											onClick={handleConfirmRename}
+											className="p-1 text-green-500 hover:text-green-400 mr-1"
+											data-tooltip-id={`confirm-rename-${savedConfig.id}`}
+											data-tooltip-content="Confirm rename">
+											<CheckIcon className="h-5 w-5" />
+										</button>
+										<button
+											onClick={handleCancelRename}
+											className="p-1 text-red-500 hover:text-red-400"
+											data-tooltip-id={`cancel-rename-${savedConfig.id}`}
+											data-tooltip-content="Cancel rename">
+											<XMarkIcon className="h-5 w-5" />
+										</button>
+									</div>
 								) : (
-									<span className="text-white">{savedConfig.name}</span>
+									<span className="text-white flex-grow">
+										{savedConfig.name}
+									</span>
 								)}
-								<div className="space-x-2">
-									{renamingConfig && renamingConfig.id === savedConfig.id ? (
-										<>
-											<button
-												onClick={handleConfirmRename}
-												className="p-1 text-green-500 hover:text-green-400"
-												data-tooltip-id={`confirm-rename-${savedConfig.id}`}
-												data-tooltip-content="Confirm rename">
-												<CheckIcon className="h-5 w-5" />
-											</button>
-											<button
-												onClick={handleCancelRename}
-												className="p-1 text-red-500 hover:text-red-400"
-												data-tooltip-id={`cancel-rename-${savedConfig.id}`}
-												data-tooltip-content="Cancel rename">
-												<XMarkIcon className="h-5 w-5" />
-											</button>
-										</>
-									) : (
+								<div className="flex space-x-2">
+									{!(
+										renamingConfig && renamingConfig.id === savedConfig.id
+									) && (
 										<>
 											<button
 												onClick={() => handleStartRename(savedConfig)}
