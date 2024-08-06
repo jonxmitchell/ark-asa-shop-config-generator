@@ -1,8 +1,10 @@
+// src/components/LicenseManager.jsx
+
 import React, { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/tauri";
 import { ClipboardDocumentIcon, CheckIcon } from "@heroicons/react/24/solid";
 
-function LicenseManager({ setIsLicensed, initialError }) {
+function LicenseManager({ setLicenseState, initialError }) {
 	const [hwid, setHwid] = useState("");
 	const [licenseKey, setLicenseKey] = useState("");
 	const [error, setError] = useState(initialError || "");
@@ -18,15 +20,48 @@ function LicenseManager({ setIsLicensed, initialError }) {
 		setError("");
 		setIsLoading(true);
 		try {
-			const valid = await invoke("validate_license", { licenseKey });
-			if (valid) {
-				setIsLicensed(true);
+			console.log("Submitting license key:", licenseKey);
+			const result = await invoke("validate_license", { licenseKey });
+			console.log("License validation result:", result);
+
+			if (typeof result === "boolean") {
+				if (result === true) {
+					console.log("License is valid (boolean result). Updating state...");
+					// Since we don't have expiration date, we'll set it to a default value
+					const defaultExpirationDate = new Date();
+					defaultExpirationDate.setFullYear(
+						defaultExpirationDate.getFullYear() + 1
+					);
+					setLicenseState({
+						isLicensed: true,
+						expirationDate: defaultExpirationDate.toISOString(),
+						error: "",
+					});
+				} else {
+					console.log("License is invalid (boolean result).");
+					setError("Invalid license key");
+				}
+			} else if (result && typeof result === "object" && "isValid" in result) {
+				if (result.isValid === true) {
+					console.log("Received expiration date:", result.expirationDate);
+
+					console.log("License is valid. Updating state...");
+					setLicenseState({
+						isLicensed: true,
+						expirationDate: result.expirationDate,
+						error: "",
+					});
+				} else {
+					console.log("License is invalid.");
+					setError("Invalid license key");
+				}
 			} else {
-				setError("Invalid license key");
+				console.error("Unexpected result structure:", result);
+				setError("Received unexpected response from server");
 			}
 		} catch (error) {
 			console.error("License validation error:", error);
-			setError(`An error occurred while validating the license`);
+			setError(`An error occurred while validating the license: ${error}`);
 		} finally {
 			setIsLoading(false);
 		}

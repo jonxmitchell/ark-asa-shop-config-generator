@@ -241,36 +241,45 @@
       }
   }
   
-  #[tauri::command]
-  async fn check_license_on_startup(state: tauri::State<'_, AppState>, license_state: tauri::State<'_, LicenseState>) -> Result<bool, String> {
-      let conn = state.0.lock().unwrap();
-      
-      if let Some(license_info) = load_license_info(&conn).map_err(|e| e.to_string())? {
-          let hwid = hwid::generate_hwid();
-          
-          if license_info.hwid != hwid {
-              return Err("HWID mismatch".to_string());
-          }
-          
-          let result = license::verify_license(&license_info.license_key, &hwid);
-          
-          match result {
-              Ok((is_valid, _)) => {
-                  if is_valid {
-                      let mut license_state = license_state.0.lock().unwrap();
-                      *license_state = true;
-                      Ok(true)
-                  } else {
-                      Err("License is no longer valid".to_string())
-                  }
-              }
-              Err(e) => Err(format!("License verification failed: {}", e)),
-          }
-      } else {
-          Ok(false)
-      }
-  }
-  
+ #[tauri::command]
+async fn check_license_on_startup(state: tauri::State<'_, AppState>, license_state: tauri::State<'_, LicenseState>) -> Result<serde_json::Value, String> {
+    let conn = state.0.lock().unwrap();
+    
+    if let Some(license_info) = load_license_info(&conn).map_err(|e| e.to_string())? {
+        let hwid = hwid::generate_hwid();
+        
+        if license_info.hwid != hwid {
+            return Err("HWID mismatch".to_string());
+        }
+        
+        let result = license::verify_license(&license_info.license_key, &hwid);
+        
+        match result {
+            Ok((is_valid, expiration_date)) => {
+                if is_valid {
+                    let mut license_state = license_state.0.lock().unwrap();
+                    *license_state = true;
+                    Ok(serde_json::json!({
+                        "isValid": true,
+                        "expirationDate": expiration_date.to_string()
+                    }))
+                } else {
+                    Ok(serde_json::json!({
+                        "isValid": false,
+                        "expirationDate": expiration_date.to_string()
+                    }))
+                }
+            }
+            Err(e) => Err(format!("License verification failed: {}", e)),
+        }
+    } else {
+        Ok(serde_json::json!({
+            "isValid": false,
+            "expirationDate": null
+        }))
+    }
+}
+
   #[tauri::command]
   async fn auto_save_config(config: Value, config_id: i64, state: tauri::State<'_, AppState>) -> Result<(), String> {
       log_to_file(&format!("Auto-save triggered for config_id: {}", config_id));

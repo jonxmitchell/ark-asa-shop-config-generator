@@ -1,6 +1,6 @@
 // src/App.jsx
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { invoke } from "@tauri-apps/api/tauri";
 import LicenseManager from "./components/LicenseManager";
 import Sidebar from "./components/Sidebar";
@@ -13,11 +13,16 @@ import AppControls from "./components/AppControls";
 import AutoSave from "./components/AutoSave";
 import Loader from "./components/Loader";
 import { usePreventBrowserShortcuts } from "./hooks/usePreventBrowserShortcuts";
+import LicenseExpirationWarning from "./components/LicenseExpirationWarning";
 
 function App() {
-	const [isLicensed, setIsLicensed] = useState(false);
-	const [licenseError, setLicenseError] = useState("");
+	const [licenseState, setLicenseState] = useState({
+		isLicensed: false,
+		expirationDate: null,
+		error: "",
+	});
 	const [isLoading, setIsLoading] = useState(true);
+	const [isAppLoaded, setIsAppLoaded] = useState(false);
 	const [activeTab, setActiveTab] = useState("generator");
 	const [activeSidebarItem, setActiveSidebarItem] = useState("MySQL");
 	const [initialShowTooltips, setInitialShowTooltips] = useState(true);
@@ -25,22 +30,36 @@ function App() {
 	useContextMenu();
 	usePreventBrowserShortcuts();
 
-	useEffect(() => {
-		const checkLicense = async () => {
-			try {
-				setIsLoading(true);
-				const result = await invoke("check_license_on_startup");
-				setIsLicensed(result);
-				setLicenseError("");
+	const checkLicense = useCallback(async () => {
+		try {
+			const result = await invoke("check_license_on_startup");
+			console.log("License check result:", result);
+			setLicenseState({
+				isLicensed: result.isValid,
+				expirationDate: result.expirationDate,
+				error: "",
+			});
+		} catch (error) {
+			console.error("License check failed:", error);
+			setLicenseState({
+				isLicensed: false,
+				expirationDate: null,
+				error: error.toString(),
+			});
+		}
+	}, []);
 
-				// Load initial settings
+	useEffect(() => {
+		const initialSetup = async () => {
+			setIsLoading(true);
+			await checkLicense();
+
+			try {
 				const settings = await invoke("load_settings_command");
 				setInitialShowTooltips(settings.show_tooltips);
 			} catch (error) {
-				console.error("License check failed:", error);
-				setIsLicensed(false);
-				setLicenseError(error);
-				toast.error(`License error: ${error}`, {
+				console.error("Failed to load settings:", error);
+				toast.error("Failed to load settings", {
 					position: "bottom-right",
 					autoClose: 3000,
 					hideProgressBar: false,
@@ -49,13 +68,22 @@ function App() {
 					draggable: true,
 					theme: "dark",
 				});
-			} finally {
-				setIsLoading(false);
 			}
+
+			setIsLoading(false);
+
+			// Simulate app loading
+			setTimeout(() => {
+				setIsAppLoaded(true);
+			}, 1000);
 		};
 
-		checkLicense();
-	}, []);
+		initialSetup();
+
+		const licenseCheckInterval = setInterval(checkLicense, 5 * 60 * 1000); // Check every 5 minutes
+
+		return () => clearInterval(licenseCheckInterval);
+	}, [checkLicense]);
 
 	if (isLoading) {
 		return (
@@ -65,11 +93,11 @@ function App() {
 		);
 	}
 
-	if (!isLicensed) {
+	if (!licenseState.isLicensed) {
 		return (
 			<LicenseManager
-				setIsLicensed={setIsLicensed}
-				initialError={licenseError}
+				setLicenseState={setLicenseState}
+				initialError={licenseState.error}
 			/>
 		);
 	}
@@ -77,6 +105,12 @@ function App() {
 	return (
 		<ConfigProvider initialShowTooltips={initialShowTooltips}>
 			<div autoComplete="off" data-form-type="other">
+				{isAppLoaded && licenseState.isLicensed && (
+					<LicenseExpirationWarning
+						expirationDate={licenseState.expirationDate}
+						isLicensed={licenseState.isLicensed}
+					/>
+				)}
 				<div className="flex h-screen bg-deep-black text-white p-4 overflow-hidden">
 					<div className="flex w-full space-x-4 h-full">
 						<div className="w-64 bg-mid-black rounded-xl shadow-lg flex flex-col overflow-hidden">
