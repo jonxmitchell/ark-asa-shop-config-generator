@@ -110,37 +110,50 @@ function AppControls() {
 
 	return (
 		<>
-			<div className="flex justify-around">
-				<IconButton
-					Icon={HiOutlineDocumentText}
-					onClick={handleLicense}
-					tooltipId="tooltip-license"
-					hoverColorClass="hover:text-purple-500"
-				/>
-				<IconButton
-					Icon={HiOutlineCog}
-					onClick={handleSettings}
-					tooltipId="tooltip-settings"
-					hoverColorClass="hover:text-green-500"
-				/>
-				<IconButton
-					Icon={HiOutlineDownload}
-					onClick={handleImport}
-					tooltipId="tooltip-import"
-					hoverColorClass="hover:text-blue-500"
-				/>
-				<IconButton
-					Icon={HiOutlineUpload}
-					onClick={handleExport}
-					tooltipId="tooltip-export"
-					hoverColorClass="hover:text-yellow-500"
-				/>
-				<IconButton
-					Icon={HiOutlineCollection}
-					onClick={handleSavedConfigs}
-					tooltipId="tooltip-saved-configs"
-					hoverColorClass="hover:text-red-500"
-				/>
+			<div className="flex flex-col space-y-4">
+				<div className="flex justify-around">
+					<IconButton
+						Icon={HiOutlineDocumentText}
+						onClick={handleLicense}
+						tooltipId="tooltip-license"
+						hoverColorClass="hover:text-purple-500"
+					/>
+					<IconButton
+						Icon={HiOutlineCog}
+						onClick={handleSettings}
+						tooltipId="tooltip-settings"
+						hoverColorClass="hover:text-green-500"
+					/>
+					<IconButton
+						Icon={HiOutlineDownload}
+						onClick={handleImport}
+						tooltipId="tooltip-import"
+						hoverColorClass="hover:text-blue-500"
+					/>
+					<IconButton
+						Icon={HiOutlineUpload}
+						onClick={handleExport}
+						tooltipId="tooltip-export"
+						hoverColorClass="hover:text-yellow-500"
+					/>
+					<IconButton
+						Icon={HiOutlineCollection}
+						onClick={handleSavedConfigs}
+						tooltipId="tooltip-saved-configs"
+						hoverColorClass="hover:text-red-500"
+					/>
+				</div>
+
+				<div className="text-center text-xs text-gray-500">
+					Developed by{" "}
+					<a
+						href="https://discordapp.com/users/727813657949634570"
+						target="_blank"
+						rel="noopener noreferrer"
+						className="text-gray-400 hover:text-gray-300">
+						arti.artificial
+					</a>
+				</div>
 			</div>
 			<SettingsModal
 				isOpen={isSettingsModalOpen}
