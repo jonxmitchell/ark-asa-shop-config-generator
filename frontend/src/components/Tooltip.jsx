@@ -11,6 +11,7 @@ const Tooltip = ({ id, content }) => {
 				content={content}
 				className="custom-tooltip"
 				float={true}
+				opacity={1}
 			/>
 		</>
 	);

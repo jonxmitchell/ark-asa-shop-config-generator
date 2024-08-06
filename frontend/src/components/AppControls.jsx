@@ -176,30 +176,35 @@ function AppControls() {
 						place="top"
 						content="View license information"
 						offset={5}
+						opacity={1}
 					/>
 					<Tooltip
 						id="tooltip-settings"
 						place="top"
 						content="Open settings"
 						offset={5}
+						opacity={1}
 					/>
 					<Tooltip
 						id="tooltip-import"
 						place="top"
 						content="Import configuration"
 						offset={5}
+						opacity={1}
 					/>
 					<Tooltip
 						id="tooltip-export"
 						place="top"
 						content="Export configuration"
 						offset={5}
+						opacity={1}
 					/>
 					<Tooltip
 						id="tooltip-saved-configs"
 						place="top"
 						content="Manage saved configurations"
 						offset={5}
+						opacity={1}
 					/>
 				</>
 			)}
