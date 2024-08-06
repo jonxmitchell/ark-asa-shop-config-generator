@@ -1,8 +1,9 @@
 // src/components/settings/modals/SavedConfigsModal.jsx
 
 import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { invoke } from "@tauri-apps/api/tauri";
+import { open } from "@tauri-apps/api/dialog";
 import { useConfig } from "../../ConfigContext";
 import { toast } from "react-toastify";
 import {
@@ -70,7 +71,6 @@ function SavedConfigsModal({ isOpen, onClose }) {
 			return;
 		}
 
-		// Check if the name already exists
 		if (savedConfigs.some((config) => config.name === newConfigName.trim())) {
 			toast.error("A configuration with this name already exists", {
 				position: "bottom-right",
@@ -97,6 +97,7 @@ function SavedConfigsModal({ isOpen, onClose }) {
 				id: null,
 				name: newConfigName,
 				config: config,
+				customExportPath: null,
 			});
 			toast.success("Config saved successfully", {
 				position: "bottom-right",
@@ -110,38 +111,25 @@ function SavedConfigsModal({ isOpen, onClose }) {
 			await loadSavedConfigs();
 			setNewConfigName("");
 
-			unloadConfig();
-
 			const newConfig = {
 				id: newConfigId,
 				name: newConfigName,
 				config: JSON.stringify(config),
+				custom_export_path: null,
 			};
 			loadConfig(newConfig);
 			setShowSaveWarning(false);
 		} catch (error) {
 			console.error("Failed to save config:", error);
-			if (error.toString().includes("already exists")) {
-				toast.error("A configuration with this name already exists", {
-					position: "bottom-right",
-					autoClose: 3000,
-					hideProgressBar: false,
-					closeOnClick: true,
-					pauseOnHover: true,
-					draggable: true,
-					theme: "dark",
-				});
-			} else {
-				toast.error("Failed to save config", {
-					position: "bottom-right",
-					autoClose: 3000,
-					hideProgressBar: false,
-					closeOnClick: true,
-					pauseOnHover: true,
-					draggable: true,
-					theme: "dark",
-				});
-			}
+			toast.error("Failed to save config", {
+				position: "bottom-right",
+				autoClose: 3000,
+				hideProgressBar: false,
+				closeOnClick: true,
+				pauseOnHover: true,
+				draggable: true,
+				theme: "dark",
+			});
 		}
 	};
 
@@ -203,6 +191,7 @@ function SavedConfigsModal({ isOpen, onClose }) {
 					id: currentlyLoadedConfig.id,
 					name: currentlyLoadedConfig.name,
 					config: config,
+					customExportPath: currentlyLoadedConfig.custom_export_path,
 				});
 				toast.success("Config updated successfully", {
 					position: "bottom-right",
@@ -266,7 +255,6 @@ function SavedConfigsModal({ isOpen, onClose }) {
 			return;
 		}
 
-		// Check if the new name already exists
 		if (
 			savedConfigs.some(
 				(config) =>
@@ -290,6 +278,7 @@ function SavedConfigsModal({ isOpen, onClose }) {
 				id: renamingConfig.id,
 				name: newName,
 				config: JSON.parse(renamingConfig.config),
+				customExportPath: renamingConfig.custom_export_path,
 			});
 			toast.success("Config renamed successfully", {
 				position: "bottom-right",
@@ -303,9 +292,78 @@ function SavedConfigsModal({ isOpen, onClose }) {
 			await loadSavedConfigs();
 			setRenamingConfig(null);
 			setNewName("");
+
+			// Update the currently loaded config if it was the renamed one
+			if (
+				currentlyLoadedConfig &&
+				currentlyLoadedConfig.id === renamingConfig.id
+			) {
+				loadConfig({
+					...currentlyLoadedConfig,
+					name: newName,
+				});
+			}
 		} catch (error) {
 			console.error("Failed to rename config:", error);
 			toast.error("Failed to rename config", {
+				position: "bottom-right",
+				autoClose: 3000,
+				hideProgressBar: false,
+				closeOnClick: true,
+				pauseOnHover: true,
+				draggable: true,
+				theme: "dark",
+			});
+		}
+	};
+
+	const handleCustomExportPathChange = async (configId, path) => {
+		try {
+			await invoke("update_config_export_path_command", { configId, path });
+			toast.success("Custom export path updated successfully", {
+				position: "bottom-right",
+				autoClose: 3000,
+				hideProgressBar: false,
+				closeOnClick: true,
+				pauseOnHover: true,
+				draggable: true,
+				theme: "dark",
+			});
+			await loadSavedConfigs();
+
+			// Update the currently loaded config if it was the one that was changed
+			if (currentlyLoadedConfig && currentlyLoadedConfig.id === configId) {
+				loadConfig({
+					...currentlyLoadedConfig,
+					custom_export_path: path,
+				});
+			}
+		} catch (error) {
+			console.error("Failed to update custom export path:", error);
+			toast.error("Failed to update custom export path", {
+				position: "bottom-right",
+				autoClose: 3000,
+				hideProgressBar: false,
+				closeOnClick: true,
+				pauseOnHover: true,
+				draggable: true,
+				theme: "dark",
+			});
+		}
+	};
+
+	const handleSelectFolder = async (configId) => {
+		try {
+			const selected = await open({
+				directory: true,
+				multiple: false,
+			});
+			if (selected) {
+				handleCustomExportPathChange(configId, selected);
+			}
+		} catch (error) {
+			console.error("Failed to open folder dialog:", error);
+			toast.error("Failed to open folder dialog", {
 				position: "bottom-right",
 				autoClose: 3000,
 				hideProgressBar: false,
@@ -408,40 +466,71 @@ function SavedConfigsModal({ isOpen, onClose }) {
 						{savedConfigs.map((savedConfig) => (
 							<div
 								key={savedConfig.id}
-								className="flex items-center justify-between bg-light-black p-4 rounded-lg">
+								className="flex items-center bg-light-black p-4 rounded-lg space-x-4">
 								{renamingConfig && renamingConfig.id === savedConfig.id ? (
-									<div className="flex items-center flex-grow">
-										<input
-											type="text"
-											value={newName}
-											onChange={(e) => setNewName(e.target.value)}
-											className="w-3/4 px-2 py-1 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500 mr-2"
-											autoFocus
-										/>
-										<button
-											onClick={handleConfirmRename}
-											className="p-1 text-green-500 hover:text-green-400 mr-1"
-											data-tooltip-id={`confirm-rename-${savedConfig.id}`}
-											data-tooltip-content="Confirm rename">
-											<CheckIcon className="h-5 w-5" />
-										</button>
-										<button
-											onClick={handleCancelRename}
-											className="p-1 text-red-500 hover:text-red-400"
-											data-tooltip-id={`cancel-rename-${savedConfig.id}`}
-											data-tooltip-content="Cancel rename">
-											<XMarkIcon className="h-5 w-5" />
-										</button>
-									</div>
+									<input
+										type="text"
+										value={newName}
+										onChange={(e) => setNewName(e.target.value)}
+										className="flex-grow px-2 py-1 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+										autoFocus
+									/>
 								) : (
 									<span className="text-white flex-grow">
 										{savedConfig.name}
 									</span>
 								)}
-								<div className="flex space-x-2">
-									{!(
-										renamingConfig && renamingConfig.id === savedConfig.id
-									) && (
+								<div className="flex-grow relative">
+									<input
+										type="text"
+										value={savedConfig.custom_export_path || ""}
+										onChange={(e) =>
+											handleCustomExportPathChange(
+												savedConfig.id,
+												e.target.value
+											)
+										}
+										className="w-full pl-3 pr-16 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+										placeholder="Custom export path"
+									/>
+									<button
+										onClick={() => handleSelectFolder(savedConfig.id)}
+										className="absolute right-1 top-1/2 transform -translate-y-1/2 px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+										data-tooltip-id={`select-folder-${savedConfig.id}`}
+										data-tooltip-content="Select custom export folder">
+										Select
+									</button>
+									{savedConfig.custom_export_path && (
+										<button
+											onClick={() =>
+												handleCustomExportPathChange(savedConfig.id, "")
+											}
+											className="absolute right-16 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
+											data-tooltip-id={`clear-export-path-${savedConfig.id}`}
+											data-tooltip-content="Clear custom export path">
+											<XMarkIcon className="h-4 w-4" />
+										</button>
+									)}
+								</div>
+								<div className="flex items-center space-x-2">
+									{renamingConfig && renamingConfig.id === savedConfig.id ? (
+										<>
+											<button
+												onClick={handleConfirmRename}
+												className="p-1 text-green-500 hover:text-green-400"
+												data-tooltip-id={`confirm-rename-${savedConfig.id}`}
+												data-tooltip-content="Confirm rename">
+												<CheckIcon className="h-5 w-5" />
+											</button>
+											<button
+												onClick={handleCancelRename}
+												className="p-1 text-red-500 hover:text-red-400"
+												data-tooltip-id={`cancel-rename-${savedConfig.id}`}
+												data-tooltip-content="Cancel rename">
+												<XMarkIcon className="h-5 w-5" />
+											</button>
+										</>
+									) : (
 										<>
 											<button
 												onClick={() => handleStartRename(savedConfig)}
@@ -486,6 +575,11 @@ function SavedConfigsModal({ isOpen, onClose }) {
 								<Tooltip id={`rename-config-${savedConfig.id}`} place="top" />
 								<Tooltip id={`confirm-rename-${savedConfig.id}`} place="top" />
 								<Tooltip id={`cancel-rename-${savedConfig.id}`} place="top" />
+								<Tooltip
+									id={`clear-export-path-${savedConfig.id}`}
+									place="top"
+								/>
+								<Tooltip id={`select-folder-${savedConfig.id}`} place="top" />
 							</React.Fragment>
 						))}
 					</>

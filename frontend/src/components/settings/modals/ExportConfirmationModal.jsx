@@ -1,4 +1,4 @@
-// src/components/modals/ExportConfirmationModal.jsx
+// src/components/settings/modals/ExportConfirmationModal.jsx
 
 import React, { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -12,15 +12,22 @@ function ExportConfirmationModal({ isOpen, onClose }) {
 	const [modalState, setModalState] = useState("confirmation");
 	const [exportedFilePath, setExportedFilePath] = useState("");
 	const [progress, setProgress] = useState(0);
-	const { config, updateConfig } = useConfig();
-	const [outputPath, setOutputPath] = useState("");
+	const [currentExportPath, setCurrentExportPath] = useState("");
+	const { config, updateConfig, currentlyLoadedConfig } = useConfig();
 
 	useEffect(() => {
 		if (isOpen) {
 			// Load the output path from settings when the modal opens
 			invoke("load_settings_command")
 				.then((settings) => {
-					setOutputPath(settings.output_path);
+					if (
+						currentlyLoadedConfig &&
+						currentlyLoadedConfig.custom_export_path
+					) {
+						setCurrentExportPath(currentlyLoadedConfig.custom_export_path);
+					} else {
+						setCurrentExportPath(settings.output_path);
+					}
 				})
 				.catch((error) => {
 					console.error("Failed to load settings:", error);
@@ -35,12 +42,12 @@ function ExportConfirmationModal({ isOpen, onClose }) {
 					});
 				});
 		}
-	}, [isOpen]);
+	}, [isOpen, currentlyLoadedConfig]);
 
 	const handleExport = useCallback(async () => {
-		if (!outputPath) {
+		if (!currentExportPath) {
 			toast.error(
-				"Please set an output location in Settings before exporting.",
+				"No export path set. Please set an output location in Settings or for this configuration.",
 				{
 					position: "bottom-right",
 					autoClose: 3000,
@@ -59,6 +66,7 @@ function ExportConfirmationModal({ isOpen, onClose }) {
 
 		try {
 			console.log("Exporting config:", config);
+			console.log("Export path:", currentExportPath);
 			if (!config || Object.keys(config).length === 0) {
 				throw new Error("Configuration is undefined or empty");
 			}
@@ -70,7 +78,10 @@ function ExportConfirmationModal({ isOpen, onClose }) {
 			}
 
 			// Actual export
-			const result = await invoke("export_config", { config: config });
+			const result = await invoke("export_config", {
+				config: config,
+				exportPath: currentExportPath,
+			});
 			console.log("Export result:", result);
 			setExportedFilePath(result.file_path);
 
@@ -92,7 +103,7 @@ function ExportConfirmationModal({ isOpen, onClose }) {
 				theme: "dark",
 			});
 		}
-	}, [config, updateConfig, outputPath]);
+	}, [config, updateConfig, currentExportPath]);
 
 	const handleClose = () => {
 		setModalState("confirmation");
@@ -104,7 +115,7 @@ function ExportConfirmationModal({ isOpen, onClose }) {
 		try {
 			await invoke("force_export_config", {
 				config: config,
-				filePath: exportedFilePath,
+				filePath: currentExportPath,
 			});
 			setModalState("success");
 		} catch (error) {
@@ -139,9 +150,12 @@ function ExportConfirmationModal({ isOpen, onClose }) {
 							<h2 className="text-xl font-bold mb-4 text-white">
 								Confirm Export
 							</h2>
-							<p className="mb-6 text-gray-300">
-								Are you sure you want to export the configuration to the chosen
-								location?
+							<p className="mb-2 text-gray-300">
+								Are you sure you want to export the configuration?
+							</p>
+							<p className="mb-4 text-gray-300">
+								Export path:{" "}
+								<span className="font-semibold">{currentExportPath}</span>
 							</p>
 							<div className="flex justify-end space-x-4">
 								<button
@@ -200,4 +214,4 @@ function ExportConfirmationModal({ isOpen, onClose }) {
 	);
 }
 
-export default React.memo(ExportConfirmationModal);
+export default ExportConfirmationModal;

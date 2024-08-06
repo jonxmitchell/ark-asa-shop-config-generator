@@ -1,5 +1,3 @@
-// src-tauri/src/db.rs
-
 use rusqlite::{Connection, Result, Error, params, OptionalExtension};
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
@@ -19,6 +17,7 @@ pub struct SavedConfig {
     pub id: Option<i64>,
     pub name: String,
     pub config: String,
+    pub custom_export_path: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -51,30 +50,18 @@ pub fn initialize_db(db_path: &Path) -> Result<Connection> {
             id INTEGER PRIMARY KEY,
             output_path TEXT NOT NULL,
             auto_save_enabled BOOLEAN NOT NULL DEFAULT 0,
-            auto_save_interval INTEGER NOT NULL DEFAULT 5
+            auto_save_interval INTEGER NOT NULL DEFAULT 5,
+            show_tooltips BOOLEAN NOT NULL DEFAULT 1
         )",
         [],
     )?;
     
-    // Add a migration to add new columns if they don't exist
-    conn.execute(
-        "ALTER TABLE settings ADD COLUMN auto_save_enabled BOOLEAN NOT NULL DEFAULT 0",
-        [],
-    ).ok(); // Ignore error if column already exists
-    conn.execute(
-        "ALTER TABLE settings ADD COLUMN auto_save_interval INTEGER NOT NULL DEFAULT 5",
-        [],
-    ).ok(); // Ignore error if column already exists
-    conn.execute(
-        "ALTER TABLE settings ADD COLUMN show_tooltips BOOLEAN NOT NULL DEFAULT 1",
-        [],
-    ).ok(); // Ignore error if column already exists
-
     conn.execute(
         "CREATE TABLE IF NOT EXISTS saved_configs (
             id INTEGER PRIMARY KEY,
             name TEXT NOT NULL UNIQUE,
-            config TEXT NOT NULL
+            config TEXT NOT NULL,
+            custom_export_path TEXT
         )",
         [],
     )?;
@@ -130,19 +117,20 @@ pub fn load_settings(conn: &Connection) -> Result<Settings> {
 
 pub fn save_config(conn: &Connection, config: &SavedConfig) -> Result<i64> {
     conn.execute(
-        "INSERT INTO saved_configs (name, config) VALUES (?1, ?2)",
-        params![config.name, config.config],
+        "INSERT INTO saved_configs (name, config, custom_export_path) VALUES (?1, ?2, ?3)",
+        params![config.name, config.config, config.custom_export_path],
     )?;
     Ok(conn.last_insert_rowid())
 }
 
 pub fn load_configs(conn: &Connection) -> Result<Vec<SavedConfig>> {
-    let mut stmt = conn.prepare("SELECT id, name, config FROM saved_configs")?;
+    let mut stmt = conn.prepare("SELECT id, name, config, custom_export_path FROM saved_configs")?;
     let config_iter = stmt.query_map([], |row| {
         Ok(SavedConfig {
             id: Some(row.get(0)?),
             name: row.get(1)?,
             config: row.get(2)?,
+            custom_export_path: row.get(3)?,
         })
     })?;
 
@@ -167,10 +155,18 @@ pub fn config_name_exists(conn: &Connection, name: &str) -> Result<bool> {
     Ok(count > 0)
 }
 
-pub fn update_config(conn: &Connection, id: i64, name: &str, config: &str) -> Result<()> {
+pub fn update_config(conn: &Connection, id: i64, name: &str, config: &str, custom_export_path: Option<&str>) -> Result<()> {
     conn.execute(
-        "UPDATE saved_configs SET name = ?1, config = ?2 WHERE id = ?3",
-        params![name, config, id],
+        "UPDATE saved_configs SET name = ?1, config = ?2, custom_export_path = ?3 WHERE id = ?4",
+        params![name, config, custom_export_path, id],
+    )?;
+    Ok(())
+}
+
+pub fn update_config_export_path(conn: &Connection, id: i64, path: Option<&str>) -> Result<()> {
+    conn.execute(
+        "UPDATE saved_configs SET custom_export_path = ?1 WHERE id = ?2",
+        params![path, id],
     )?;
     Ok(())
 }
@@ -197,24 +193,26 @@ pub fn load_license_info(conn: &Connection) -> Result<Option<LicenseInfo>> {
 
 pub fn load_current_config(conn: &Connection) -> Result<Option<SavedConfig>> {
     conn.query_row(
-        "SELECT id, name, config FROM saved_configs WHERE id = (SELECT MAX(id) FROM saved_configs)",
+        "SELECT id, name, config, custom_export_path FROM saved_configs WHERE id = (SELECT MAX(id) FROM saved_configs)",
         [],
         |row| Ok(SavedConfig {
             id: Some(row.get(0)?),
             name: row.get(1)?,
             config: row.get(2)?,
+            custom_export_path: row.get(3)?,
         })
     ).optional()
 }
 
 pub fn load_config_by_id(conn: &Connection, id: i64) -> Result<Option<SavedConfig>> {
     conn.query_row(
-        "SELECT id, name, config FROM saved_configs WHERE id = ?1",
+        "SELECT id, name, config, custom_export_path FROM saved_configs WHERE id = ?1",
         params![id],
         |row| Ok(SavedConfig {
             id: Some(row.get(0)?),
             name: row.get(1)?,
             config: row.get(2)?,
+            custom_export_path: row.get(3)?,
         })
     ).optional()
 }

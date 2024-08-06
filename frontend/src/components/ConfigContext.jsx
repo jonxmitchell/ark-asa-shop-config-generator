@@ -6,7 +6,6 @@ import React, {
 	useState,
 	useCallback,
 	useEffect,
-	useMemo,
 } from "react";
 import { invoke } from "@tauri-apps/api/tauri";
 import { defaultConfig } from "../config/defaultConfig";
@@ -21,6 +20,7 @@ export const ConfigProvider = ({ children, initialShowTooltips = true }) => {
 	const [showTooltips, setShowTooltips] = useState(initialShowTooltips);
 	const [autoSaveSettings, setAutoSaveSettings] = useState(null);
 	const [isLoading, setIsLoading] = useState(true);
+	const [currentExportPath, setCurrentExportPath] = useState("");
 
 	const updateConfig = useCallback((newConfigOrUpdater) => {
 		setConfig((prevConfig) => {
@@ -61,18 +61,21 @@ export const ConfigProvider = ({ children, initialShowTooltips = true }) => {
 	const loadConfig = useCallback((configToLoad) => {
 		setCurrentlyLoadedConfig(configToLoad);
 		setConfig(JSON.parse(configToLoad.config));
+		setCurrentExportPath(configToLoad.custom_export_path || "");
 		console.log("Loaded config:", configToLoad);
 	}, []);
 
 	const unloadConfig = useCallback(() => {
 		setCurrentlyLoadedConfig(null);
 		setConfig(defaultConfig);
+		setCurrentExportPath("");
 		console.log("Unloaded config");
 	}, []);
 
 	const importConfig = useCallback((importedConfig) => {
 		setCurrentlyLoadedConfig(null);
 		setConfig(importedConfig);
+		setCurrentExportPath("");
 		console.log("Imported new config, current config unloaded");
 	}, []);
 
@@ -80,33 +83,25 @@ export const ConfigProvider = ({ children, initialShowTooltips = true }) => {
 		setShowTooltips((prevState) => (value !== undefined ? value : !prevState));
 	}, []);
 
-	const contextValue = useMemo(
-		() => ({
-			config,
-			updateConfig,
-			currentlyLoadedConfig,
-			loadConfig,
-			unloadConfig,
-			importConfig,
-			showTooltips,
-			toggleTooltips,
-			autoSaveSettings,
-			setAutoSaveSettings,
-			loadAutoSaveSettings,
-		}),
-		[
-			config,
-			currentlyLoadedConfig,
-			showTooltips,
-			autoSaveSettings,
-			updateConfig,
-			loadConfig,
-			unloadConfig,
-			importConfig,
-			toggleTooltips,
-			loadAutoSaveSettings,
-		]
-	);
+	const updateCurrentExportPath = useCallback((newPath) => {
+		setCurrentExportPath(newPath);
+	}, []);
+
+	const contextValue = {
+		config,
+		updateConfig,
+		currentlyLoadedConfig,
+		loadConfig,
+		unloadConfig,
+		importConfig,
+		showTooltips,
+		toggleTooltips,
+		autoSaveSettings,
+		setAutoSaveSettings,
+		loadAutoSaveSettings,
+		currentExportPath,
+		updateCurrentExportPath,
+	};
 
 	if (isLoading) {
 		return null; // or a loading spinner
