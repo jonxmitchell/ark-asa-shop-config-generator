@@ -14,6 +14,7 @@ import AutoSave from "./components/AutoSave";
 import Loader from "./components/Loader";
 import { usePreventBrowserShortcuts } from "./hooks/usePreventBrowserShortcuts";
 import LicenseExpirationWarning from "./components/LicenseExpirationWarning";
+import TitleBar from "./components/TitleBar";
 
 function App() {
 	const [licenseState, setLicenseState] = useState({
@@ -104,15 +105,19 @@ function App() {
 
 	return (
 		<ConfigProvider initialShowTooltips={initialShowTooltips}>
-			<div autoComplete="off" data-form-type="other">
-				{isAppLoaded && licenseState.isLicensed && (
-					<LicenseExpirationWarning
-						expirationDate={licenseState.expirationDate}
-						isLicensed={licenseState.isLicensed}
-					/>
-				)}
-				<div className="flex h-screen bg-deep-black text-white p-4 overflow-hidden">
-					<div className="flex w-full space-x-4 h-full">
+			<div
+				autoComplete="off"
+				data-form-type="other"
+				className="flex flex-col h-screen bg-window-bg rounded-window overflow-hidden">
+				<TitleBar />
+				<div className="flex-1 flex bg-deep-black text-white overflow-hidden">
+					{isAppLoaded && licenseState.isLicensed && (
+						<LicenseExpirationWarning
+							expirationDate={licenseState.expirationDate}
+							isLicensed={licenseState.isLicensed}
+						/>
+					)}
+					<div className="flex w-full space-x-4 h-full p-4">
 						<div className="w-64 bg-mid-black rounded-xl shadow-lg flex flex-col overflow-hidden">
 							<Sidebar
 								activeItem={activeSidebarItem}

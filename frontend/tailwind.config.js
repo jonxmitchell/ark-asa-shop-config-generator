@@ -10,6 +10,8 @@ module.exports = {
 				"accent-blue": "#3B82F6",
 				"scrollbar-thumb": "#3B82F6",
 				"scrollbar-track": "#1E1E1E",
+				"window-bg": "#0A0A0A",
+				"gray-700": "#374151",
 			},
 			boxShadow: {
 				// prettier-ignore

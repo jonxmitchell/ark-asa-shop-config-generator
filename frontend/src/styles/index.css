@@ -8,6 +8,7 @@ html,
 body {
 	height: 100%;
 	overflow: hidden;
+	/* @apply bg-transparent; */
 }
 
 body {
@@ -27,3 +28,8 @@ code {
 #root {
 	height: 100%;
 }
+
+/* .rounded-window {
+	border-radius: 8px;
+	overflow: hidden;
+} */
