@@ -20,10 +20,10 @@ import { useConfig } from "./ConfigContext";
 import { toast } from "react-toastify";
 import { Tooltip } from "react-tooltip";
 
-const IconButton = ({ Icon, onClick, title, tooltipId }) => (
+const IconButton = ({ Icon, onClick, title, tooltipId, hoverColorClass }) => (
 	<button
 		onClick={onClick}
-		className="text-gray-400 hover:text-accent-blue transition-colors"
+		className={`text-gray-400 ${hoverColorClass} transition-colors transform hover:-translate-y-1 hover:scale-110 duration-200`}
 		title={title}
 		data-tooltip-id={tooltipId}>
 		<Icon className="h-6 w-6" />
@@ -59,7 +59,7 @@ function AppControls() {
 
 				// Simulate progress
 				for (let i = 0; i <= 100; i++) {
-					await new Promise((resolve) => setTimeout(resolve, 20)); // 20ms delay between each progress update
+					await new Promise((resolve) => setTimeout(resolve, 20));
 					setImportProgress(i);
 				}
 
@@ -67,7 +67,6 @@ function AppControls() {
 				const importedConfig = JSON.parse(contents);
 				importConfig(importedConfig);
 
-				// Ensure the progress modal is shown for at least 2 seconds
 				await new Promise((resolve) => setTimeout(resolve, 2000 - 20 * 100));
 
 				setIsImportProgressOpen(false);
@@ -117,30 +116,35 @@ function AppControls() {
 					onClick={handleLicense}
 					title="License"
 					tooltipId="tooltip-license"
+					hoverColorClass="hover:text-purple-500"
 				/>
 				<IconButton
 					Icon={HiOutlineCog}
 					onClick={handleSettings}
 					title="Settings"
 					tooltipId="tooltip-settings"
+					hoverColorClass="hover:text-green-500"
 				/>
 				<IconButton
 					Icon={HiOutlineDownload}
 					onClick={handleImport}
 					title="Import"
 					tooltipId="tooltip-import"
+					hoverColorClass="hover:text-blue-500"
 				/>
 				<IconButton
 					Icon={HiOutlineUpload}
 					onClick={handleExport}
 					title="Export"
 					tooltipId="tooltip-export"
+					hoverColorClass="hover:text-yellow-500"
 				/>
 				<IconButton
 					Icon={HiOutlineCollection}
 					onClick={handleSavedConfigs}
 					title="Saved Configs"
 					tooltipId="tooltip-saved-configs"
+					hoverColorClass="hover:text-red-500"
 				/>
 			</div>
 			<SettingsModal
