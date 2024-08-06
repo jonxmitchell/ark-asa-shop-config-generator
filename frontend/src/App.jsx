@@ -96,10 +96,13 @@ function App() {
 
 	if (!licenseState.isLicensed) {
 		return (
-			<LicenseManager
-				setLicenseState={setLicenseState}
-				initialError={licenseState.error}
-			/>
+			<div>
+				<TitleBar />
+				<LicenseManager
+					setLicenseState={setLicenseState}
+					initialError={licenseState.error}
+				/>
+			</div>
 		);
 	}
 

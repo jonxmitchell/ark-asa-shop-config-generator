@@ -13,10 +13,10 @@ function TitleBar() {
 	return (
 		<div
 			data-tauri-drag-region
-			className="h-10 bg-mid-black flex justify-between items-center px-4 rounded-t-lg">
+			className="h-10 bg-mid-black flex justify-between items-center px-4">
 			<div className="bg-light-black rounded-full px-3 group">
 				<span className="text-sm text-gray-400 group-hover:text-blue-500 transition-colors select-none">
-					ASA Ark Shop Config Generator
+					ASA ArkShop Config Generator
 				</span>
 			</div>
 			<div className="flex space-x-4">
