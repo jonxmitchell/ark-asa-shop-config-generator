@@ -55,6 +55,7 @@ function LicenseExpirationWarning({ expirationDate, isLicensed }) {
 						closeOnClick: false,
 						draggable: false,
 						closeButton: false,
+						theme: "dark",
 						toastId: "license-expired",
 					}
 				);
@@ -154,6 +155,7 @@ function LicenseExpirationWarning({ expirationDate, isLicensed }) {
 							closeOnClick: true,
 							pauseOnHover: true,
 							draggable: true,
+							theme: "dark",
 						});
 					}
 
