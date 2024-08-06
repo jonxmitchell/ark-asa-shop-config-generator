@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import { TrashIcon } from "@heroicons/react/24/solid";
-import { motion, AnimatePresence } from "framer-motion";
 import { useConfig } from "../ConfigContext";
 import { Tooltip } from "react-tooltip";
 
