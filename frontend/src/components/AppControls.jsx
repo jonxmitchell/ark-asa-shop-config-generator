@@ -114,35 +114,30 @@ function AppControls() {
 				<IconButton
 					Icon={HiOutlineDocumentText}
 					onClick={handleLicense}
-					title="License"
 					tooltipId="tooltip-license"
 					hoverColorClass="hover:text-purple-500"
 				/>
 				<IconButton
 					Icon={HiOutlineCog}
 					onClick={handleSettings}
-					title="Settings"
 					tooltipId="tooltip-settings"
 					hoverColorClass="hover:text-green-500"
 				/>
 				<IconButton
 					Icon={HiOutlineDownload}
 					onClick={handleImport}
-					title="Import"
 					tooltipId="tooltip-import"
 					hoverColorClass="hover:text-blue-500"
 				/>
 				<IconButton
 					Icon={HiOutlineUpload}
 					onClick={handleExport}
-					title="Export"
 					tooltipId="tooltip-export"
 					hoverColorClass="hover:text-yellow-500"
 				/>
 				<IconButton
 					Icon={HiOutlineCollection}
 					onClick={handleSavedConfigs}
-					title="Saved Configs"
 					tooltipId="tooltip-saved-configs"
 					hoverColorClass="hover:text-red-500"
 				/>
@@ -181,35 +176,30 @@ function AppControls() {
 						place="top"
 						content="View license information"
 						offset={5}
-						float={true}
 					/>
 					<Tooltip
 						id="tooltip-settings"
 						place="top"
 						content="Open settings"
 						offset={5}
-						float={true}
 					/>
 					<Tooltip
 						id="tooltip-import"
 						place="top"
 						content="Import configuration"
 						offset={5}
-						float={true}
 					/>
 					<Tooltip
 						id="tooltip-export"
 						place="top"
 						content="Export configuration"
 						offset={5}
-						float={true}
 					/>
 					<Tooltip
 						id="tooltip-saved-configs"
 						place="top"
 						content="Manage saved configurations"
 						offset={5}
-						float={true}
 					/>
 				</>
 			)}
