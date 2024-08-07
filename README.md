@@ -1,10 +1,10 @@
-# 🚀 ASA ArkShop Config Generator 🦖
+# 🚀 ASA ArkShop Config Editor 🦖
 
-Welcome to the ASA ArkShop Config Generator, the ultimate tool for ARK: Survival Ascended server administrators to create, manage, and optimize their server configurations with ease and precision! 🎮🛠️
+Welcome to the ASA ArkShop Config Editor, the ultimate tool for ARK: Survival Ascended server administrators to create, manage, and optimize their server configurations with ease and precision! 🎮🛠️
 
 ## 🌟 Introduction
 
-The ASA ArkShop Config Generator is a state-of-the-art application designed to revolutionize the way ARK: Survival Ascended server administrators manage their server configurations. Built with the power of Tauri, React, and Rust, this tool combines the best of web technologies with native performance to deliver a seamless, efficient, and user-friendly experience. 🚀💻
+The ASA ArkShop Config Editor is a state-of-the-art application designed to revolutionize the way ARK: Survival Ascended server administrators manage their server configurations. Built with the power of Tauri, React, and Rust, this tool combines the best of web technologies with native performance to deliver a seamless, efficient, and user-friendly experience. 🚀💻
 Whether you're a seasoned server admin or just starting out, our application provides an intuitive interface to create, edit, and optimize complex configuration files for the ArkShop plugin. Say goodbye to manual JSON editing and hello to visual, interactive configuration management! 🎉👋
 
 ## 🔥 Features
