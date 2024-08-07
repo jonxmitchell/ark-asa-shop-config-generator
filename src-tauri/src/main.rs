@@ -1,3 +1,5 @@
+// src-tauri/src/main.rs
+
 #![cfg_attr(
     all(not(debug_assertions), target_os = "windows"),
     windows_subsystem = "windows"
@@ -8,7 +10,7 @@ mod ark_data;
 mod hwid;
 mod license;
 
-use db::{get_database_path, initialize_db, save_settings, load_settings, Settings, SavedConfig, save_config, load_configs, delete_config, config_name_exists, update_config, LicenseInfo, save_license_info, load_license_info, load_current_config, load_config_by_id, update_config_export_path};
+use db::{get_database_path, initialize_db, save_settings, load_settings, Settings, SavedConfig, save_config, load_configs, delete_config, config_name_exists, update_config, LicenseInfo, save_license_info, load_license_info, load_current_config, load_config_by_id, update_config_export_paths};
 use ark_data::read_ark_data;
 use std::fs;
 use std::path::{PathBuf, Path};
@@ -75,20 +77,25 @@ struct ExportResult {
 }
 
 #[tauri::command]
-fn export_config(config: Value, export_path: String) -> Result<ExportResult, String> {
-    let file_path = PathBuf::from(&export_path).join("config.json");
-    
-    let file_exists = Path::new(&file_path).exists();
+async fn export_config(config: Value, export_paths: Vec<String>) -> Result<Vec<ExportResult>, String> {
+    let mut results = Vec::new();
 
-    if !file_exists {
-        fs::write(&file_path, serde_json::to_string_pretty(&config).unwrap())
-            .map_err(|e| format!("Failed to write file: {}", e))?;
+    for path in export_paths {
+        let file_path = PathBuf::from(&path).join("config.json");
+        let file_exists = Path::new(&file_path).exists();
+
+        if !file_exists {
+            fs::write(&file_path, serde_json::to_string_pretty(&config).unwrap())
+                .map_err(|e| format!("Failed to write file: {}", e))?;
+        }
+
+        results.push(ExportResult {
+            file_path: file_path.to_string_lossy().into_owned(),
+            file_existed: file_exists,
+        });
     }
 
-    Ok(ExportResult {
-        file_path: file_path.to_string_lossy().into_owned(),
-        file_existed: file_exists,
-    })
+    Ok(results)
 }
 
 #[tauri::command]
@@ -138,11 +145,11 @@ fn open_file_location(path: String) -> Result<(), String> {
 }
 
 #[tauri::command]
-fn save_config_command(state: tauri::State<AppState>, id: Option<i64>, name: String, config: Value, custom_export_path: Option<String>) -> Result<i64, String> {
+fn save_config_command(state: tauri::State<AppState>, id: Option<i64>, name: String, config: Value, custom_export_paths: Option<Vec<String>>) -> Result<i64, String> {
     let conn = state.0.lock().unwrap();
     
     if let Some(id) = id {
-        update_config(&conn, id, &name, &serde_json::to_string(&config).map_err(|e| e.to_string())?, custom_export_path.as_deref()).map_err(|e| e.to_string())?;
+        update_config(&conn, id, &name, &serde_json::to_string(&config).map_err(|e| e.to_string())?, custom_export_paths.as_ref()).map_err(|e| e.to_string())?;
         Ok(id)
     } else {
         if config_name_exists(&conn, &name).map_err(|e| e.to_string())? {
@@ -153,7 +160,7 @@ fn save_config_command(state: tauri::State<AppState>, id: Option<i64>, name: Str
             id: None,
             name,
             config: serde_json::to_string(&config).map_err(|e| e.to_string())?,
-            custom_export_path,
+            custom_export_paths,
         };
         save_config(&conn, &saved_config).map_err(|e| e.to_string())
     }
@@ -282,7 +289,7 @@ async fn auto_save_config(config: Value, config_id: i64, state: tauri::State<'_,
     
     if let Some(current_config) = current_config {
         log_to_file(&format!("Updating config: {}", current_config.name));
-        update_config(&conn, current_config.id.unwrap(), &current_config.name, &serde_json::to_string(&config).map_err(|e| e.to_string())?, current_config.custom_export_path.as_deref()).map_err(|e| e.to_string())?;
+        update_config(&conn, current_config.id.unwrap(), &current_config.name, &serde_json::to_string(&config).map_err(|e| e.to_string())?, current_config.custom_export_paths.as_ref()).map_err(|e| e.to_string())?;
         log_to_file("Config updated successfully");
         Ok(())
     } else {
@@ -298,9 +305,9 @@ fn get_current_config(state: tauri::State<AppState>) -> Result<Option<SavedConfi
 }
 
 #[tauri::command]
-fn update_config_export_path_command(state: tauri::State<AppState>, config_id: i64, path: Option<String>) -> Result<(), String> {
+fn update_config_export_paths_command(state: tauri::State<AppState>, config_id: i64, paths: Option<Vec<String>>) -> Result<(), String> {
     let conn = state.0.lock().map_err(|_| "Failed to acquire database lock".to_string())?;
-    update_config_export_path(&conn, config_id, path.as_deref()).map_err(|e| e.to_string())
+    update_config_export_paths(&conn, config_id, paths).map_err(|e| e.to_string())
 }
 
 fn main() {
@@ -380,7 +387,7 @@ fn main() {
                 check_license_on_startup,
                 auto_save_config,
                 get_current_config,
-                update_config_export_path_command
+                update_config_export_paths_command
             ])
             .run(tauri::generate_context!())
             .expect("error while running tauri application");

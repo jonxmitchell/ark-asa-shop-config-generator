@@ -16,7 +16,6 @@ import {
 	ChevronDownIcon,
 	ChevronUpIcon,
 } from "@heroicons/react/24/solid";
-import { HiOutlineFolder, HiX } from "react-icons/hi";
 import { CiFloppyDisk } from "react-icons/ci";
 import { Tooltip } from "react-tooltip";
 
@@ -29,6 +28,7 @@ function SavedConfigsModal({ isOpen, onClose }) {
 	const [renamingConfig, setRenamingConfig] = useState(null);
 	const [newName, setNewName] = useState("");
 	const [showExportPath, setShowExportPath] = useState({});
+	const [customExportPaths, setCustomExportPaths] = useState({});
 	const {
 		config,
 		currentlyLoadedConfig,
@@ -47,6 +47,11 @@ function SavedConfigsModal({ isOpen, onClose }) {
 		try {
 			const configs = await invoke("load_configs_command");
 			setSavedConfigs(configs);
+			const paths = {};
+			configs.forEach((config) => {
+				paths[config.id] = config.custom_export_paths || [];
+			});
+			setCustomExportPaths(paths);
 		} catch (error) {
 			console.error("Failed to load saved configs:", error);
 			toast.error("Failed to load saved configs", {
@@ -101,7 +106,7 @@ function SavedConfigsModal({ isOpen, onClose }) {
 				id: null,
 				name: newConfigName,
 				config: config,
-				customExportPath: null,
+				customExportPaths: [],
 			});
 			toast.success("Config saved successfully", {
 				position: "bottom-right",
@@ -119,7 +124,7 @@ function SavedConfigsModal({ isOpen, onClose }) {
 				id: newConfigId,
 				name: newConfigName,
 				config: JSON.stringify(config),
-				custom_export_path: null,
+				custom_export_paths: [],
 			};
 			loadConfig(newConfig);
 			setShowSaveWarning(false);
@@ -195,7 +200,7 @@ function SavedConfigsModal({ isOpen, onClose }) {
 					id: currentlyLoadedConfig.id,
 					name: currentlyLoadedConfig.name,
 					config: config,
-					customExportPath: currentlyLoadedConfig.custom_export_path,
+					customExportPaths: customExportPaths[currentlyLoadedConfig.id] || [],
 				});
 				toast.success("Config updated successfully", {
 					position: "bottom-right",
@@ -282,7 +287,7 @@ function SavedConfigsModal({ isOpen, onClose }) {
 				id: renamingConfig.id,
 				name: newName,
 				config: JSON.parse(renamingConfig.config),
-				customExportPath: renamingConfig.custom_export_path,
+				customExportPaths: customExportPaths[renamingConfig.id] || [],
 			});
 			toast.success("Config renamed successfully", {
 				position: "bottom-right",
@@ -320,10 +325,10 @@ function SavedConfigsModal({ isOpen, onClose }) {
 		}
 	};
 
-	const handleCustomExportPathChange = async (configId, path) => {
+	const handleCustomExportPathChange = async (configId, paths) => {
 		try {
-			await invoke("update_config_export_path_command", { configId, path });
-			toast.success("Custom export path updated successfully", {
+			await invoke("update_config_export_paths_command", { configId, paths });
+			toast.success("Custom export paths updated successfully", {
 				position: "bottom-right",
 				autoClose: 3000,
 				hideProgressBar: false,
@@ -337,12 +342,12 @@ function SavedConfigsModal({ isOpen, onClose }) {
 			if (currentlyLoadedConfig && currentlyLoadedConfig.id === configId) {
 				loadConfig({
 					...currentlyLoadedConfig,
-					custom_export_path: path,
+					custom_export_paths: paths,
 				});
 			}
 		} catch (error) {
-			console.error("Failed to update custom export path:", error);
-			toast.error("Failed to update custom export path", {
+			console.error("Failed to update custom export paths:", error);
+			toast.error("Failed to update custom export paths", {
 				position: "bottom-right",
 				autoClose: 3000,
 				hideProgressBar: false,
@@ -354,14 +359,19 @@ function SavedConfigsModal({ isOpen, onClose }) {
 		}
 	};
 
-	const handleSelectFolder = async (configId) => {
+	const handleAddExportPath = async (configId) => {
 		try {
 			const selected = await open({
 				directory: true,
 				multiple: false,
 			});
 			if (selected) {
-				handleCustomExportPathChange(configId, selected);
+				const updatedPaths = [...(customExportPaths[configId] || []), selected];
+				setCustomExportPaths({
+					...customExportPaths,
+					[configId]: updatedPaths,
+				});
+				handleCustomExportPathChange(configId, updatedPaths);
 			}
 		} catch (error) {
 			console.error("Failed to open folder dialog:", error);
@@ -514,7 +524,7 @@ function SavedConfigsModal({ isOpen, onClose }) {
 													className="text-gray-400 hover:text-gray-300 cursor-pointer flex items-center mx-4"
 													onClick={() => toggleShowExportPath(savedConfig.id)}>
 													<span className="mr-2 text-sm">
-														Custom Export Path
+														Custom Export Paths
 													</span>
 													{showExportPath[savedConfig.id] ? (
 														<ChevronUpIcon className="h-4 w-4" />
@@ -549,32 +559,49 @@ function SavedConfigsModal({ isOpen, onClose }) {
 										)}
 									</div>
 									{showExportPath[savedConfig.id] && (
-										<div className="relative mt-2">
-											<HiOutlineFolder className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-											<input
-												type="text"
-												value={savedConfig.custom_export_path || ""}
-												readOnly
-												className="w-full pl-10 pr-24 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
-												placeholder="Custom export path"
-											/>
-											{savedConfig.custom_export_path && (
-												<button
-													onClick={() =>
-														handleCustomExportPathChange(savedConfig.id, "")
-													}
-													className="absolute right-20 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
-													data-tooltip-id={`clear-export-path-${savedConfig.id}`}
-													data-tooltip-content="Clear custom export path">
-													<HiX className="h-4 w-4" />
-												</button>
+										<div className="mt-2 space-y-2">
+											<h6 className="text-sm font-medium text-gray-300">
+												Custom Export Paths
+											</h6>
+											{(customExportPaths[savedConfig.id] || []).map(
+												(path, index) => (
+													<div
+														key={index}
+														className="flex items-center space-x-2">
+														<input
+															type="text"
+															value={path}
+															readOnly
+															className="flex-grow px-3 py-2 text-sm text-white bg-dark-black rounded border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+														/>
+														<button
+															onClick={() => {
+																const updatedPaths = customExportPaths[
+																	savedConfig.id
+																].filter((_, i) => i !== index);
+																setCustomExportPaths({
+																	...customExportPaths,
+																	[savedConfig.id]: updatedPaths,
+																});
+																handleCustomExportPathChange(
+																	savedConfig.id,
+																	updatedPaths
+																);
+															}}
+															className="text-red-500 hover:text-red-400"
+															data-tooltip-id={`remove-export-path-${savedConfig.id}-${index}`}
+															data-tooltip-content="Remove this export path">
+															<XMarkIcon className="h-5 w-5" />
+														</button>
+													</div>
+												)
 											)}
 											<button
-												onClick={() => handleSelectFolder(savedConfig.id)}
-												className="absolute right-2 top-1/2 transform -translate-y-1/2 px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
-												data-tooltip-id={`select-folder-${savedConfig.id}`}
-												data-tooltip-content="Choose custom export folder">
-												Select
+												onClick={() => handleAddExportPath(savedConfig.id)}
+												className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm"
+												data-tooltip-id={`add-export-path-${savedConfig.id}`}
+												data-tooltip-content="Add a new export path">
+												Add Export Path
 											</button>
 										</div>
 									)}
@@ -619,15 +646,18 @@ function SavedConfigsModal({ isOpen, onClose }) {
 									opacity={1}
 								/>
 								<Tooltip
-									id={`clear-export-path-${savedConfig.id}`}
+									id={`add-export-path-${savedConfig.id}`}
 									place="top"
 									opacity={1}
 								/>
-								<Tooltip
-									id={`select-folder-${savedConfig.id}`}
-									place="top"
-									opacity={1}
-								/>
+								{(customExportPaths[savedConfig.id] || []).map((_, index) => (
+									<Tooltip
+										key={index}
+										id={`remove-export-path-${savedConfig.id}-${index}`}
+										place="top"
+										opacity={1}
+									/>
+								))}
 							</React.Fragment>
 						))}
 					</>

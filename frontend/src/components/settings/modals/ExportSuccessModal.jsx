@@ -5,21 +5,21 @@ import { motion } from "framer-motion";
 import { invoke } from "@tauri-apps/api/tauri";
 import { ClipboardDocumentIcon, CheckIcon } from "@heroicons/react/24/solid";
 
-function ExportSuccessModal({ filePath, onClose }) {
-	const [copied, setCopied] = useState(false);
+function ExportSuccessModal({ filePaths, onClose }) {
+	const [copiedIndex, setCopiedIndex] = useState(-1);
 
-	const handleOpenLocation = async () => {
+	const handleOpenLocation = async (path) => {
 		try {
-			await invoke("open_file_location", { path: filePath });
+			await invoke("open_file_location", { path });
 		} catch (error) {
 			console.error("Failed to open file location:", error);
 		}
 	};
 
-	const handleCopyPath = () => {
-		navigator.clipboard.writeText(filePath).then(() => {
-			setCopied(true);
-			setTimeout(() => setCopied(false), 2000); // Reset after 2 seconds
+	const handleCopyPath = (path, index) => {
+		navigator.clipboard.writeText(path).then(() => {
+			setCopiedIndex(index);
+			setTimeout(() => setCopiedIndex(-1), 2000); // Reset after 2 seconds
 		});
 	};
 
@@ -33,24 +33,30 @@ function ExportSuccessModal({ filePath, onClose }) {
 			<p className="mb-3 text-gray-300">
 				The configuration has been successfully exported to:
 			</p>
-			<div className="flex items-center bg-dark-black rounded-lg p-2 mb-6">
-				<p className="text-sm text-gray-400 mr-2 flex-grow overflow-hidden overflow-ellipsis whitespace-nowrap">
-					{filePath}
-				</p>
-				<button
-					onClick={handleCopyPath}
-					className="text-gray-400 hover:text-white transition-colors"
-					title="Copy path">
-					{copied ? (
-						<CheckIcon className="h-5 w-5 text-green-500" />
-					) : (
-						<ClipboardDocumentIcon className="h-5 w-5" />
-					)}
-				</button>
+			<div className="space-y-2 max-h-60 overflow-y-auto mb-6">
+				{filePaths.map((filePath, index) => (
+					<div
+						key={index}
+						className="flex items-center bg-dark-black rounded-lg p-2">
+						<p className="text-sm text-gray-400 mr-2 flex-grow overflow-hidden overflow-ellipsis whitespace-nowrap">
+							{filePath}
+						</p>
+						<button
+							onClick={() => handleCopyPath(filePath, index)}
+							className="text-gray-400 hover:text-white transition-colors mr-2"
+							title="Copy path">
+							{copiedIndex === index ? (
+								<CheckIcon className="h-5 w-5 text-green-500" />
+							) : (
+								<ClipboardDocumentIcon className="h-5 w-5" />
+							)}
+						</button>
+					</div>
+				))}
 			</div>
 			<div className="flex justify-end space-x-4">
 				<button
-					onClick={handleOpenLocation}
+					onClick={() => handleOpenLocation(filePaths[0])}
 					className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
 					Open File Location
 				</button>

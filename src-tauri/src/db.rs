@@ -1,3 +1,5 @@
+// src-tauri/src/db.rs
+
 use rusqlite::{Connection, Result, Error, params, OptionalExtension};
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
@@ -17,7 +19,7 @@ pub struct SavedConfig {
     pub id: Option<i64>,
     pub name: String,
     pub config: String,
-    pub custom_export_path: Option<String>,
+    pub custom_export_paths: Option<Vec<String>>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -61,7 +63,7 @@ pub fn initialize_db(db_path: &Path) -> Result<Connection> {
             id INTEGER PRIMARY KEY,
             name TEXT NOT NULL UNIQUE,
             config TEXT NOT NULL,
-            custom_export_path TEXT
+            custom_export_paths TEXT
         )",
         [],
     )?;
@@ -116,21 +118,27 @@ pub fn load_settings(conn: &Connection) -> Result<Settings> {
 }
 
 pub fn save_config(conn: &Connection, config: &SavedConfig) -> Result<i64> {
+    let custom_export_paths = serde_json::to_string(&config.custom_export_paths).unwrap_or_default();
     conn.execute(
-        "INSERT INTO saved_configs (name, config, custom_export_path) VALUES (?1, ?2, ?3)",
-        params![config.name, config.config, config.custom_export_path],
+        "INSERT INTO saved_configs (name, config, custom_export_paths) VALUES (?1, ?2, ?3)",
+        params![config.name, config.config, custom_export_paths],
     )?;
     Ok(conn.last_insert_rowid())
 }
 
 pub fn load_configs(conn: &Connection) -> Result<Vec<SavedConfig>> {
-    let mut stmt = conn.prepare("SELECT id, name, config, custom_export_path FROM saved_configs")?;
+    let mut stmt = conn.prepare("SELECT id, name, config, custom_export_paths FROM saved_configs")?;
     let config_iter = stmt.query_map([], |row| {
+        let custom_export_paths: Option<String> = row.get(3)?;
+        let paths: Option<Vec<String>> = custom_export_paths
+            .map(|s| serde_json::from_str(&s).unwrap_or_default())
+            .or(Some(Vec::new()));
+
         Ok(SavedConfig {
             id: Some(row.get(0)?),
             name: row.get(1)?,
             config: row.get(2)?,
-            custom_export_path: row.get(3)?,
+            custom_export_paths: paths,
         })
     })?;
 
@@ -155,18 +163,26 @@ pub fn config_name_exists(conn: &Connection, name: &str) -> Result<bool> {
     Ok(count > 0)
 }
 
-pub fn update_config(conn: &Connection, id: i64, name: &str, config: &str, custom_export_path: Option<&str>) -> Result<()> {
+pub fn update_config(conn: &Connection, id: i64, name: &str, config: &str, custom_export_paths: Option<&Vec<String>>) -> Result<()> {
+    let paths_json = custom_export_paths
+        .map(|paths| serde_json::to_string(paths).unwrap_or_default())
+        .unwrap_or_default();
+
     conn.execute(
-        "UPDATE saved_configs SET name = ?1, config = ?2, custom_export_path = ?3 WHERE id = ?4",
-        params![name, config, custom_export_path, id],
+        "UPDATE saved_configs SET name = ?1, config = ?2, custom_export_paths = ?3 WHERE id = ?4",
+        params![name, config, paths_json, id],
     )?;
     Ok(())
 }
 
-pub fn update_config_export_path(conn: &Connection, id: i64, path: Option<&str>) -> Result<()> {
+pub fn update_config_export_paths(conn: &Connection, id: i64, paths: Option<Vec<String>>) -> Result<()> {
+    let paths_json = paths
+        .map(|p| serde_json::to_string(&p).unwrap_or_default())
+        .unwrap_or_default();
+
     conn.execute(
-        "UPDATE saved_configs SET custom_export_path = ?1 WHERE id = ?2",
-        params![path, id],
+        "UPDATE saved_configs SET custom_export_paths = ?1 WHERE id = ?2",
+        params![paths_json, id],
     )?;
     Ok(())
 }
@@ -193,26 +209,40 @@ pub fn load_license_info(conn: &Connection) -> Result<Option<LicenseInfo>> {
 
 pub fn load_current_config(conn: &Connection) -> Result<Option<SavedConfig>> {
     conn.query_row(
-        "SELECT id, name, config, custom_export_path FROM saved_configs WHERE id = (SELECT MAX(id) FROM saved_configs)",
+        "SELECT id, name, config, custom_export_paths FROM saved_configs WHERE id = (SELECT MAX(id) FROM saved_configs)",
         [],
-        |row| Ok(SavedConfig {
-            id: Some(row.get(0)?),
-            name: row.get(1)?,
-            config: row.get(2)?,
-            custom_export_path: row.get(3)?,
-        })
+        |row| {
+            let custom_export_paths: Option<String> = row.get(3)?;
+            let paths: Option<Vec<String>> = custom_export_paths
+                .map(|s| serde_json::from_str(&s).unwrap_or_default())
+                .or(Some(Vec::new()));
+
+            Ok(SavedConfig {
+                id: Some(row.get(0)?),
+                name: row.get(1)?,
+                config: row.get(2)?,
+                custom_export_paths: paths,
+            })
+        }
     ).optional()
 }
 
 pub fn load_config_by_id(conn: &Connection, id: i64) -> Result<Option<SavedConfig>> {
     conn.query_row(
-        "SELECT id, name, config, custom_export_path FROM saved_configs WHERE id = ?1",
+        "SELECT id, name, config, custom_export_paths FROM saved_configs WHERE id = ?1",
         params![id],
-        |row| Ok(SavedConfig {
-            id: Some(row.get(0)?),
-            name: row.get(1)?,
-            config: row.get(2)?,
-            custom_export_path: row.get(3)?,
-        })
+        |row| {
+            let custom_export_paths: Option<String> = row.get(3)?;
+            let paths: Option<Vec<String>> = custom_export_paths
+                .map(|s| serde_json::from_str(&s).unwrap_or_default())
+                .or(Some(Vec::new()));
+
+            Ok(SavedConfig {
+                id: Some(row.get(0)?),
+                name: row.get(1)?,
+                config: row.get(2)?,
+                custom_export_paths: paths,
+            })
+        }
     ).optional()
 }

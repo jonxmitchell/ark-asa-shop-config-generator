@@ -10,47 +10,52 @@ import { toast } from "react-toastify";
 
 function ExportConfirmationModal({ isOpen, onClose }) {
 	const [modalState, setModalState] = useState("confirmation");
-	const [exportedFilePath, setExportedFilePath] = useState("");
+	const [exportedFilePaths, setExportedFilePaths] = useState([]);
 	const [progress, setProgress] = useState(0);
-	const [currentExportPath, setCurrentExportPath] = useState("");
+	const [currentExportPaths, setCurrentExportPaths] = useState([]);
 	const { config, updateConfig, currentlyLoadedConfig } = useConfig();
+
+	const loadExportPaths = useCallback(async () => {
+		try {
+			const settings = await invoke("load_settings_command");
+			if (
+				currentlyLoadedConfig &&
+				currentlyLoadedConfig.custom_export_paths &&
+				currentlyLoadedConfig.custom_export_paths.length > 0
+			) {
+				setCurrentExportPaths(currentlyLoadedConfig.custom_export_paths);
+			} else if (settings.output_path) {
+				setCurrentExportPaths([settings.output_path]);
+			} else {
+				setCurrentExportPaths([]);
+			}
+		} catch (error) {
+			console.error("Failed to load settings:", error);
+			toast.error("Failed to load settings", {
+				position: "bottom-right",
+				autoClose: 3000,
+				hideProgressBar: false,
+				closeOnClick: true,
+				pauseOnHover: true,
+				draggable: true,
+				theme: "dark",
+			});
+		}
+	}, [currentlyLoadedConfig]);
 
 	useEffect(() => {
 		if (isOpen) {
-			// Load the output path from settings when the modal opens
-			invoke("load_settings_command")
-				.then((settings) => {
-					if (
-						currentlyLoadedConfig &&
-						currentlyLoadedConfig.custom_export_path
-					) {
-						setCurrentExportPath(currentlyLoadedConfig.custom_export_path);
-					} else {
-						setCurrentExportPath(settings.output_path);
-					}
-				})
-				.catch((error) => {
-					console.error("Failed to load settings:", error);
-					toast.error("Failed to load settings", {
-						position: "bottom-right",
-						autoClose: 3000,
-						hideProgressBar: false,
-						closeOnClick: true,
-						pauseOnHover: true,
-						draggable: true,
-						theme: "dark",
-					});
-				});
+			loadExportPaths();
 		}
-	}, [isOpen, currentlyLoadedConfig]);
+	}, [isOpen, loadExportPaths]);
 
 	const handleExport = useCallback(async () => {
-		if (!currentExportPath) {
+		if (currentExportPaths.length === 0) {
 			toast.error(
-				"No export path set. Please set an output location in Settings or for this configuration.",
+				"No export paths set. Please set a default output location in Settings or configure custom export paths for this configuration.",
 				{
 					position: "bottom-right",
-					autoClose: 3000,
+					autoClose: 5000,
 					hideProgressBar: false,
 					closeOnClick: true,
 					pauseOnHover: true,
@@ -66,7 +71,7 @@ function ExportConfirmationModal({ isOpen, onClose }) {
 
 		try {
 			console.log("Exporting config:", config);
-			console.log("Export path:", currentExportPath);
+			console.log("Export paths:", currentExportPaths);
 			if (!config || Object.keys(config).length === 0) {
 				throw new Error("Configuration is undefined or empty");
 			}
@@ -78,17 +83,19 @@ function ExportConfirmationModal({ isOpen, onClose }) {
 			}
 
 			// Actual export
-			const result = await invoke("export_config", {
+			const results = await invoke("export_config", {
 				config: config,
-				exportPath: currentExportPath,
+				exportPaths: currentExportPaths,
 			});
-			console.log("Export result:", result);
-			setExportedFilePath(result.file_path);
+			console.log("Export results:", results);
+			setExportedFilePaths(results.map((r) => r.file_path));
 
 			// Ensure the progress modal is shown for at least 2 seconds
 			await new Promise((resolve) => setTimeout(resolve, 2000 - 20 * 100));
 
-			setModalState(result.file_existed ? "fileExistsWarning" : "success");
+			setModalState(
+				results.some((r) => r.file_existed) ? "fileExistsWarning" : "success"
+			);
 			updateConfig(config);
 		} catch (error) {
 			console.error("Export failed:", error);
@@ -103,7 +110,7 @@ function ExportConfirmationModal({ isOpen, onClose }) {
 				theme: "dark",
 			});
 		}
-	}, [config, updateConfig, currentExportPath]);
+	}, [config, updateConfig, currentExportPaths]);
 
 	const handleClose = () => {
 		setModalState("confirmation");
@@ -113,10 +120,12 @@ function ExportConfirmationModal({ isOpen, onClose }) {
 
 	const handleProceed = async () => {
 		try {
-			await invoke("force_export_config", {
-				config: config,
-				filePath: currentExportPath,
-			});
+			for (const path of currentExportPaths) {
+				await invoke("force_export_config", {
+					config: config,
+					filePath: path,
+				});
+			}
 			setModalState("success");
 		} catch (error) {
 			console.error("Force export failed:", error);
@@ -150,25 +159,48 @@ function ExportConfirmationModal({ isOpen, onClose }) {
 							<h2 className="text-xl font-bold mb-4 text-white">
 								Confirm Export
 							</h2>
-							<p className="mb-2 text-gray-300">
-								Are you sure you want to export the configuration?
-							</p>
-							<p className="mb-4 text-gray-300">
-								Export path:{" "}
-								<span className="font-semibold">{currentExportPath}</span>
-							</p>
-							<div className="flex justify-end space-x-4">
-								<button
-									onClick={handleClose}
-									className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors">
-									Cancel
-								</button>
-								<button
-									onClick={handleExport}
-									className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
-									Export
-								</button>
-							</div>
+							{currentExportPaths.length > 0 ? (
+								<>
+									<p className="mb-2 text-gray-300">
+										Are you sure you want to export the configuration?
+									</p>
+									<p className="mb-4 text-gray-300">
+										Export paths:
+										{currentExportPaths.map((path, index) => (
+											<span key={index} className="font-semibold block ml-2">
+												{path}
+											</span>
+										))}
+									</p>
+									<div className="flex justify-end space-x-4">
+										<button
+											onClick={handleClose}
+											className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors">
+											Cancel
+										</button>
+										<button
+											onClick={handleExport}
+											className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
+											Export
+										</button>
+									</div>
+								</>
+							) : (
+								<>
+									<p className="mb-4 text-red-500">
+										No export paths are set. Please set a default output
+										location in Settings or configure custom export paths for
+										this configuration.
+									</p>
+									<div className="flex justify-end">
+										<button
+											onClick={handleClose}
+											className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors">
+											Close
+										</button>
+									</div>
+								</>
+							)}
 						</motion.div>
 					)}
 
@@ -184,8 +216,8 @@ function ExportConfirmationModal({ isOpen, onClose }) {
 							className="bg-mid-black p-6 rounded-lg max-w-md w-full">
 							<h2 className="text-xl font-bold mb-4 text-white">⚠️ Warning</h2>
 							<p className="mb-6 text-gray-300">
-								A configuration file already exists at the specified location.
-								Do you want to overwrite it?
+								One or more configuration files already exist at the specified
+								locations. Do you want to overwrite them?
 							</p>
 							<div className="flex justify-end space-x-4">
 								<button
@@ -204,7 +236,7 @@ function ExportConfirmationModal({ isOpen, onClose }) {
 
 					{modalState === "success" && (
 						<ExportSuccessModal
-							filePath={exportedFilePath}
+							filePaths={exportedFilePaths}
 							onClose={handleClose}
 						/>
 					)}

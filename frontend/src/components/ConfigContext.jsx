@@ -69,7 +69,7 @@ export const ConfigProvider = ({ children, initialShowTooltips = true }) => {
 		setCurrentlyLoadedConfig(null);
 		setConfig(defaultConfig);
 		setCurrentExportPath("");
-		console.log("Unloaded config");
+		console.log("Unloaded config, reset to default");
 	}, []);
 
 	const importConfig = useCallback((importedConfig) => {
