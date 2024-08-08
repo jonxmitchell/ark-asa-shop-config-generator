@@ -43,7 +43,7 @@ Encountering issues? Try these quick fixes:
 
 Our application follows a robust architecture:
 
-- 🖥️ Frontend: React with TypeScript for type-safe, component-based UI
+- 🖥️ Frontend: React with JavaScript, component-based UI
 - 🚀 Backend: Rust for high-performance, memory-safe operations
 - 🔗 Bridge: Tauri for seamless integration between web and native layers
 - 🗃️ Data Storage: SQLite for efficient local data management
